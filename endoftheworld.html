@@ -12,7 +12,7 @@
       font-family: Tahoma, sans-serif;
       direction: rtl;
       margin: 0;
-      padding: 30px 15px;
+      padding: 20px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -26,26 +26,6 @@
       width: 100%;
       max-width: 380px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-      position: relative;
-    }
-
-    /* زر الرجوع */
-    .back-btn {
-      position: absolute;
-      top: -45px;
-      right: 0;
-      background: #fbbc04;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    }
-
-    .back-btn:hover {
-      background: #ffd54f;
     }
 
     h1 {
@@ -63,16 +43,24 @@
       font-size: 16px;
     }
 
-    button.calc {
+    button {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
       border: none;
-      background: #ff4444;
-      color: #000;
       font-size: 16px;
       cursor: pointer;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+    }
+
+    .calc {
+      background: #ff4444;
+      color: #000;
+    }
+
+    .back {
+      background: #fbbc04;
+      color: #000;
     }
 
     .section {
@@ -98,6 +86,11 @@
       text-shadow: 0 0 6px rgba(52,199,89,0.6);
     }
 
+    .max-red {
+      font-weight: bold;
+      text-shadow: 0 0 6px rgba(255,59,48,0.6);
+    }
+
     hr {
       border: none;
       height: 1px;
@@ -110,10 +103,6 @@
 <body>
 
 <div class="box">
-
-  <!-- زر العودة -->
-  <button class="back-btn" onclick="goHome()">🏠 الرئيسية</button>
-
   <h1>☠️ كشف السيولة</h1>
 
   <input type="number" id="x" placeholder="أدخل X" step="any">
@@ -122,11 +111,14 @@
   <button class="calc" onclick="calcLiquidity()">كشف السيولة</button>
 
   <div id="results"></div>
+
+  <!-- زر العودة أسفل التطبيق -->
+  <button class="back" onclick="goHome()">🏠 العودة إلى الصفحة الرئيسية</button>
 </div>
 
 <script>
 function goHome() {
-  window.location.href = "index.html"; // عدل الاسم إذا صفحتك الرئيسية مختلفة
+  window.location.href = "index.html";
 }
 
 function calcLiquidity() {
@@ -164,9 +156,9 @@ function calcLiquidity() {
   html += `<div class="section">
             <div class="title green">⬇️ أسفل Y</div>`;
   levels.forEach(l => {
-    html += `<div class="value green max">🔥 ماكس: ${(y - a * l.5).toFixed(4)}</div>`;
+    html += `<div class="value green">${(y - a * l).toFixed(4)}</div>`;
   });
-  html += `<div class="value green"><strong>1.5:</strong> ${(y - a * 1.5).toFixed(4)}</div>`;
+  html += `<div class="value green max">🔥 ماكس: ${(y - a * 1.5).toFixed(4)}</div>`;
   html += `</div>`;
 
   // ⬆️ أعلى Y (أحمر)
