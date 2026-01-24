@@ -26,6 +26,26 @@
       width: 100%;
       max-width: 380px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      position: relative;
+    }
+
+    /* زر الرجوع */
+    .back-btn {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: #fbbc04;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+
+    .back-btn:hover {
+      background: #ffd54f;
     }
 
     h1 {
@@ -43,7 +63,7 @@
       font-size: 16px;
     }
 
-    button {
+    button.calc {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
@@ -53,10 +73,6 @@
       font-size: 16px;
       cursor: pointer;
       margin-bottom: 20px;
-    }
-
-    button:hover {
-      background: #ff0000;
     }
 
     .section {
@@ -69,18 +85,17 @@
       font-size: 15px;
     }
 
-    .green {
-      color: #34c759;
-    }
-
-    .red {
-      color: #ff3b30;
-    }
+    .green { color: #34c759; }
+    .red   { color: #ff3b30; }
 
     .value {
       font-size: 14px;
-      margin-right: 8px;
       line-height: 1.7;
+    }
+
+    .max {
+      font-weight: bold;
+      text-shadow: 0 0 6px rgba(52,199,89,0.6);
     }
 
     hr {
@@ -95,17 +110,25 @@
 <body>
 
 <div class="box">
+
+  <!-- زر العودة -->
+  <button class="back-btn" onclick="goHome()">🏠 الرئيسية</button>
+
   <h1>☠️ كشف السيولة</h1>
 
   <input type="number" id="x" placeholder="أدخل X" step="any">
   <input type="number" id="y" placeholder="أدخل Y" step="any">
 
-  <button onclick="calcLiquidity()">كشف السيولة</button>
+  <button class="calc" onclick="calcLiquidity()">كشف السيولة</button>
 
   <div id="results"></div>
 </div>
 
 <script>
+function goHome() {
+  window.location.href = "index.html"; // عدل الاسم إذا صفحتك الرئيسية مختلفة
+}
+
 function calcLiquidity() {
   const x = parseFloat(document.getElementById("x").value);
   const y = parseFloat(document.getElementById("y").value);
@@ -120,7 +143,7 @@ function calcLiquidity() {
 
   let html = `<div class="section"><strong>a = ${a.toFixed(4)}</strong></div><hr>`;
 
-  // أسفل X - أحمر
+  // ⬇️ أسفل X (أحمر)
   html += `<div class="section">
             <div class="title red">⬇️ أسفل X</div>`;
   levels.forEach(l => {
@@ -128,23 +151,25 @@ function calcLiquidity() {
   });
   html += `</div>`;
 
-  // أعلى X - أخضر
+  // ⬆️ أعلى X (أخضر + ماكس)
   html += `<div class="section">
             <div class="title green">⬆️ أعلى X</div>`;
   levels.forEach(l => {
     html += `<div class="value green">${(x + a * l).toFixed(4)}</div>`;
   });
+  html += `<div class="value green max">🔥 ماكس: ${(x + a * 1.5).toFixed(4)}</div>`;
   html += `</div><hr>`;
 
-  // أسفل Y - أخضر
+  // ⬇️ أسفل Y (أخضر + 1.5)
   html += `<div class="section">
             <div class="title green">⬇️ أسفل Y</div>`;
   levels.forEach(l => {
     html += `<div class="value green">${(y - a * l).toFixed(4)}</div>`;
   });
+  html += `<div class="value green"><strong>1.5:</strong> ${(y - a * 1.5).toFixed(4)}</div>`;
   html += `</div>`;
 
-  // أعلى Y - أحمر
+  // ⬆️ أعلى Y (أحمر)
   html += `<div class="section">
             <div class="title red">⬆️ أعلى Y</div>`;
   levels.forEach(l => {
