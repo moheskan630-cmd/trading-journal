@@ -2,57 +2,159 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>نهاية العالم</title>
+  <title>☠️ نهاية العالم - كشف السيولة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
-      background: radial-gradient(circle, #1a0000, #000);
-      color: #ff4444;
+      background: radial-gradient(circle at top, #1a1a1a, #000);
+      color: #e8eaed;
       font-family: Tahoma, sans-serif;
       direction: rtl;
       margin: 0;
+      padding: 30px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      text-align: center;
+      min-height: 100vh;
     }
+
+    .box {
+      background: rgba(255,255,255,0.05);
+      padding: 25px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+
     h1 {
-      font-size: 42px;
+      text-align: center;
+      color: #ff4444;
       margin-bottom: 20px;
     }
-    p {
-      font-size: 20px;
-      color: #ddd;
-      max-width: 600px;
-      line-height: 1.8;
-    }
-    button {
-      margin-top: 30px;
-      padding: 12px 25px;
-      font-size: 16px;
-      border: none;
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
       border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
       background: #ff4444;
       color: #000;
+      font-size: 16px;
       cursor: pointer;
+      margin-bottom: 20px;
     }
+
     button:hover {
       background: #ff0000;
     }
+
+    .section {
+      margin-bottom: 15px;
+    }
+
+    .title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .green {
+      color: #34c759;
+    }
+
+    .red {
+      color: #ff3b30;
+    }
+
+    .value {
+      font-size: 14px;
+      margin-right: 8px;
+      line-height: 1.7;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: #333;
+      margin: 18px 0;
+    }
   </style>
 </head>
+
 <body>
 
-  <div>
-    <h1>☠️ نهاية العالم</h1>
-    <p>
-      عندما تختفي السيولة،  
-      وتنهار الدعوم،  
-      وتكسر المقاومات بلا رحمة…  
-      اعلم أن إدارة المخاطر هي آخر ملجأ لك.
-    </p>
-    <button onclick="history.back()">🔙 رجوع</button>
-  </div>
+<div class="box">
+  <h1>☠️ كشف السيولة</h1>
+
+  <input type="number" id="x" placeholder="أدخل X" step="any">
+  <input type="number" id="y" placeholder="أدخل Y" step="any">
+
+  <button onclick="calcLiquidity()">كشف السيولة</button>
+
+  <div id="results"></div>
+</div>
+
+<script>
+function calcLiquidity() {
+  const x = parseFloat(document.getElementById("x").value);
+  const y = parseFloat(document.getElementById("y").value);
+
+  if (isNaN(x) || isNaN(y)) {
+    alert("يرجى إدخال قيم صحيحة أو عشرية");
+    return;
+  }
+
+  const a = x - y;
+  const levels = [0.236, 0.382, 0.5, 0.618, 0.786];
+
+  let html = `<div class="section"><strong>a = ${a.toFixed(4)}</strong></div><hr>`;
+
+  // أسفل X - أحمر
+  html += `<div class="section">
+            <div class="title red">⬇️ أسفل X</div>`;
+  levels.forEach(l => {
+    html += `<div class="value red">${(x - a * l).toFixed(4)}</div>`;
+  });
+  html += `</div>`;
+
+  // أعلى X - أخضر
+  html += `<div class="section">
+            <div class="title green">⬆️ أعلى X</div>`;
+  levels.forEach(l => {
+    html += `<div class="value green">${(x + a * l).toFixed(4)}</div>`;
+  });
+  html += `</div><hr>`;
+
+  // أسفل Y - أخضر
+  html += `<div class="section">
+            <div class="title green">⬇️ أسفل Y</div>`;
+  levels.forEach(l => {
+    html += `<div class="value green">${(y - a * l).toFixed(4)}</div>`;
+  });
+  html += `</div>`;
+
+  // أعلى Y - أحمر
+  html += `<div class="section">
+            <div class="title red">⬆️ أعلى Y</div>`;
+  levels.forEach(l => {
+    html += `<div class="value red">${(y + a * l).toFixed(4)}</div>`;
+  });
+  html += `</div>`;
+
+  document.getElementById("results").innerHTML = html;
+}
+</script>
 
 </body>
 </html>
