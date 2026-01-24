@@ -34,33 +34,46 @@
       margin-bottom: 20px;
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-
+    /* Input و Buttons بنفس الحجم */
+    input,
     button {
       width: 100%;
-      padding: 12px;
-      border-radius: 8px;
+      height: 48px;
+      padding: 0 12px;
+      border-radius: 10px;
       border: none;
       font-size: 16px;
-      cursor: pointer;
-      margin-bottom: 15px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
     }
 
-    .calc {
+    input {
+      background: #2b2b2b;
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button.calc {
       background: #ff4444;
       color: #000;
+      cursor: pointer;
     }
 
-    .back {
+    button.calc:hover {
+      background: #ff0000;
+    }
+
+    button.back {
       background: #fbbc04;
       color: #000;
+      cursor: pointer;
+    }
+
+    button.back:hover {
+      background: #ffd54f;
     }
 
     .section {
@@ -84,11 +97,6 @@
     .max {
       font-weight: bold;
       text-shadow: 0 0 6px rgba(52,199,89,0.6);
-    }
-
-    .max-red {
-      font-weight: bold;
-      text-shadow: 0 0 6px rgba(255,59,48,0.6);
     }
 
     hr {
@@ -118,7 +126,7 @@
 
 <script>
 function goHome() {
-  window.location.href = "index.html";
+  window.location.href = "index.html"; // عدل إذا اسم الصفحة الرئيسية مختلف
 }
 
 function calcLiquidity() {
