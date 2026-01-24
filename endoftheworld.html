@@ -160,11 +160,11 @@ function calcLiquidity() {
   html += `<div class="value green max">🔥 ماكس: ${(x + a * 1.5).toFixed(4)}</div>`;
   html += `</div><hr>`;
 
-  // ⬇️ أسفل Y (أخضر + 1.5)
+  // ⬇️ أسفل Y (أخضر + ماكس)
   html += `<div class="section">
             <div class="title green">⬇️ أسفل Y</div>`;
   levels.forEach(l => {
-    html += `<div class="value green">${(y - a * l).toFixed(4)}</div>`;
+    html += `<div class="value green max">🔥 ماكس: ${(y - a * l.5).toFixed(4)}</div>`;
   });
   html += `<div class="value green"><strong>1.5:</strong> ${(y - a * 1.5).toFixed(4)}</div>`;
   html += `</div>`;
