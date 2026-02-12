@@ -34,7 +34,6 @@
       margin-bottom: 20px;
     }
 
-    /* Input و Buttons بنفس الحجم */
     input,
     button {
       width: 100%;
@@ -92,6 +91,22 @@
     .value {
       font-size: 14px;
       line-height: 1.7;
+      margin-bottom: 6px;
+    }
+
+    .value input {
+      width: 70px;
+      height: 28px;
+      font-size: 12px;
+      margin: 0 5px;
+    }
+
+    .value button {
+      width: 30px;
+      height: 28px;
+      font-size: 14px;
+      padding: 0;
+      margin: 0 2px;
     }
 
     .max {
@@ -120,13 +135,12 @@
 
   <div id="results"></div>
 
-  <!-- زر العودة أسفل التطبيق -->
   <button class="back" onclick="goHome()">🏠 العودة إلى الصفحة الرئيسية</button>
 </div>
 
 <script>
 function goHome() {
-  window.location.href = "index.html"; // عدل إذا اسم الصفحة الرئيسية مختلف
+  window.location.href = "index.html";
 }
 
 function calcLiquidity() {
@@ -141,43 +155,71 @@ function calcLiquidity() {
   const a = x - y;
   const levels = [0.236, 0.382, 0.5, 0.618, 0.786];
 
+  let counter = 0;
+
+  function createEditableValue(value, colorClass) {
+    counter++;
+    return `
+      <div class="value ${colorClass}">
+        <span id="val${counter}">${value.toFixed(4)}</span>
+        <input type="number" id="edit${counter}" step="any">
+        <button onclick="modifyValue('val${counter}','edit${counter}','add')">+</button>
+        <button onclick="modifyValue('val${counter}','edit${counter}','sub')">-</button>
+      </div>
+    `;
+  }
+
   let html = `<div class="section"><strong>a = ${a.toFixed(4)}</strong></div><hr>`;
 
-  // ⬇️ أسفل X (أحمر)
-  html += `<div class="section">
-            <div class="title red">⬇️ أسفل X</div>`;
+  html += `<div class="section"><div class="title red">⬇️ أسفل X</div>`;
   levels.forEach(l => {
-    html += `<div class="value red">${(x - a * l).toFixed(4)}</div>`;
+    html += createEditableValue(x - a * l, "red");
   });
   html += `</div>`;
 
-  // ⬆️ أعلى X (أخضر + ماكس)
-  html += `<div class="section">
-            <div class="title green">⬆️ أعلى X</div>`;
+  html += `<div class="section"><div class="title green">⬆️ أعلى X</div>`;
   levels.forEach(l => {
-    html += `<div class="value green">${(x + a * l).toFixed(4)}</div>`;
+    html += createEditableValue(x + a * l, "green");
   });
-  html += `<div class="value green max">🔥 ماكس: ${(x + a * 1.5).toFixed(4)}</div>`;
+  html += createEditableValue(x + a * 1.5, "green max");
   html += `</div><hr>`;
 
-  // ⬇️ أسفل Y (أخضر + ماكس)
-  html += `<div class="section">
-            <div class="title green">⬇️ أسفل Y</div>`;
+  html += `<div class="section"><div class="title green">⬇️ أسفل Y</div>`;
   levels.forEach(l => {
-    html += `<div class="value green">${(y - a * l).toFixed(4)}</div>`;
+    html += createEditableValue(y - a * l, "green");
   });
-  html += `<div class="value green max">🔥 ماكس: ${(y - a * 1.5).toFixed(4)}</div>`;
+  html += createEditableValue(y - a * 1.5, "green max");
   html += `</div>`;
 
-  // ⬆️ أعلى Y (أحمر)
-  html += `<div class="section">
-            <div class="title red">⬆️ أعلى Y</div>`;
+  html += `<div class="section"><div class="title red">⬆️ أعلى Y</div>`;
   levels.forEach(l => {
-    html += `<div class="value red">${(y + a * l).toFixed(4)}</div>`;
+    html += createEditableValue(y + a * l, "red");
   });
   html += `</div>`;
 
   document.getElementById("results").innerHTML = html;
+}
+
+function modifyValue(valueId, inputId, operation) {
+  let valueElement = document.getElementById(valueId);
+  let inputElement = document.getElementById(inputId);
+
+  let current = parseFloat(valueElement.innerText);
+  let change = parseFloat(inputElement.value);
+
+  if (isNaN(change)) {
+    alert("ادخل رقم صحيح");
+    return;
+  }
+
+  if (operation === "add") {
+    current += change;
+  } else {
+    current -= change;
+  }
+
+  valueElement.innerText = current.toFixed(4);
+  inputElement.value = "";
 }
 </script>
 
