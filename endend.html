@@ -24,7 +24,7 @@
       padding: 25px;
       border-radius: 14px;
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     }
 
@@ -128,18 +128,29 @@ function calcLiquidity() {
 
   const a = Math.abs(x - y);
 
+  // نخبة مستويات الدخول (القناص)
   const sniper = [0.618, 0.707, 0.786, 0.886];
+
+  // نخبة الأهداف
   const targets = [1.272, 1.618];
 
   let html = `<div class="section"><strong>a = ${a.toFixed(4)}</strong></div><hr>`;
 
-  html += buildSection("🟢 منطقة شراء قناص (أسفل X)", "sniper", sniper, l => (x - a * l));
-  html += buildSection("🔴 منطقة بيع قناص (أعلى X)", "sniper", sniper, l => (x + a * l));
+  // ====== X ======
+  html += buildSection("⬇️ أسفل X (شراء)", "sniper", sniper, l => (x - a * l));
+  html += buildSection("⬆️ أعلى X (بيع)", "sniper", sniper, l => (x + a * l));
+
+  html += buildSection("🎯 أهداف صعود من X", "gold", targets, l => (x + a * l));
+  html += buildSection("🎯 أهداف هبوط من X", "gold", targets, l => (x - a * l));
 
   html += `<hr>`;
 
-  html += buildSection("🎯 أهداف صعود", "gold", targets, l => (x + a * l));
-  html += buildSection("🎯 أهداف هبوط", "gold", targets, l => (x - a * l));
+  // ====== Y ======
+  html += buildSection("⬇️ أسفل Y (شراء)", "sniper", sniper, l => (y - a * l));
+  html += buildSection("⬆️ أعلى Y (بيع)", "sniper", sniper, l => (y + a * l));
+
+  html += buildSection("🎯 أهداف صعود من Y", "gold", targets, l => (y + a * l));
+  html += buildSection("🎯 أهداف هبوط من Y", "gold", targets, l => (y - a * l));
 
   document.getElementById("results").innerHTML = html;
 }
