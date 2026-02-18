@@ -1,362 +1,168 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>الصفحة الرئيسية - تطبيق التداول</title>
+  <meta charset="UTF-8">
+  <title>🎯 كاشف السيولة الاحترافي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
-      background: #202124;
+      background: radial-gradient(circle at top, #1a1a1a, #000);
       color: #e8eaed;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Tahoma, sans-serif;
       direction: rtl;
       margin: 0;
-      padding: 40px 20px;
+      padding: 20px 15px;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       min-height: 100vh;
-      user-select: none;
-      overflow-x: hidden;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.05);
+      padding: 25px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 430px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     }
 
     h1 {
-      color: #fbbc04;
-      font-size: 32px;
-      margin-bottom: 25px;
-      font-weight: 700;
-    }
-
-    #datetime {
-      background: rgba(255 255 255 / 0.05);
-      border-radius: 12px;
-      padding: 15px 30px;
-      font-size: 20px;
-      font-weight: 600;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-      color: #fbbc04;
-      margin-bottom: 50px;
-      letter-spacing: 1.2px;
-      min-width: 320px;
       text-align: center;
-      line-height: 1.5;
+      color: #ffcc00;
+      margin-bottom: 20px;
     }
 
-    #datetime .date {
-      font-size: 22px;
-      font-weight: 700;
+    input, button {
+      width: 100%;
+      height: 48px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
     }
 
-    #datetime .time {
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    /* الشموع */
-    #candles {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      flex-wrap: nowrap;
-      overflow: hidden;
-    }
-
-    .candle {
-      width: 20px;
-      height: 80px;
-      position: relative;
-      user-select: none;
-    }
-
-    .candle-body {
-      width: 10px;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 4px;
-      transition: all 0.4s ease;
-    }
-
-    .wick {
-      width: 3px;
-      background: currentColor;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 2px;
-      transition: all 0.4s ease;
-    }
-
-    .candle.green {
-      color: #34c759;
-    }
-
-    .candle.green .candle-body {
-      bottom: 15px;
-      height: 50px;
-      background-color: #34c759;
-    }
-
-    .candle.green .wick {
-      bottom: 65px;
-      height: 15px;
-    }
-
-    .candle.red {
-      color: #ff3b30;
-    }
-
-    .candle.red .candle-body {
-      top: 15px;
-      height: 50px;
-      background-color: #ff3b30;
-    }
-
-    .candle.red .wick {
-      top: 65px;
-      height: 15px;
-    }
-
-    /* العبارة */
-    #quote {
-      font-family: 'Courier New', cursive;
-      font-size: 18px;
-      color: #a2a2a2;
-      text-align: center;
-      margin-bottom: 60px;
-      padding: 10px 20px;
-      max-width: 90%;
-    }
-
-    /* زر القائمة */
-    .sidebar-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      font-size: 26px;
-      background: #fbbc04;
-      color: #202124;
-      border-radius: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    }
-
-    /* القائمة الجانبية */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -250px;
-      width: 250px;
-      height: 100%;
-      background: #303134;
+    input {
+      background: #2b2b2b;
       color: #fff;
-      box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-      transition: right 0.3s ease;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
     }
 
-    .sidebar.open {
-      right: 0;
-    }
-
-    .sidebar-header {
-      padding: 15px;
-      border-bottom: 1px solid #555;
-      background: #202124;
-      text-align: center;
-    }
-
-    .sidebar-header h3 {
-      margin: 0;
-      font-size: 18px;
-      color: #fbbc04;
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: center;
-      flex-grow: 1;
-    }
-
-    .sidebar-menu li {
-      padding: 16px 10px;
-      border-bottom: 1px solid #444;
+    button.calc {
+      background: #ffcc00;
+      color: #000;
       cursor: pointer;
-      font-size: 17px;
+      font-weight: bold;
     }
 
-    .sidebar-menu li:hover {
-      background: #444;
+    button.back {
+      background: #fbbc04;
+      color: #000;
+      cursor: pointer;
     }
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.2);
-      display: none;
-      z-index: 999;
+    .section {
+      margin-bottom: 14px;
     }
 
-    .overlay.active {
-      display: block;
+    .title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 15px;
     }
 
-    footer {
-      margin-top: auto;
+    .green { color: #34c759; }
+    .red   { color: #ff3b30; }
+    .gold  { color: #ffd700; }
+
+    .value {
       font-size: 14px;
-      color: #777;
-      padding: 20px;
+      line-height: 1.8;
+      font-weight: bold;
+    }
+
+    .sniper {
+      color: #ffcc00;
+      text-shadow: 0 0 6px rgba(255,204,0,0.7);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: #333;
+      margin: 18px 0;
     }
   </style>
 </head>
+
 <body>
 
-<!-- زر القائمة -->
-<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+<div class="box">
+  <h1>🎯 كاشف السيولة الاحترافي</h1>
 
-<!-- القائمة الجانبية -->
-<div id="sidebar" class="sidebar">
-  <div class="sidebar-header">
-    <h3>القائمة</h3>
-  </div>
-  <ul class="sidebar-menu">
-    <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
-    <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
-    <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
-    <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
-    <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
-    <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
-    <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
-    <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
-    <li onclick="navigateTo('endoftheworld.html')">☠️ نهاية العالم</li>
-    <li onclick="navigateTo('end2.html')">☠️ 2نهاية العالم</li>
-    <li onclick="navigateTo('endworldfinal.html')">☠️  نهاية العالم الجحيم</li>
-    <li onclick="navigateTo('endend.html')">☠️  نهاية العالم الشروع</li>
-  </ul>
+  <input type="number" id="x" placeholder="أدخل X" step="any">
+  <input type="number" id="y" placeholder="أدخل Y" step="any">
+
+  <button class="calc" onclick="calcLiquidity()">تحليل احترافي</button>
+
+  <div id="results"></div>
+
+  <button class="back" onclick="goHome()">🏠 العودة</button>
 </div>
-
-<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
-<h1>مرحبًا بك في تطبيق التداول</h1>
-
-<div id="datetime">
-  <div class="date"></div>
-  <div class="time"></div>
-</div>
-
-<div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع"></div>
-
-<div id="quote"></div>
-
-<footer>© by NnEe</footer>
 
 <script>
-  // التاريخ والوقت
-  function updateDateTime() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const formattedDate = `${day}/${month}/${year}`;
+function goHome() {
+  window.location.href = "index.html";
+}
 
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'مساءً' : 'صباحًا';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
+function calcLiquidity() {
+  const x = parseFloat(document.getElementById("x").value);
+  const y = parseFloat(document.getElementById("y").value);
 
-    const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
-    document.querySelector('.date').textContent = formattedDate;
-    document.querySelector('.time').textContent = formattedTime;
-  }
-  setInterval(updateDateTime, 1000);
-  updateDateTime();
-
-  // الشموع
-  const candlesContainer = document.getElementById('candles');
-  const candleCount = 6;
-  let candles = [];
-
-  function createCandles() {
-    candlesContainer.innerHTML = '';
-    for (let i = 0; i < candleCount; i++) {
-      const candle = document.createElement('div');
-      candle.classList.add('candle', i % 2 === 0 ? 'green' : 'red');
-
-      const wick = document.createElement('div');
-      wick.classList.add('wick');
-      candle.appendChild(wick);
-
-      const body = document.createElement('div');
-      body.classList.add('candle-body');
-      candle.appendChild(body);
-
-      candlesContainer.appendChild(candle);
-      candles.push(candle);
-    }
+  if (isNaN(x) || isNaN(y)) {
+    alert("يرجى إدخال قيم صحيحة");
+    return;
   }
 
-  function animateCandles() {
-    candles.forEach((candle, i) => {
-      const body = candle.querySelector('.candle-body');
-      const wick = candle.querySelector('.wick');
-      const isGreen = candle.classList.contains('green');
-      const bodyHeight = Math.floor(Math.random() * 30) + 40;
-      const wickHeight = Math.floor(Math.random() * 20) + 10;
+  const a = Math.abs(x - y);
 
-      if (isGreen) {
-        body.style.height = bodyHeight + 'px';
-        body.style.bottom = '15px';
-        body.style.top = 'auto';
-        wick.style.height = wickHeight + 'px';
-        wick.style.bottom = (15 + bodyHeight) + 'px';
-        wick.style.top = 'auto';
-      } else {
-        body.style.height = bodyHeight + 'px';
-        body.style.top = '15px';
-        body.style.bottom = 'auto';
-        wick.style.height = wickHeight + 'px';
-        wick.style.top = (15 + bodyHeight) + 'px';
-        wick.style.bottom = 'auto';
-      }
-    });
-  }
+  // نخبة مستويات الدخول (القناص)
+  const sniper = [0.618, 0.707, 0.786, 0.886];
 
-  candlesContainer.addEventListener('click', animateCandles);
-  window.addEventListener('scroll', animateCandles);
-  createCandles();
+  // نخبة الأهداف
+  const targets = [1.272, 1.618];
 
-  // القائمة الجانبية
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('active');
-  }
+  let html = `<div class="section"><strong>a = ${a.toFixed(4)}</strong></div><hr>`;
 
-  function navigateTo(url) {
-    window.location.href = url;
-  }
+  // ====== X ======
+  html += buildSection("⬇️ أسفل X (شراء)", "sniper", sniper, l => (x - a * l));
+  html += buildSection("⬆️ أعلى X (بيع)", "sniper", sniper, l => (x + a * l));
 
-  // العبارات العشوائية
-  const quotes = [
-    "تداول بعقل لا بعاطفة.",
-    "الخسارة جزء من اللعبة، المهم أن تتعلم منها.",
-    "كن صبورًا، السوق لا يرحم المتسرعين.",
-    "استراتيجيتك أهم من توقّعاتك.",
-    "أوقف الخسارة قبل أن توقفك.",
-    "كل نقطة تُحسب، فكر بحجم المخاطرة دائمًا.",
-  ];
-  document.getElementById("quote").textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  html += buildSection("🎯 أهداف صعود من X", "gold", targets, l => (x + a * l));
+  html += buildSection("🎯 أهداف هبوط من X", "gold", targets, l => (x - a * l));
+
+  html += `<hr>`;
+
+  // ====== Y ======
+  html += buildSection("⬇️ أسفل Y (شراء)", "sniper", sniper, l => (y - a * l));
+  html += buildSection("⬆️ أعلى Y (بيع)", "sniper", sniper, l => (y + a * l));
+
+  html += buildSection("🎯 أهداف صعود من Y", "gold", targets, l => (y + a * l));
+  html += buildSection("🎯 أهداف هبوط من Y", "gold", targets, l => (y - a * l));
+
+  document.getElementById("results").innerHTML = html;
+}
+
+function buildSection(title, color, levels, formula) {
+  let html = `<div class="section"><div class="title ${color}">${title}</div>`;
+  levels.forEach(l => {
+    html += `<div class="value ${color}">${l} → ${formula(l).toFixed(4)}</div>`;
+  });
+  html += `</div>`;
+  return html;
+}
 </script>
 
 </body>
