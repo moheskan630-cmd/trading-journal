@@ -176,6 +176,23 @@
   /* PANEL */
   .panel{display:none;}
   .panel.active{display:block;}
+
+  /* SETUP MODAL */
+  .setup-modal{position:fixed;inset:0;background:rgba(10,12,16,0.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .setup-modal.hidden{display:none;}
+  .setup-modal-box{background:var(--card);border:1px solid rgba(212,168,83,0.3);border-radius:24px;padding:28px 22px;max-width:420px;width:100%;}
+  .setup-modal-logo{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:16px;}
+  .setup-modal-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px;}
+  .setup-modal-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:22px;}
+  .setup-field{margin-bottom:18px;}
+  .setup-field-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--text);}
+  .setup-link{font-size:11px;color:var(--gold);text-decoration:none;font-weight:600;}
+  .setup-link:hover{text-decoration:underline;}
+  .setup-field-sub{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.6;}
+  .setup-field-status{font-size:11px;margin-top:5px;min-height:14px;}
+  .setup-save-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:14px;color:#0A0C10;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity 0.2s;}
+  .setup-save-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .setup-note{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -193,14 +210,43 @@
     <div class="live-badge"><div class="live-dot"></div>مباشر</div>
   </div>
 
-  <!-- FRED SETUP -->
-  <div class="setup-banner" id="setupBanner">
-    <div class="setup-title">🔑 أضف مفتاح FRED للبيانات الماكرو الحقيقية</div>
-    <div class="setup-text">سيجلب: Real Yield · DXY · VIX · Breakeven · أسعار الفائدة<br>مجاناً من بنك الاحتياطي الفيدرالي الأمريكي</div>
-    <div class="setup-input-row">
-      <input class="setup-input" id="fredKeyInput" type="password" placeholder="الصق مفتاح FRED هنا..." autocomplete="off">
-      <button class="setup-btn" onclick="saveFredKey()">حفظ ✓</button>
+  <!-- SETUP MODAL - يظهر عند أول تشغيل -->
+  <div class="setup-modal" id="setupModal">
+    <div class="setup-modal-box">
+      <div class="setup-modal-logo">QUANT·PRO</div>
+      <div class="setup-modal-title">🔑 إعداد مفاتيح API</div>
+      <div class="setup-modal-sub">مطلوب مرة واحدة فقط · تُحفظ على جهازك</div>
+
+      <div class="setup-field">
+        <div class="setup-field-label">
+          <span>📡 Twelve Data API Key</span>
+          <a class="setup-link" href="https://twelvedata.com/account/api-keys" target="_blank">احصل عليه مجاناً ↗</a>
+        </div>
+        <div class="setup-field-sub">يُستخدم لجلب أسعار الذهب والعملات في الوقت الفعلي</div>
+        <input class="setup-input" id="tdKeyInput" type="password" placeholder="أدخل Twelve Data API Key..." autocomplete="off" dir="ltr">
+        <div class="setup-field-status" id="tdStatus"></div>
+      </div>
+
+      <div class="setup-field">
+        <div class="setup-field-label">
+          <span>🏛 FRED API Key</span>
+          <a class="setup-link" href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">احصل عليه مجاناً ↗</a>
+        </div>
+        <div class="setup-field-sub">يُستخدم لجلب بيانات الفائدة والتضخم والماكرو من الاحتياطي الفيدرالي</div>
+        <input class="setup-input" id="fredKeyInput" type="password" placeholder="أدخل FRED API Key..." autocomplete="off" dir="ltr">
+        <div class="setup-field-status" id="fredStatus"></div>
+      </div>
+
+      <button class="setup-save-btn" id="setupSaveBtn" onclick="saveAllKeys()">
+        حفظ وبدء التحليل ✓
+      </button>
+      <div class="setup-note">🔒 تُحفظ المفاتيح محلياً على جهازك فقط ولا تُرسل لأي خادم</div>
     </div>
+  </div>
+
+  <!-- زر إعادة الإعداد -->
+  <div style="text-align:center;margin-bottom:12px;display:none;" id="resetRow">
+    <button onclick="resetKeys()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;">⚙️ تغيير مفاتيح API</button>
   </div>
 
   <div class="error-banner" id="errorBanner"></div>
@@ -268,80 +314,4 @@
       <div class="model-card">
         <div class="model-icon">⚡</div>
         <div class="model-name">Momentum · RSI</div>
-        <div class="model-signal" id="g-m3Signal">—</div>
-        <div class="model-value" id="g-m3Val">RSI = —</div>
-      </div>
-      <div class="model-card">
-        <div class="model-icon">🤖</div>
-        <div class="model-name">ML · XGBoost</div>
-        <div class="model-signal" id="g-m4Signal">—</div>
-        <div class="model-value" id="g-m4Val">P = —</div>
-      </div>
-    </div>
-
-    <div class="section-title">العوامل الماكرو</div>
-    <div class="factors-list">
-      <div class="factor-row">
-        <div class="factor-right"><div class="factor-icon">🏦</div>
-          <div><div class="factor-name">Real Yield (TIPS)</div><div class="factor-sub">العائد الحقيقي</div></div>
-        </div>
-        <div class="factor-left">
-          <div class="factor-val" id="g-f1Val">—</div>
-          <div class="factor-badge" id="g-f1Badge"></div>
-          <div class="factor-impact" id="g-f1Impact">—</div>
-        </div>
-      </div>
-      <div class="factor-row">
-        <div class="factor-right"><div class="factor-icon">💵</div>
-          <div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div>
-        </div>
-        <div class="factor-left">
-          <div class="factor-val" id="g-f2Val">—</div>
-          <div class="factor-badge" id="g-f2Badge"></div>
-          <div class="factor-impact" id="g-f2Impact">—</div>
-        </div>
-      </div>
-      <div class="factor-row">
-        <div class="factor-right"><div class="factor-icon">😱</div>
-          <div><div class="factor-name">VIX Index</div><div class="factor-sub">مؤشر الخوف</div></div>
-        </div>
-        <div class="factor-left">
-          <div class="factor-val" id="g-f3Val">—</div>
-          <div class="factor-badge" id="g-f3Badge"></div>
-          <div class="factor-impact" id="g-f3Impact">—</div>
-        </div>
-      </div>
-      <div class="factor-row">
-        <div class="factor-right"><div class="factor-icon">🔥</div>
-          <div><div class="factor-name">Breakeven Inflation</div><div class="factor-sub">توقعات التضخم</div></div>
-        </div>
-        <div class="factor-left">
-          <div class="factor-val" id="g-f4Val">—</div>
-          <div class="factor-badge" id="g-f4Badge"></div>
-          <div class="factor-impact" id="g-f4Impact">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">تقلب GARCH اليومي</div>
-    <div class="vol-card">
-      <div class="vol-header">
-        <div class="vol-title">النطاق المتوقع</div>
-        <div class="vol-val" id="g-volVal">±—</div>
-      </div>
-      <div class="vol-bars" id="g-volBars"></div>
-    </div>
-
-    <button class="refresh-btn gold-btn" id="g-refreshBtn" onclick="runGold()">
-      <span id="g-refreshIcon">🔄</span> تحديث الذهب
-    </button>
-  </div>
-
-  <!-- ══════════════ EUR/USD PANEL ══════════════ -->
-  <div class="panel" id="panel-eur">
-    <div class="price-card eur-theme">
-      <div class="price-watermark eur-wm">€</div>
-      <div class="price-label">سعر اليورو مقابل الدولار · EUR/USD</div>
-      <div class="price-main eur-col" id="e-priceMain">—</div>
-      <div class="price-sub">
-        <div clas
+ 
