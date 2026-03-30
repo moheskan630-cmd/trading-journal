@@ -15,7 +15,64 @@
     --buy:#22C55E; --sell:#EF4444; --neutral:#F59E0B;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
+ <script>
+// ===============================
+// 🔑 مفاتيح API (مضافة تلقائياً)
+// ===============================
+const DEFAULT_TD_KEY = "482fb2c5ca1949728b91b5580af2d697";
+const DEFAULT_FRED_KEY = "ef9d91127d16799eb8ab51a266fe383f";
+
+// ===============================
+// 💾 حفظ المفاتيح إذا غير موجودة
+// ===============================
+function loadDefaultKeys() {
+  const savedTd = localStorage.getItem("td_api_key");
+  const savedFred = localStorage.getItem("fred_api_key");
+
+  if (!savedTd) {
+    localStorage.setItem("td_api_key", DEFAULT_TD_KEY);
+    console.log("✅ Twelve Data Key Saved");
+  }
+
+  if (!savedFred) {
+    localStorage.setItem("fred_api_key", DEFAULT_FRED_KEY);
+    console.log("✅ FRED Key Saved");
+  }
+}
+
+// ===============================
+// 🧠 تخطي شاشة الإعداد تلقائياً
+// ===============================
+function autoSkipSetup() {
+  const td = localStorage.getItem("td_api_key");
+  const fred = localStorage.getItem("fred_api_key");
+
+  if (td && fred) {
+    const modal = document.getElementById("setupModal");
+    if (modal) modal.classList.add("hidden");
+
+    const resetRow = document.getElementById("resetRow");
+    if (resetRow) resetRow.style.display = "block";
+  }
+}
+
+// ===============================
+// 🔄 إعادة تعيين المفاتيح (زر الإعداد)
+// ===============================
+function resetKeys() {
+  localStorage.removeItem("td_api_key");
+  localStorage.removeItem("fred_api_key");
+  location.reload();
+}
+
+// ===============================
+// 🚀 تشغيل تلقائي عند فتح الصفحة
+// ===============================
+window.addEventListener("load", () => {
+  loadDefaultKeys();
+  autoSkipSetup();
+});
+</script> body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
   body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(212,168,83,0.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
   .container{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:16px;}
 
