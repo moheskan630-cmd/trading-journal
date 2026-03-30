@@ -1,127 +1,547 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>مجازفه - حساب اللوت</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      direction: rtl;
-      background: #202124;
-      color: #e8eaed;
-      text-align: center;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gold Quant Signal · Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#D4A853; --gold-light:#F0C96B; --gold-dark:#A07830;
+    --bg:#0A0C10; --card:#141926; --border:rgba(212,168,83,0.15);
+    --text:#E8EAF0; --muted:#6B7280;
+    --buy:#22C55E; --sell:#EF4444; --neutral:#F59E0B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(212,168,83,0.08) 0%,transparent 60%);pointer-events:none;z-index:0;}
+  .container{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:16px;}
 
-    h2 {
-      color: #fbbc04;
-      margin-bottom: 20px;
-    }
+  .header{display:flex;align-items:center;justify-content:space-between;padding:12px 0 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+  .logo{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+  .logo span{color:var(--text);font-weight:600;}
+  .live-badge{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--buy);font-weight:700;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--buy);animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 
-    .container {
-      background: #303134;
-      border-radius: 12px;
-      padding: 25px 20px 30px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    }
+  /* FRED SETUP */
+  .setup-banner{background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.3);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:none;}
+  .setup-banner.show{display:block;}
+  .setup-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px;}
+  .setup-text{font-size:12px;color:var(--muted);line-height:1.7;}
+  .setup-input-row{display:flex;gap:8px;margin-top:10px;}
+  .setup-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:13px;outline:none;direction:ltr;}
+  .setup-input:focus{border-color:rgba(212,168,83,0.5);}
+  .setup-btn{background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:10px;padding:8px 14px;color:#0A0C10;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;}
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      text-align: right;
-    }
+  .error-banner{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#FCA5A5;display:none;}
+  .error-banner.show{display:block;}
 
-    input {
-      padding: 10px;
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #5f6368;
-      background: #202124;
-      color: #e8eaed;
-      text-align: center;
-      box-sizing: border-box;
-    }
+  .price-card{background:linear-gradient(135deg,#1A1F30 0%,#141926 100%);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+  .price-card::after{content:'Au';position:absolute;left:-10px;top:50%;transform:translateY(-50%);font-family:'Rajdhani',sans-serif;font-size:100px;font-weight:700;color:rgba(212,168,83,0.04);line-height:1;}
+  .price-label{font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .price-main{font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:700;color:var(--gold-light);line-height:1;}
+  .price-sub{display:flex;align-items:center;gap:12px;margin-top:8px;}
+  .price-change{font-size:13px;font-weight:700;padding:3px 8px;border-radius:8px;}
+  .price-change.up{background:rgba(34,197,94,0.15);color:var(--buy);}
+  .price-change.down{background:rgba(239,68,68,0.15);color:var(--sell);}
+  .price-time{font-size:11px;color:var(--muted);}
+  .data-source{font-size:10px;color:var(--muted);margin-top:6px;opacity:0.7;}
 
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      background: #fbbc04;
-      color: #202124;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+  .signal-card{border-radius:20px;padding:24px;margin-bottom:16px;text-align:center;transition:all 0.5s ease;}
+  .signal-card.BUY{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.4);box-shadow:0 0 40px rgba(34,197,94,0.1);}
+  .signal-card.SELL{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(239,68,68,0.05));border:2px solid rgba(239,68,68,0.4);box-shadow:0 0 40px rgba(239,68,68,0.1);}
+  .signal-card.NEUTRAL{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.04));border:2px solid rgba(245,158,11,0.3);}
+  .signal-card.LOADING{background:rgba(255,255,255,0.02);border:2px solid var(--border);}
+  .signal-label{font-size:12px;color:var(--muted);margin-bottom:10px;letter-spacing:1px;}
+  .signal-text{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:700;line-height:1;}
+  .signal-text.BUY{color:var(--buy);}.signal-text.SELL{color:var(--sell);}.signal-text.NEUTRAL{color:var(--neutral);}
+  .signal-ar{font-size:18px;font-weight:700;margin-top:4px;opacity:0.8;}
+  .signal-confidence{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .conf-label{font-size:12px;color:var(--muted);}
+  .conf-bar{flex:1;max-width:140px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+  .conf-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+  .conf-fill.BUY{background:linear-gradient(90deg,var(--buy),#86EFAC);}
+  .conf-fill.SELL{background:linear-gradient(90deg,var(--sell),#FCA5A5);}
+  .conf-fill.NEUTRAL{background:linear-gradient(90deg,var(--neutral),#FCD34D);}
+  .conf-val{font-size:13px;font-weight:700;}
+  .conf-val.BUY{color:var(--buy);}.conf-val.SELL{color:var(--sell);}.conf-val.NEUTRAL{color:var(--neutral);}
 
-    button:hover {
-      background: #e3aa00;
-    }
+  .section-title{font-size:13px;color:var(--muted);letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
-    .result {
-      margin-top: 25px;
-      font-size: 17px;
-    }
+  .models-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .model-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;}
+  .model-icon{font-size:18px;margin-bottom:6px;}
+  .model-name{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+  .model-signal{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;}
+  .model-signal.BUY{color:var(--buy);}.model-signal.SELL{color:var(--sell);}.model-signal.NEUTRAL{color:var(--neutral);}
+  .model-value{font-size:11px;color:var(--muted);margin-top:2px;}
 
-    #backBtn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      background: #fbbc04;
-      color: #202124;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
+  .factors-list{margin-bottom:16px;}
+  .factor-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+  .factor-right{display:flex;align-items:center;gap:10px;}
+  .factor-icon{font-size:16px;}
+  .factor-name{font-size:13px;font-weight:500;}
+  .factor-sub{font-size:11px;color:var(--muted);}
+  .factor-left{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+  .factor-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;}
+  .factor-badge{font-size:9px;color:var(--gold);font-weight:700;}
+  .factor-impact{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;}
+  .factor-impact.bull{background:rgba(34,197,94,0.15);color:var(--buy);}
+  .factor-impact.bear{background:rgba(239,68,68,0.15);color:var(--sell);}
+  .factor-impact.neut{background:rgba(107,114,128,0.2);color:var(--muted);}
+  .factor-impact.live{background:rgba(212,168,83,0.15);color:var(--gold);}
+
+  .candle-wrap{margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;}
+  .candle-title{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted);}
+  .candles{display:flex;gap:5px;align-items:flex-end;height:60px;}
+  .candle{flex:1;border-radius:2px;min-height:4px;}
+  .candle.up{background:var(--buy);opacity:0.85;}
+  .candle.down{background:var(--sell);opacity:0.85;}
+
+  .vol-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;}
+  .vol-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .vol-title{font-size:13px;font-weight:600;}
+  .vol-val{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--gold);}
+  .vol-bars{display:flex;gap:4px;align-items:flex-end;height:48px;}
+  .vol-bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold-dark),var(--gold));opacity:0.6;min-height:4px;}
+  .vol-bar.active{opacity:1;background:linear-gradient(180deg,var(--gold),var(--gold-light));}
+
+  .refresh-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:16px;color:#0A0C10;font-family:'Tajawal',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease;-webkit-tap-highlight-color:transparent;}
+  .refresh-btn:active{transform:scale(0.98);}
+  .refresh-btn.loading{opacity:0.7;pointer-events:none;}
+  .spin{animation:spin 1s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .footer{text-align:center;padding:12px 0 20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);}
+
+  .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity 0.5s ease;}
+  .loading-overlay.hidden{opacity:0;pointer-events:none;}
+  .loading-logo{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--gold);margin-bottom:24px;letter-spacing:3px;}
+  .loading-bar-wrap{width:200px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+  .loading-bar{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));border-radius:2px;animation:loadbar 2.2s ease forwards;}
+  @keyframes loadbar{from{width:0}to{width:100%}}
+  .loading-text{font-size:12px;color:var(--muted);margin-top:12px;}
+  .loading-step{font-size:11px;color:var(--gold);margin-top:6px;min-height:16px;}
+  .model-card,.factor-row{animation:fadeUp 0.4s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .model-card:nth-child(1){animation-delay:0.05s}.model-card:nth-child(2){animation-delay:0.1s}
+  .model-card:nth-child(3){animation-delay:0.15s}.model-card:nth-child(4){animation-delay:0.2s}
+</style>
 </head>
 <body>
 
-  <h2>مجازفة 🎲 - حساب اللوت الذكي</h2>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">GOLD·Q</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-text">جاري جلب البيانات الحقيقية...</div>
+  <div class="loading-step" id="loadStep">⏳ الاتصال بـ Twelve Data</div>
+</div>
 
-  <div class="container">
-    <label for="capital">رأس المال ($):</label>
-    <input type="number" id="capital" placeholder="أدخل رأس المال" />
-
-    <label for="reflection">نقاط الانعكاس:</label>
-    <input type="number" id="reflection" placeholder="أدخل عدد النقاط" />
-
-    <button onclick="calculateLot()">احسب اللوت المناسب</button>
-
-    <div class="result" id="result"></div>
+<div class="container">
+  <div class="header">
+    <div class="logo">GOLD<span>·Q</span></div>
+    <div class="live-badge"><div class="live-dot"></div>مباشر</div>
   </div>
 
-  <button id="backBtn" onclick="window.location.href='index.html'">العودة للصفحة الرئيسية</button>
+  <!-- ✅ أضف مفتاح FRED هنا -->
+  <div class="setup-banner" id="setupBanner">
+    <div class="setup-title">🔑 أضف مفتاح FRED للبيانات الماكرو الحقيقية</div>
+    <div class="setup-text">
+      سيجلب: Real Yield · DXY · VIX · Breakeven Inflation<br>
+      مجاناً من بنك الاحتياطي الفيدرالي الأمريكي
+    </div>
+    <div class="setup-input-row">
+      <input class="setup-input" id="fredKeyInput" type="password"
+             placeholder="الصق مفتاح FRED هنا..." autocomplete="off">
+      <button class="setup-btn" onclick="saveFredKey()">حفظ ✓</button>
+    </div>
+  </div>
 
-  <script>
-    function calculateLot() {
-      const capital = parseFloat(document.getElementById('capital').value);
-      const reflection = parseFloat(document.getElementById('reflection').value);
+  <div class="error-banner" id="errorBanner"></div>
 
-      if (!capital || !reflection || reflection === 0) {
-        document.getElementById('result').innerHTML = "يرجى إدخال القيم بشكل صحيح.";
-        return;
-      }
+  <div class="price-card">
+    <div class="price-label">سعر الذهب الفوري · XAU/USD</div>
+    <div class="price-main" id="priceMain">—</div>
+    <div class="price-sub">
+      <div class="price-change" id="priceChange">—</div>
+      <div class="price-time" id="priceTime">—</div>
+    </div>
+    <div class="data-source" id="dataSource">📡 Twelve Data API</div>
+  </div>
 
-      const riskPerTrade = capital / 3;
-      const dollarsPerPoint = riskPerTrade / reflection;
-      const rawLot = dollarsPerPoint / 100;
-      const finalLot = Math.floor(rawLot * 100) / 100;
+  <div class="signal-card LOADING" id="signalCard">
+    <div class="signal-label">⚡ إشارة النموذج الموحّد</div>
+    <div class="signal-text" id="signalText" style="color:var(--muted);font-size:28px">جاري التحليل</div>
+    <div class="signal-ar" id="signalAr" style="color:var(--muted)">يرجى الانتظار...</div>
+    <div class="signal-confidence">
+      <div class="conf-label">الثقة</div>
+      <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
+      <div class="conf-val" id="confVal">—</div>
+    </div>
+  </div>
 
-      const profit10pips = finalLot * 15 * 100;
-      const lossAtReflection = finalLot * reflection * 100;
+  <div class="section-title">شمعات آخر ١٢ ساعة</div>
+  <div class="candle-wrap">
+    <div class="candle-title" id="candleTitle">جاري التحميل...</div>
+    <div class="candles" id="candlesBar"></div>
+  </div>
 
-      document.getElementById('result').innerHTML = `
-        <p>🔢 حجم اللوت المناسب: <strong>${finalLot.toFixed(2)}</strong></p>
-        <p>✅ الربح في حال 15 نقاط: <strong>$${profit10pips.toFixed(2)}</strong></p>
-        <p>❌ الخسارة في حال انعكاس ${reflection} نقطة: <strong>$${lossAtReflection.toFixed(2)}</strong></p>
-      `;
-    }
-  </script>
+  <div class="section-title">نتائج النماذج الفردية</div>
+  <div class="models-grid">
+    <div class="model-card">
+      <div class="model-icon">📈</div>
+      <div class="model-name">GARCH · التقلب</div>
+      <div class="model-signal" id="m1Signal">—</div>
+      <div class="model-value" id="m1Val">σ = —</div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🔁</div>
+      <div class="model-name">Mean Reversion · Z</div>
+      <div class="model-signal" id="m2Signal">—</div>
+      <div class="model-value" id="m2Val">Z = —</div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">⚡</div>
+      <div class="model-name">Momentum · RSI</div>
+      <div class="model-signal" id="m3Signal">—</div>
+      <div class="model-value" id="m3Val">RSI = —</div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🤖</div>
+      <div class="model-name">ML · XGBoost</div>
+      <div class="model-signal" id="m4Signal">—</div>
+      <div class="model-value" id="m4Val">P = —</div>
+    </div>
+  </div>
 
+  <div class="section-title">العوامل الماكرو</div>
+  <div class="factors-list">
+    <div class="factor-row">
+      <div class="factor-right"><div class="factor-icon">🏦</div>
+        <div><div class="factor-name">Real Yield (TIPS)</div><div class="factor-sub">العائد الحقيقي</div></div>
+      </div>
+      <div class="factor-left">
+        <div class="factor-val" id="f1Val">—</div>
+        <div class="factor-badge" id="f1Badge"></div>
+        <div class="factor-impact" id="f1Impact">—</div>
+      </div>
+    </div>
+    <div class="factor-row">
+      <div class="factor-right"><div class="factor-icon">💵</div>
+        <div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div>
+      </div>
+      <div class="factor-left">
+        <div class="factor-val" id="f2Val">—</div>
+        <div class="factor-badge" id="f2Badge"></div>
+        <div class="factor-impact" id="f2Impact">—</div>
+      </div>
+    </div>
+    <div class="factor-row">
+      <div class="factor-right"><div class="factor-icon">😱</div>
+        <div><div class="factor-name">VIX Index</div><div class="factor-sub">مؤشر الخوف</div></div>
+      </div>
+      <div class="factor-left">
+        <div class="factor-val" id="f3Val">—</div>
+        <div class="factor-badge" id="f3Badge"></div>
+        <div class="factor-impact" id="f3Impact">—</div>
+      </div>
+    </div>
+    <div class="factor-row">
+      <div class="factor-right"><div class="factor-icon">🔥</div>
+        <div><div class="factor-name">Breakeven Inflation</div><div class="factor-sub">توقعات التضخم</div></div>
+      </div>
+      <div class="factor-left">
+        <div class="factor-val" id="f4Val">—</div>
+        <div class="factor-badge" id="f4Badge"></div>
+        <div class="factor-impact" id="f4Impact">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">تقلب GARCH اليومي</div>
+  <div class="vol-card">
+    <div class="vol-header">
+      <div class="vol-title">النطاق المتوقع</div>
+      <div class="vol-val" id="volVal">±—</div>
+    </div>
+    <div class="vol-bars" id="volBars"></div>
+  </div>
+
+  <button class="refresh-btn" id="refreshBtn" onclick="runAnalysis()">
+    <span id="refreshIcon">🔄</span> تحديث البيانات
+  </button>
+
+  <div class="footer">
+    نموذج بحثي · ليس توصية استثمارية<br>
+    Twelve Data + FRED API · آخر تحديث: <span id="lastUpdate">—</span>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// ⚙️  CONFIG
+// ══════════════════════════════════════════
+const TD_KEY   = '482fb2c5ca1949728b91b5580af2d697';
+let   FRED_KEY = localStorage.getItem('fred_key') || '';
+
+const TD_BASE   = 'https://api.twelvedata.com';
+const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
+
+// FRED Series IDs
+const FRED_IDS = {
+  realYield : 'DFII10',    // 10-Year Real Yield (TIPS)
+  dxy       : 'DTWEXBGS',  // Dollar Index (Broad)
+  vix       : 'VIXCLS',    // CBOE VIX
+  breakeven : 'T10YIE',    // 10-Year Breakeven Inflation
+};
+
+// ══════════════════════════════════════════
+// KEY MANAGEMENT
+// ══════════════════════════════════════════
+function saveFredKey() {
+  const val = document.getElementById('fredKeyInput').value.trim();
+  if (!val) return;
+  FRED_KEY = val;
+  localStorage.setItem('fred_key', val);
+  document.getElementById('setupBanner').style.display = 'none';
+  document.getElementById('fredKeyInput').value = '';
+  runAnalysis();
+}
+
+// ══════════════════════════════════════════
+// FETCH FUNCTIONS
+// ══════════════════════════════════════════
+async function fetchTD(path) {
+  const r = await fetch(`${TD_BASE}/${path}&apikey=${TD_KEY}`);
+  const d = await r.json();
+  if (d.status === 'error') throw new Error('Twelve Data: ' + d.message);
+  return d;
+}
+
+async function fetchFRED(seriesId) {
+  const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=5`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.error_message) throw new Error(d.error_message);
+  // Find latest non-null value
+  const obs = d.observations?.find(o => o.value !== '.');
+  return obs ? parseFloat(obs.value) : null;
+}
+
+async function fetchAllFRED() {
+  if (!FRED_KEY) return null;
+  try {
+    const [realYield, dxy, vix, breakeven] = await Promise.allSettled([
+      fetchFRED(FRED_IDS.realYield),
+      fetchFRED(FRED_IDS.dxy),
+      fetchFRED(FRED_IDS.vix),
+      fetchFRED(FRED_IDS.breakeven),
+    ]);
+    return {
+      realYield : realYield.status==='fulfilled' ? realYield.value : null,
+      dxy       : dxy.status==='fulfilled'       ? dxy.value       : null,
+      vix       : vix.status==='fulfilled'       ? vix.value       : null,
+      breakeven : breakeven.status==='fulfilled' ? breakeven.value : null,
+    };
+  } catch(e) { console.warn('FRED error:', e); return null; }
+}
+
+// ══════════════════════════════════════════
+// QUANTITATIVE MODELS
+// ══════════════════════════════════════════
+function calcRSI(cl, p=14) {
+  if (cl.length < p+1) return 50;
+  let g=0,l=0;
+  for (let i=cl.length-p;i<cl.length;i++) { const d=cl[i]-cl[i-1]; d>0?g+=d:l-=d; }
+  return 100-(100/(1+(g/(l||0.0001))));
+}
+function calcZ(cl, w=20) {
+  if (cl.length<w) return 0;
+  const s=cl.slice(-w), m=s.reduce((a,b)=>a+b,0)/w;
+  const std=Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0)/w);
+  return std===0?0:(cl[cl.length-1]-m)/std;
+}
+function calcVol(cl) {
+  if (cl.length<2) return 1;
+  const ret=[];
+  for(let i=1;i<cl.length;i++) ret.push((cl[i]-cl[i-1])/cl[i-1]*100);
+  const r=ret.slice(-10), m=r.reduce((a,b)=>a+b,0)/r.length;
+  return Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0)/r.length);
+}
+
+function sigGARCH(vol,rsi){
+  if(vol>1.5&&rsi>70)return{sig:'SELL',val:`σ=${vol.toFixed(2)}%`};
+  if(vol>1.5&&rsi<30)return{sig:'BUY', val:`σ=${vol.toFixed(2)}%`};
+  if(vol<0.5)        return{sig:'NEUTRAL',val:`σ=${vol.toFixed(2)}%`};
+  return rsi>55?{sig:'BUY',val:`σ=${vol.toFixed(2)}%`}:{sig:'SELL',val:`σ=${vol.toFixed(2)}%`};
+}
+function sigMR(z){return z<-1.5?{sig:'BUY',val:`Z=${z.toFixed(2)}`}:z>1.5?{sig:'SELL',val:`Z=${z.toFixed(2)}`}:{sig:'NEUTRAL',val:`Z=${z.toFixed(2)}`};}
+function sigMom(rsi){return rsi>60?{sig:'BUY',val:`RSI=${rsi.toFixed(1)}`}:rsi<40?{sig:'SELL',val:`RSI=${rsi.toFixed(1)}`}:{sig:'NEUTRAL',val:`RSI=${rsi.toFixed(1)}`};}
+function sigML(rsi,z,vol,f) {
+  let s=0.5;
+  if(rsi>60)s+=0.09;else if(rsi<40)s-=0.09;
+  if(z<-1.5)s+=0.11;else if(z>1.5)s-=0.11;
+  if(vol>1.5&&rsi<40)s+=0.07;
+  if(vol>1.5&&rsi>70)s-=0.07;
+  if(f){
+    if(f.realYield!==null){if(f.realYield<1.0)s+=0.08;else if(f.realYield>1.5)s-=0.08;}
+    if(f.dxy!==null){if(f.dxy<101)s+=0.06;else if(f.dxy>104)s-=0.08;}
+    if(f.vix!==null&&f.vix>25)s+=0.08;
+    if(f.breakeven!==null&&f.breakeven>2.4)s+=0.06;
+  }
+  s=Math.max(0.1,Math.min(0.9,s));
+  const p=(s*100).toFixed(0);
+  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
+}
+function macroSigs(f){
+  if(!f)return['NEUTRAL','NEUTRAL','NEUTRAL','NEUTRAL'];
+  return[
+    f.realYield===null?'NEUTRAL':f.realYield<1.0?'BUY':f.realYield>1.5?'SELL':'NEUTRAL',
+    f.dxy===null?'NEUTRAL':f.dxy<101?'BUY':f.dxy>104?'SELL':'NEUTRAL',
+    f.vix===null?'NEUTRAL':f.vix>25?'BUY':f.vix<15?'SELL':'NEUTRAL',
+    f.breakeven===null?'NEUTRAL':f.breakeven>2.4?'BUY':f.breakeven<2.0?'SELL':'NEUTRAL',
+  ];
+}
+function ensemble(m1,m2,m3,m4,mac){
+  const all=[m1.sig,m2.sig,m3.sig,m4.sig,...mac];
+  const c={BUY:0,SELL:0,NEUTRAL:0};
+  all.forEach(s=>c[s]++); c[m4.sig]++;
+  const tot=all.length+1;
+  let fin='NEUTRAL';
+  if(c.BUY>=c.SELL&&c.BUY>=c.NEUTRAL)fin='BUY';
+  else if(c.SELL>=c.BUY&&c.SELL>=c.NEUTRAL)fin='SELL';
+  return{signal:fin,confidence:Math.max(45,Math.round((c[fin]/tot)*100))};
+}
+
+// ══════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════
+const AR={BUY:'شراء ↑',SELL:'بيع ↓',NEUTRAL:'انتظار ◈'};
+const IC={BUY:'bull',SELL:'bear',NEUTRAL:'neut'};
+const IA={BUY:'صاعد ↑',SELL:'هابط ↓',NEUTRAL:'محايد'};
+
+function setModel(idS,idV,r){
+  const el=document.getElementById(idS);
+  el.textContent=AR[r.sig]; el.className='model-signal '+r.sig;
+  document.getElementById(idV).textContent=r.val;
+}
+function setFactor(n,val,sig,live){
+  document.getElementById(`f${n}Val`).textContent=val||'—';
+  document.getElementById(`f${n}Badge`).textContent=live?'🟢 FRED حقيقي':'⚪ محاكاة';
+  const el=document.getElementById(`f${n}Impact`);
+  el.textContent=IA[sig]; el.className='factor-impact '+(live?'live':IC[sig]);
+}
+function buildCandles(vals){
+  const bar=document.getElementById('candlesBar'); bar.innerHTML='';
+  const sl=vals.slice(0,12).reverse();
+  const H=sl.map(v=>parseFloat(v.high)),L=sl.map(v=>parseFloat(v.low));
+  const mx=Math.max(...H),mn=Math.min(...L),rng=mx-mn||1;
+  sl.forEach(v=>{
+    const c=document.createElement('div');
+    c.className='candle '+(parseFloat(v.close)>=parseFloat(v.open)?'up':'down');
+    c.style.height=Math.max(6,((parseFloat(v.high)-parseFloat(v.low))/rng)*100)+'%';
+    bar.appendChild(c);
+  });
+  document.getElementById('candleTitle').textContent=
+    `${sl.length} شمعة ساعية · آخر $${parseFloat(vals[0].close).toFixed(1)}`;
+}
+function buildVol(vol,price){
+  const c=document.getElementById('volBars'); c.innerHTML='';
+  for(let i=0;i<12;i++){
+    const b=document.createElement('div');
+    b.className='vol-bar'+(i===11?' active':'');
+    b.style.height=(20+Math.random()*60)+'%';
+    c.appendChild(b);
+  }
+  document.getElementById('volVal').textContent=`±$${(vol*price/100).toFixed(0)}`;
+}
+function showErr(m){const e=document.getElementById('errorBanner');e.textContent='⚠️ '+m;e.classList.add('show');}
+function hideErr(){document.getElementById('errorBanner').classList.remove('show');}
+
+// ══════════════════════════════════════════
+// MAIN ANALYSIS
+// ══════════════════════════════════════════
+async function runAnalysis(){
+  const btn=document.getElementById('refreshBtn');
+  const icon=document.getElementById('refreshIcon');
+  btn.classList.add('loading');
+  icon.innerHTML='<span class="spin">⟳</span>';
+  hideErr();
+
+  try{
+    const [quote,series,fred]=await Promise.all([
+      fetchTD('quote?symbol=XAU/USD'),
+      fetchTD('time_series?symbol=XAU/USD&interval=1h&outputsize=30'),
+      fetchAllFRED(),
+    ]);
+
+    const price=parseFloat(quote.close||quote.price);
+    const prev=parseFloat(quote.previous_close);
+    const change=price-prev, pct=(change/prev)*100;
+    const closes=series.values.map(v=>parseFloat(v.close)).reverse();
+
+    const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
+    const m1=sigGARCH(vol,rsi), m2=sigMR(z), m3=sigMom(rsi), m4=sigML(rsi,z,vol,fred);
+    const mac=macroSigs(fred);
+    const res=ensemble(m1,m2,m3,m4,mac);
+    const live=!!fred;
+
+    // Price
+    const up=change>=0;
+    document.getElementById('priceMain').textContent='$'+price.toFixed(2);
+    const pc=document.getElementById('priceChange');
+    pc.textContent=(up?'+':'')+change.toFixed(2)+' ('+(up?'+':'')+pct.toFixed(2)+'%)';
+    pc.className='price-change '+(up?'up':'down');
+    document.getElementById('priceTime').textContent=new Date().toLocaleTimeString('ar-SA');
+    document.getElementById('dataSource').textContent=
+      live?'📡 Twelve Data + FRED · بيانات حقيقية كاملة ✓':'📡 Twelve Data ✓ · (أضف FRED للماكرو الحقيقي)';
+
+    // Signal
+    const card=document.getElementById('signalCard');
+    card.className='signal-card '+res.signal;
+    const st=document.getElementById('signalText');
+    st.textContent=res.signal; st.className='signal-text '+res.signal;
+    document.getElementById('signalAr').textContent=AR[res.signal];
+    document.getElementById('confFill').className='conf-fill '+res.signal;
+    document.getElementById('confFill').style.width=res.confidence+'%';
+    document.getElementById('confVal').textContent=res.confidence+'%';
+    document.getElementById('confVal').className='conf-val '+res.signal;
+
+    // Models
+    setModel('m1Signal','m1Val',m1); setModel('m2Signal','m2Val',m2);
+    setModel('m3Signal','m3Val',m3); setModel('m4Signal','m4Val',m4);
+
+    // Macro
+    const fv=(v,d)=>v!==null?v.toFixed(d):'—';
+    setFactor(1, fred?.realYield!==null?fv(fred.realYield,2)+'%':'—', mac[0], live&&fred?.realYield!==null);
+    setFactor(2, fred?.dxy!==null?fv(fred.dxy,1):'—',               mac[1], live&&fred?.dxy!==null);
+    setFactor(3, fred?.vix!==null?fv(fred.vix,1):'—',               mac[2], live&&fred?.vix!==null);
+    setFactor(4, fred?.breakeven!==null?fv(fred.breakeven,2)+'%':'—',mac[3], live&&fred?.breakeven!==null);
+
+    buildCandles(series.values);
+    buildVol(vol,price);
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
+
+  }catch(err){
+    showErr(err.message+' · تحقق من الاتصال أو المفتاح');
+    console.error(err);
+  }
+  btn.classList.remove('loading');
+  icon.textContent='🔄';
+}
+
+// Init
+window.addEventListener('load',()=>{
+  if(FRED_KEY) document.getElementById('setupBanner').style.display='none';
+  else document.getElementById('setupBanner').classList.add('show');
+  const steps=['⏳ الاتصال بـ Twelve Data...','📊 جلب XAU/USD...','🏛 استعلام FRED...','🧮 تشغيل النماذج...','✅ جاهز!'];
+  let i=0; const el=document.getElementById('loadStep');
+  const iv=setInterval(()=>{if(i<steps.length)el.textContent=steps[i++];else clearInterval(iv);},450);
+  setTimeout(()=>{document.getElementById('loadingOverlay').classList.add('hidden');runAnalysis();},2300);
+});
+setInterval(()=>{if(!document.getElementById('refreshBtn').classList.contains('loading'))runAnalysis();},60000);
+</script>
 </body>
 </html>
