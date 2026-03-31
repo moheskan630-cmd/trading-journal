@@ -6,7 +6,6 @@
 <title>تنبيهات الذهب</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:Tahoma;
   background:#0a0a0f;
@@ -15,22 +14,18 @@ body{
   max-width:500px;
   margin:auto;
 }
-h1{text-align:center;color:#f0c040;margin-bottom:15px}
-
+h1{text-align:center;color:#f0c040}
 .box{
   border:1px solid #222;
   padding:15px;
   border-radius:10px;
-  margin-bottom:10px;
+  margin:10px 0;
   text-align:center;
 }
-
 .price{
   font-size:2.5rem;
   color:#f0c040;
-  font-weight:bold;
 }
-
 input,select{
   width:100%;
   padding:10px;
@@ -40,7 +35,6 @@ input,select{
   border:1px solid #333;
   border-radius:6px;
 }
-
 button{
   width:100%;
   padding:10px;
@@ -48,14 +42,8 @@ button{
   background:#f0c040;
   border:none;
   border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
 }
-
-.alert{
-  padding:8px;
-  border-bottom:1px solid #222;
-}
+.alert{border-bottom:1px solid #222;padding:6px}
 </style>
 </head>
 
@@ -66,69 +54,67 @@ button{
 <div class="box" id="status">جاري الاتصال...</div>
 
 <div class="box">
-  <div>السعر الحالي</div>
+  السعر الحالي
   <div class="price" id="price">—</div>
 </div>
 
 <div class="box">
-  <div>إضافة تنبيه</div>
-
   <select id="dir">
     <option value="above">فوق السعر</option>
     <option value="below">تحت السعر</option>
   </select>
-
-  <input type="number" id="target" placeholder="ادخل السعر">
-
+  <input type="number" id="target" placeholder="السعر">
   <button onclick="addAlert()">إضافة</button>
 </div>
 
-<div class="box">
-  <div>التنبيهات</div>
-  <div id="alerts"></div>
-</div>
+<div class="box" id="alerts"></div>
 
 <script>
-// ✅ Proxy لتجاوز الحظر
-const API = "https://api.allorigins.win/raw?url=https://api.metals.live/v1/spot/gold";
 
-let alerts = JSON.parse(localStorage.getItem("alerts") || "[]");
-let currentPrice = 0;
+// 🔥 قائمة بروكسيات
+const APIs = [
+  "https://api.allorigins.win/raw?url=https://api.metals.live/v1/spot/gold",
+  "https://thingproxy.freeboard.io/fetch/https://api.metals.live/v1/spot/gold",
+  "https://corsproxy.io/?https://api.metals.live/v1/spot/gold"
+];
 
-// جلب السعر
-async function getGold(){
-  try{
-    document.getElementById("status").innerText="جاري التحديث...";
+let alerts = JSON.parse(localStorage.getItem("alerts")||"[]");
+let price = 0;
 
-    const res = await fetch(API);
-    const data = await res.json();
+// جلب السعر مع fallback
+async function fetchGold(){
+  document.getElementById("status").innerText="جاري التحديث...";
 
-    currentPrice = data[0][1];
+  for(let url of APIs){
+    try{
+      const res = await fetch(url);
+      const data = await res.json();
 
-    document.getElementById("price").innerText = currentPrice.toFixed(2);
-    document.getElementById("status").innerText="متصل ✔";
+      price = data[0][1];
 
-    checkAlerts();
+      document.getElementById("price").innerText = price.toFixed(2);
+      document.getElementById("status").innerText="متصل ✔";
 
-  }catch(e){
-    document.getElementById("status").innerText="فشل الاتصال ❌";
-    console.error(e);
+      checkAlerts();
+      return;
+
+    }catch(e){
+      console.log("فشل:", url);
+    }
   }
+
+  document.getElementById("status").innerText="فشل الاتصال ❌";
 }
 
 // إضافة تنبيه
 function addAlert(){
   const dir = document.getElementById("dir").value;
-  const price = parseFloat(document.getElementById("target").value);
+  const target = parseFloat(document.getElementById("target").value);
 
-  if(!price){
-    alert("ادخل سعر صحيح");
-    return;
-  }
+  if(!target) return alert("ادخل سعر");
 
-  alerts.push({dir, price, done:false});
-  save();
-  render();
+  alerts.push({dir,target,done:false});
+  save(); render();
 }
 
 // فحص التنبيهات
@@ -136,22 +122,21 @@ function checkAlerts(){
   alerts.forEach(a=>{
     if(a.done) return;
 
-    if(a.dir==="above" && currentPrice >= a.price){
-      alert("🔥 السعر صعد فوق "+a.price);
-      a.done = true;
+    if(a.dir==="above" && price>=a.target){
+      alert("🔥 السعر وصل فوق "+a.target);
+      a.done=true;
     }
 
-    if(a.dir==="below" && currentPrice <= a.price){
-      alert("🔥 السعر نزل تحت "+a.price);
-      a.done = true;
+    if(a.dir==="below" && price<=a.target){
+      alert("🔥 السعر نزل تحت "+a.target);
+      a.done=true;
     }
   });
 
-  save();
-  render();
+  save(); render();
 }
 
-// عرض التنبيهات
+// عرض
 function render(){
   const el = document.getElementById("alerts");
 
@@ -160,21 +145,20 @@ function render(){
     return;
   }
 
-  el.innerHTML = alerts.map(a => `
+  el.innerHTML = alerts.map(a=>`
     <div class="alert">
-      ${a.dir==="above"?"⬆":"⬇"} ${a.price} ${a.done?"✔":""}
+      ${a.dir==="above"?"⬆":"⬇"} ${a.target} ${a.done?"✔":""}
     </div>
   `).join("");
 }
 
-// حفظ
 function save(){
-  localStorage.setItem("alerts", JSON.stringify(alerts));
+  localStorage.setItem("alerts",JSON.stringify(alerts));
 }
 
 // تشغيل
-setInterval(getGold, 30000);
-getGold();
+setInterval(fetchGold,30000);
+fetchGold();
 render();
 
 </script>
