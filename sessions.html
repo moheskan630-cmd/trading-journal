@@ -1,84 +1,189 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>جلسات التداول الآن</title>
-  <style>
-    body {
-      background: #202124;
-      color: #fbbc04;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تنبيهات الذهب · XAU/USD</title>
 
-    h1 {
-      font-size: 26px;
-      margin-bottom: 15px;
-    }
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Segoe UI',Tahoma,Arial;
+  background:#09090f;color:#e0e6f0;
+  padding:20px;max-width:520px;margin:auto
+}
+.header{text-align:center;margin-bottom:20px}
+.header h1{color:#f0c040;font-size:1.1rem}
 
-    .session-box {
-      background: #303134;
-      border-radius: 12px;
-      padding: 20px 30px;
-      color: #e8eaed;
-      font-size: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
+.api-status{
+  text-align:center;
+  padding:8px;
+  margin-bottom:15px;
+  border:1px solid #222;
+  border-radius:8px
+}
 
-    #backBtn {
-      margin-top: 30px;
-      background: #fbbc04;
-      color: #202124;
-      padding: 14px 28px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
+.gold-card{
+  text-align:center;
+  padding:20px;
+  border:1px solid #333;
+  border-radius:15px;
+  margin-bottom:15px
+}
 
-    #backBtn:hover {
-      background: #e3aa00;
-    }
-  </style>
+.gold-price{
+  font-size:2.5rem;
+  color:#f0c040;
+  font-weight:bold
+}
+
+.card{
+  background:#111;
+  border:1px solid #222;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:10px
+}
+
+input,select{
+  width:100%;
+  padding:8px;
+  margin-top:5px;
+  background:#000;
+  color:#fff;
+  border:1px solid #333;
+  border-radius:6px
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#f0c040;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer
+}
+
+.alert-item{
+  padding:10px;
+  border-bottom:1px solid #222;
+  font-size:0.9rem
+}
+</style>
 </head>
+
 <body>
 
-<h1>الجلسة الحالية حسب توقيتك المحلي</h1>
-<div class="session-box" id="sessionNow">جارٍ التحميل...</div>
+<div class="header">
+  <h1>🥇 تنبيهات الذهب</h1>
+</div>
 
-<button id="backBtn" onclick="goBack()">العودة للصفحة الرئيسية</button>
+<div class="api-status" id="status">جاري الاتصال...</div>
+
+<div class="gold-card">
+  <div>السعر الحالي</div>
+  <div class="gold-price" id="price">—</div>
+</div>
+
+<div class="card">
+  <div>إضافة تنبيه</div>
+
+  <select id="dir">
+    <option value="above">فوق السعر</option>
+    <option value="below">تحت السعر</option>
+  </select>
+
+  <input type="number" id="target" placeholder="السعر">
+
+  <button onclick="addAlert()">إضافة</button>
+</div>
+
+<div class="card">
+  <div>التنبيهات</div>
+  <div id="alerts"></div>
+</div>
 
 <script>
-  function getCurrentSession() {
-    const now = new Date();
-    const hours = now.getHours();
+// API جديد ثابت
+const API = "https://api.metals.live/v1/spot/gold";
 
-    // الجلسات بناءً على التوقيت المحلي UTC+3
-    if (hours >= 3 && hours < 12) {
-      return "جلسة طوكيو 🇯🇵";
-    } else if (hours >= 10 && hours < 19) {
-      return "جلسة لندن 🇬🇧";
-    } else if (hours >= 15 && hours < 24) {
-      return "جلسة نيويورك 🇺🇸";
-    } else {
-      return "الأسواق مغلقة 🌙";
+let alerts = JSON.parse(localStorage.getItem("alerts")||"[]");
+let currentPrice = 0;
+
+async function getGold(){
+  try{
+    document.getElementById("status").innerText="جاري التحديث...";
+
+    const res = await fetch(API);
+    const data = await res.json();
+
+    currentPrice = data[0][1];
+
+    document.getElementById("price").innerText = currentPrice.toFixed(2);
+    document.getElementById("status").innerText="متصل ✔";
+
+    checkAlerts();
+
+  }catch(e){
+    document.getElementById("status").innerText="خطأ بالاتصال ❌";
+    console.error(e);
+  }
+}
+
+function addAlert(){
+  const dir = document.getElementById("dir").value;
+  const price = parseFloat(document.getElementById("target").value);
+
+  if(!price) return alert("ادخل سعر صحيح");
+
+  alerts.push({dir,price,done:false});
+  save();
+  render();
+}
+
+function checkAlerts(){
+  alerts.forEach(a=>{
+    if(a.done) return;
+
+    if(a.dir==="above" && currentPrice>=a.price){
+      alert("🔥 وصل السعر فوق "+a.price);
+      a.done=true;
     }
+
+    if(a.dir==="below" && currentPrice<=a.price){
+      alert("🔥 نزل السعر تحت "+a.price);
+      a.done=true;
+    }
+  });
+
+  save();
+  render();
+}
+
+function render(){
+  const el = document.getElementById("alerts");
+
+  if(!alerts.length){
+    el.innerHTML="لا يوجد تنبيهات";
+    return;
   }
 
-  document.getElementById("sessionNow").textContent = getCurrentSession();
+  el.innerHTML = alerts.map(a=>
+    `<div class="alert-item">
+      ${a.dir==="above"?"⬆":"⬇"} ${a.price}
+      ${a.done?"✔":""}
+    </div>`
+  ).join("");
+}
 
-  function goBack() {
-    window.location.href = "index.html";
-  }
+function save(){
+  localStorage.setItem("alerts",JSON.stringify(alerts));
+}
+
+setInterval(getGold,30000);
+getGold();
+render();
 </script>
 
 </body>
