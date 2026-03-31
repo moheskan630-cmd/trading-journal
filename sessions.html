@@ -3,90 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تنبيهات الذهب · XAU/USD</title>
+<title>تنبيهات الذهب</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
-  font-family:'Segoe UI',Tahoma,Arial;
-  background:#09090f;color:#e0e6f0;
-  padding:20px;max-width:520px;margin:auto
-}
-.header{text-align:center;margin-bottom:20px}
-.header h1{color:#f0c040;font-size:1.1rem}
-
-.api-status{
-  text-align:center;
-  padding:8px;
-  margin-bottom:15px;
-  border:1px solid #222;
-  border-radius:8px
-}
-
-.gold-card{
-  text-align:center;
+  font-family:Tahoma;
+  background:#0a0a0f;
+  color:#fff;
   padding:20px;
-  border:1px solid #333;
-  border-radius:15px;
-  margin-bottom:15px
+  max-width:500px;
+  margin:auto;
+}
+h1{text-align:center;color:#f0c040;margin-bottom:15px}
+
+.box{
+  border:1px solid #222;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+  text-align:center;
 }
 
-.gold-price{
+.price{
   font-size:2.5rem;
   color:#f0c040;
-  font-weight:bold
-}
-
-.card{
-  background:#111;
-  border:1px solid #222;
-  border-radius:10px;
-  padding:15px;
-  margin-bottom:10px
+  font-weight:bold;
 }
 
 input,select{
   width:100%;
-  padding:8px;
+  padding:10px;
   margin-top:5px;
   background:#000;
   color:#fff;
   border:1px solid #333;
-  border-radius:6px
+  border-radius:6px;
 }
 
 button{
   width:100%;
   padding:10px;
+  margin-top:10px;
   background:#f0c040;
   border:none;
   border-radius:8px;
   font-weight:bold;
-  cursor:pointer
+  cursor:pointer;
 }
 
-.alert-item{
-  padding:10px;
+.alert{
+  padding:8px;
   border-bottom:1px solid #222;
-  font-size:0.9rem
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>🥇 تنبيهات الذهب</h1>
-</div>
+<h1>🥇 تنبيهات الذهب</h1>
 
-<div class="api-status" id="status">جاري الاتصال...</div>
+<div class="box" id="status">جاري الاتصال...</div>
 
-<div class="gold-card">
+<div class="box">
   <div>السعر الحالي</div>
-  <div class="gold-price" id="price">—</div>
+  <div class="price" id="price">—</div>
 </div>
 
-<div class="card">
+<div class="box">
   <div>إضافة تنبيه</div>
 
   <select id="dir">
@@ -94,23 +78,24 @@ button{
     <option value="below">تحت السعر</option>
   </select>
 
-  <input type="number" id="target" placeholder="السعر">
+  <input type="number" id="target" placeholder="ادخل السعر">
 
   <button onclick="addAlert()">إضافة</button>
 </div>
 
-<div class="card">
+<div class="box">
   <div>التنبيهات</div>
   <div id="alerts"></div>
 </div>
 
 <script>
-// API جديد ثابت
-const API = "https://api.metals.live/v1/spot/gold";
+// ✅ Proxy لتجاوز الحظر
+const API = "https://api.allorigins.win/raw?url=https://api.metals.live/v1/spot/gold";
 
-let alerts = JSON.parse(localStorage.getItem("alerts")||"[]");
+let alerts = JSON.parse(localStorage.getItem("alerts") || "[]");
 let currentPrice = 0;
 
+// جلب السعر
 async function getGold(){
   try{
     document.getElementById("status").innerText="جاري التحديث...";
@@ -126,34 +111,39 @@ async function getGold(){
     checkAlerts();
 
   }catch(e){
-    document.getElementById("status").innerText="خطأ بالاتصال ❌";
+    document.getElementById("status").innerText="فشل الاتصال ❌";
     console.error(e);
   }
 }
 
+// إضافة تنبيه
 function addAlert(){
   const dir = document.getElementById("dir").value;
   const price = parseFloat(document.getElementById("target").value);
 
-  if(!price) return alert("ادخل سعر صحيح");
+  if(!price){
+    alert("ادخل سعر صحيح");
+    return;
+  }
 
-  alerts.push({dir,price,done:false});
+  alerts.push({dir, price, done:false});
   save();
   render();
 }
 
+// فحص التنبيهات
 function checkAlerts(){
   alerts.forEach(a=>{
     if(a.done) return;
 
-    if(a.dir==="above" && currentPrice>=a.price){
-      alert("🔥 وصل السعر فوق "+a.price);
-      a.done=true;
+    if(a.dir==="above" && currentPrice >= a.price){
+      alert("🔥 السعر صعد فوق "+a.price);
+      a.done = true;
     }
 
-    if(a.dir==="below" && currentPrice<=a.price){
-      alert("🔥 نزل السعر تحت "+a.price);
-      a.done=true;
+    if(a.dir==="below" && currentPrice <= a.price){
+      alert("🔥 السعر نزل تحت "+a.price);
+      a.done = true;
     }
   });
 
@@ -161,6 +151,7 @@ function checkAlerts(){
   render();
 }
 
+// عرض التنبيهات
 function render(){
   const el = document.getElementById("alerts");
 
@@ -169,21 +160,23 @@ function render(){
     return;
   }
 
-  el.innerHTML = alerts.map(a=>
-    `<div class="alert-item">
-      ${a.dir==="above"?"⬆":"⬇"} ${a.price}
-      ${a.done?"✔":""}
-    </div>`
-  ).join("");
+  el.innerHTML = alerts.map(a => `
+    <div class="alert">
+      ${a.dir==="above"?"⬆":"⬇"} ${a.price} ${a.done?"✔":""}
+    </div>
+  `).join("");
 }
 
+// حفظ
 function save(){
-  localStorage.setItem("alerts",JSON.stringify(alerts));
+  localStorage.setItem("alerts", JSON.stringify(alerts));
 }
 
-setInterval(getGold,30000);
+// تشغيل
+setInterval(getGold, 30000);
 getGold();
 render();
+
 </script>
 
 </body>
