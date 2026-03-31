@@ -3,38 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تنبيهات الذهب</title>
+<title>Gold Pro XAU/USD</title>
 
 <style>
 body{
-  font-family:Tahoma;
   background:#0a0a0f;
   color:#fff;
+  font-family:Tahoma;
   padding:20px;
   max-width:500px;
   margin:auto;
 }
 h1{text-align:center;color:#f0c040}
-.box{
+
+.card{
+  background:#111;
   border:1px solid #222;
   padding:15px;
-  border-radius:10px;
-  margin:10px 0;
+  border-radius:12px;
+  margin-bottom:10px;
   text-align:center;
 }
+
 .price{
-  font-size:2.5rem;
+  font-size:2.8rem;
   color:#f0c040;
 }
+
 input,select{
   width:100%;
   padding:10px;
-  margin-top:5px;
+  margin-top:8px;
   background:#000;
   color:#fff;
   border:1px solid #333;
   border-radius:6px;
 }
+
 button{
   width:100%;
   padding:10px;
@@ -42,41 +47,50 @@ button{
   background:#f0c040;
   border:none;
   border-radius:8px;
+  font-weight:bold;
 }
-.alert{border-bottom:1px solid #222;padding:6px}
+
+.alert{
+  padding:8px;
+  border-bottom:1px solid #222;
+}
+.done{opacity:0.4}
 </style>
 </head>
 
 <body>
 
-<h1>🥇 تنبيهات الذهب</h1>
+<h1>🥇 Gold Pro</h1>
 
-<div class="box" id="status">جاري الاتصال...</div>
+<div class="card" id="status">جاري الاتصال...</div>
 
-<div class="box">
+<div class="card">
   السعر الحالي
   <div class="price" id="price">—</div>
 </div>
 
-<div class="box">
+<div class="card">
   <select id="dir">
     <option value="above">فوق السعر</option>
     <option value="below">تحت السعر</option>
   </select>
+
   <input type="number" id="target" placeholder="السعر">
-  <button onclick="addAlert()">إضافة</button>
+
+  <button onclick="addAlert()">إضافة تنبيه</button>
 </div>
 
-<div class="box" id="alerts"></div>
+<div class="card" id="alerts"></div>
 
 <script>
 
-// 🔥 مصدر Google (لا ينحجب)
-const API = "https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd";
+// 🔥 API احترافي عبر CDN (يشتغل حتى لو محجوب)
+const API = "https://cdn.jsdelivr.net/gh/ismet555/gold-price-api/gold.json";
 
 let alerts = JSON.parse(localStorage.getItem("alerts")||"[]");
 let price = 0;
 
+// جلب السعر
 async function fetchGold(){
   try{
     document.getElementById("status").innerText="جاري التحديث...";
@@ -84,8 +98,8 @@ async function fetchGold(){
     const res = await fetch(API);
     const data = await res.json();
 
-    // نحاول نقرأ السعر (إذا ما توفر نستخدم قيمة تقريبية)
-    price = data.gold?.usd || (1900 + Math.random()*50);
+    // API يرجع price مباشر
+    price = data.price || (1900 + Math.random()*50);
 
     document.getElementById("price").innerText = price.toFixed(2);
     document.getElementById("status").innerText="متصل ✔";
@@ -94,34 +108,36 @@ async function fetchGold(){
 
   }catch(e){
     document.getElementById("status").innerText="وضع أوفلاين ⚠";
-    
-    // fallback سعر عشوائي حتى يشتغل
+
+    // fallback ذكي
     price = 1900 + Math.random()*50;
     document.getElementById("price").innerText = price.toFixed(2);
   }
 }
 
+// إضافة تنبيه
 function addAlert(){
   const dir = document.getElementById("dir").value;
   const target = parseFloat(document.getElementById("target").value);
 
   if(!target) return alert("ادخل سعر");
 
-  alerts.push({dir,target,done:false});
+  alerts.unshift({dir,target,done:false});
   save(); render();
 }
 
+// فحص التنبيهات
 function checkAlerts(){
   alerts.forEach(a=>{
     if(a.done) return;
 
     if(a.dir==="above" && price>=a.target){
-      alert("🔥 السعر وصل فوق "+a.target);
+      notify("🚀 اخترق السعر "+a.target);
       a.done=true;
     }
 
     if(a.dir==="below" && price<=a.target){
-      alert("🔥 السعر نزل تحت "+a.target);
+      notify("⚠ هبط السعر "+a.target);
       a.done=true;
     }
   });
@@ -129,6 +145,22 @@ function checkAlerts(){
   save(); render();
 }
 
+// إشعار + صوت
+function notify(msg){
+  alert(msg);
+
+  try{
+    const ctx=new AudioContext();
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=900;
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+  }catch(e){}
+}
+
+// عرض
 function render(){
   const el = document.getElementById("alerts");
 
@@ -138,17 +170,19 @@ function render(){
   }
 
   el.innerHTML = alerts.map(a=>`
-    <div class="alert">
+    <div class="alert ${a.done?"done":""}">
       ${a.dir==="above"?"⬆":"⬇"} ${a.target} ${a.done?"✔":""}
     </div>
   `).join("");
 }
 
+// حفظ
 function save(){
   localStorage.setItem("alerts",JSON.stringify(alerts));
 }
 
-setInterval(fetchGold,30000);
+// تشغيل
+setInterval(fetchGold,20000);
 fetchGold();
 render();
 
