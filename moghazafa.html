@@ -662,7 +662,8 @@
 
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
-    metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span>
+    metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
+    <span id="countdownTimer" style="color:var(--gold);font-size:10px;">🔄 تحديث تلقائي كل 15 دقيقة</span>
   </div>
 </div>
 
@@ -778,16 +779,43 @@ let _metalsCache = null;
 let _metalsCacheTime = 0;
 
 async function fetchMetals() {
-  // كاش لمدة 60 ثانية لتفادي الطلبات الزائدة
   if (_metalsCache && Date.now() - _metalsCacheTime < 60000) return _metalsCache;
-  const r = await fetch('https://api.metals.live/v1/spot');
-  if (!r.ok) throw new Error(`metals.live HTTP ${r.status}`);
-  const arr = await r.json();
-  // arr = [ { gold: 3200.5, silver: 32.1, ... } ]
-  const obj = arr[0] || arr;
-  _metalsCache = obj;
-  _metalsCacheTime = Date.now();
-  return obj;
+
+  // المصدر 1: goldprice.org يدعم CORS
+  try {
+    const r = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+    if (r.ok) {
+      const d = await r.json();
+      const gold = d.items?.[0]?.xauPrice;
+      const silver = d.items?.[0]?.xagPrice;
+      if (gold) {
+        _metalsCache = { gold, silver: silver || gold/80 };
+        _metalsCacheTime = Date.now();
+        return _metalsCache;
+      }
+    }
+  } catch(e) { console.warn('goldprice.org failed:', e.message); }
+
+  // المصدر 2: Twelve Data كـ fallback (سعر فقط لا يحتاج خطة Grow)
+  if (TD_KEY) {
+    try {
+      const [rG, rS] = await Promise.all([
+        fetch(`${TD_BASE}/price?symbol=XAU/USD&apikey=${TD_KEY}`),
+        fetch(`${TD_BASE}/price?symbol=XAG/USD&apikey=${TD_KEY}`),
+      ]);
+      const dG = await rG.json();
+      const dS = await rS.json();
+      const gold = parseFloat(dG.price);
+      const silver = parseFloat(dS.price) || gold/80;
+      if (!isNaN(gold)) {
+        _metalsCache = { gold, silver };
+        _metalsCacheTime = Date.now();
+        return _metalsCache;
+      }
+    } catch(e) { console.warn('TD price fallback failed:', e.message); }
+  }
+
+  throw new Error('تعذّر جلب سعر الذهب · تحقق من الاتصال بالإنترنت');
 }
 
 // بناء بيانات تسلسل زمني اصطناعي من السعر الحالي
@@ -1109,7 +1137,7 @@ function setSignal(p,res){ const card=document.getElementById(`${p}-signalCard`)
 function setPrice(p,price,change,pct,label,prefix='$'){ const up=change>=0; document.getElementById(`${p}-priceMain`).textContent=prefix+price.toFixed(prefix==='¥'?2:4); const pc=document.getElementById(`${p}-priceChange`); pc.textContent=(up?'+':'')+change.toFixed(prefix==='¥'?2:4)+' ('+(up?'+':'')+pct.toFixed(2)+'%)'; pc.className='price-change '+(up?'up':'down'); document.getElementById(`${p}-priceTime`).textContent=new Date().toLocaleTimeString('ar-SA'); document.getElementById(`${p}-dataSource`).textContent=label; }
 function buildCandles(p,vals,prefix='$',dp=2){ const bar=document.getElementById(`${p}-candlesBar`); bar.innerHTML=''; const sl=vals.slice(0,12).reverse(); const H=sl.map(v=>parseFloat(v.high)),L=sl.map(v=>parseFloat(v.low)); const mx=Math.max(...H),mn=Math.min(...L),rng=mx-mn||1; sl.forEach(v=>{ const c=document.createElement('div'); c.className='candle '+(parseFloat(v.close)>=parseFloat(v.open)?'up':'down'); c.style.height=Math.max(6,((parseFloat(v.high)-parseFloat(v.low))/rng)*100)+'%'; bar.appendChild(c); }); document.getElementById(`${p}-candleTitle`).textContent=`${sl.length} شمعة ساعية · آخر ${prefix}${parseFloat(vals[0].close).toFixed(dp)}`; }
 function buildVol(p,vol,price,cls,prefix='$',dp=4){ const c=document.getElementById(`${p}-volBars`); c.innerHTML=''; for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className=`vol-bar ${cls}`+(i===11?' active':''); b.style.height=(20+Math.random()*60)+'%'; c.appendChild(b); } document.getElementById(`${p}-volVal`).textContent=`±${prefix}${(vol*price/100).toFixed(dp)}`; }
-function showErr(m){ const e=document.getElementById('errorBanner'); let msg=m; if(m.includes('Failed to fetch'))msg='فشل الاتصال بالـ API · تحقق من مفتاح Twelve Data أو اتصال الإنترنت'; else if(m.includes('HTTP 4'))msg='مفتاح API غير صحيح · يرجى التحقق من المفتاح'; else if(m.includes('HTTP 5'))msg='خطأ في خادم API · حاول مرة أخرى بعد قليل'; e.textContent='⚠️ '+msg; e.classList.add('show'); }
+function showErr(m){ const e=document.getElementById('errorBanner'); let msg=m; if(m.includes('Failed to fetch')||m.includes('NetworkError'))msg='فشل الاتصال بالإنترنت · تحقق من اتصالك'; else if(m.includes('تعذّر جلب سعر الذهب'))msg=m; else if(m.includes('HTTP 4'))msg='مفتاح API غير صحيح · يرجى التحقق من المفتاح'; else if(m.includes('HTTP 5'))msg='خطأ في خادم API · حاول مرة أخرى بعد قليل'; else if(m.includes('Twelve Data'))msg='Twelve Data: '+m.split('Twelve Data: ')[1]; e.textContent='⚠️ '+msg; e.classList.add('show'); }
 function hideErr(){ document.getElementById('errorBanner').classList.remove('show'); }
 function setBtnLoading(p,on){ const btn=document.getElementById(`${p}-refreshBtn`); const icon=document.getElementById(`${p}-refreshIcon`); if(on){btn.classList.add('loading');icon.innerHTML='<span class="spin">⟳</span>';}else{btn.classList.remove('loading');icon.textContent='🔄';} }
 
@@ -1173,10 +1201,10 @@ async function runGold(){
     setModel('g','m1',m1.sig,m1.val); setModel('g','m2',m2.sig,m2.val);
     setModel('g','m3',m3.sig,m3.val); setModel('g','m4',m4.sig,m4.val);
     const fv=(v,d)=>v!==null?v.toFixed(d):'—';
-    setFactor('g',1,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[0],live&&fredData?.realYield!=null);
+    setFactor('g',1,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[0],fredData?.realYield!=null);
     setFactor('g',2,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[1],fredData?.dxyLive,'td');
     setFactor('g',3,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[2],fredData?.vixLive,'td');
-    setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],live&&fredData?.breakeven!=null);
+    setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],fredData?.breakeven!=null);
     buildCandles('g',series.values,'$',1);
     buildVol('g',vol,price,'gold-bar','$',0);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
@@ -1225,7 +1253,7 @@ async function runEUR(){
     const fv=(v,d)=>v!==null?v.toFixed(d):'—';
     setFactor('e',1,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[0],fredData?.dxyLive,'td');
     setFactor('e',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
-    setFactor('e',3,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[2],live&&fredData?.breakeven!=null);
+    setFactor('e',3,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[2],fredData?.breakeven!=null);
     buildCandles('e',series.values,'',5);
     buildVol('e',vol,price,'eur-bar','',5);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
@@ -1427,7 +1455,22 @@ window.addEventListener('load',()=>{
 setInterval(()=>{
   const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`).classList.contains('loading'));
   if(!anyLoading) runAll();
-},60000);
+},15*60*1000); // كل 15 دقيقة
+
+// عداد تنازلي للتحديث التلقائي
+(function startCountdown(){
+  const INTERVAL = 15 * 60; // ثانية
+  let remaining = INTERVAL;
+  const el = document.getElementById('countdownTimer');
+  if (!el) return;
+  setInterval(()=>{
+    remaining--;
+    if (remaining <= 0) remaining = INTERVAL;
+    const m = String(Math.floor(remaining/60)).padStart(2,'0');
+    const s = String(remaining % 60).padStart(2,'0');
+    el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
+  }, 1000);
+})();
 </script>
 </body>
 </html>
