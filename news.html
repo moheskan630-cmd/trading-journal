@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v6 MTF</title>
+<title>Quant Signal Pro · Live v8 MTF</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1413,7 +1413,7 @@
 </div>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-logo">QUANT·PRO <span style="font-size:14px;color:var(--teal-light)">v2</span></div>
+  <div class="loading-logo">QUANT·PRO <span style="font-size:14px;color:var(--teal-light)">v8</span></div>
   <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   <div class="loading-text">جاري جلب البيانات الحقيقية...</div>
   <div class="loading-step" id="loadStep">⏳ الاتصال بـ Twelve Data</div>
@@ -1421,14 +1421,14 @@
 
 <div class="container">
   <div class="header">
-    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v6</span></div>
+    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v8</span></div>
     <div class="live-badge"><div class="live-dot"></div>مباشر</div>
   </div>
 
   <!-- SETUP MODAL -->
   <div class="setup-modal" id="setupModal">
     <div class="setup-modal-box">
-      <div class="setup-modal-logo">QUANT·PRO v2</div>
+      <div class="setup-modal-logo">QUANT·PRO v8</div>
       <div class="setup-modal-title">🔑 إعداد مفاتيح API</div>
       <div class="setup-modal-sub">مطلوب مرة واحدة فقط · تُحفظ على جهازك</div>
       <div class="setup-field">
@@ -1460,11 +1460,11 @@
       </div>
       <div class="setup-field">
         <div class="setup-field-label">
-          <span>📰 NewsAPI Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري)</span></span>
-          <a class="setup-link" href="https://newsapi.org/register" target="_blank">احصل عليه مجاناً ↗</a>
+          <span>📊 Alpha Vantage Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري · أخبار مالية)</span></span>
+          <a class="setup-link" href="https://www.alphavantage.co/support/#api-key" target="_blank">احصل عليه مجاناً ↗</a>
         </div>
-        <div class="setup-field-sub">يجلب أخبار مالية من 80,000+ مصدر · 100 طلب/يوم مجاناً</div>
-        <input class="setup-input" id="newsapiKeyInput" type="password" placeholder="أدخل NewsAPI Key... (اختياري)" autocomplete="off" dir="ltr">
+        <div class="setup-field-sub">أخبار مالية + sentiment analysis · 25 طلب/يوم مجاناً · يدعم CORS ✓</div>
+        <input class="setup-input" id="avKeyInput" type="password" placeholder="أدخل Alpha Vantage Key... (اختياري)" autocomplete="off" dir="ltr">
         <div class="setup-field-status" id="newsapiStatus"></div>
       </div>
       <button class="setup-save-btn" id="setupSaveBtn" onclick="saveAllKeys()">حفظ وبدء التحليل ✓</button>
@@ -2477,7 +2477,7 @@
   </div><!-- /panel-quantbrain -->
 
   <div class="footer">
-    نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
+    نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v8<br>
     metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
     <span id="countdownTimer" style="color:var(--gold);font-size:10px;">🔄 تحديث تلقائي كل 15 دقيقة</span>
   </div>
@@ -2500,10 +2500,18 @@
 // ══════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════
-let TD_KEY   = localStorage.getItem('td_key')   || '';
-let FRED_KEY = localStorage.getItem('fred_key') || '';
-let FINNHUB_KEY = localStorage.getItem('finnhub_key') || '';
-let NEWSAPI_KEY = localStorage.getItem('newsapi_key') || '';
+// ── تخزين المفاتيح بطبقات متعددة ──
+function _loadKey(k) {
+  try { return sessionStorage.getItem(k) || localStorage.getItem(k) || ''; } catch(e) { return ''; }
+}
+function _saveKey(k, v) {
+  try { sessionStorage.setItem(k, v); } catch(e) {}
+  try { localStorage.setItem(k, v); } catch(e) {}
+}
+let TD_KEY      = _loadKey('td_key');
+let FRED_KEY    = _loadKey('fred_key');
+let FINNHUB_KEY = _loadKey('finnhub_key');
+let AV_KEY      = _loadKey('av_key');   // Alpha Vantage (بديل NewsAPI — مجاني + يدعم CORS)
 const TD_BASE   = 'https://api.twelvedata.com';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 
@@ -2618,7 +2626,7 @@ function saveAllKeys() {
   const tdVal      = document.getElementById('tdKeyInput').value.trim();
   const fredVal    = document.getElementById('fredKeyInput').value.trim();
   const finnhubVal = document.getElementById('finnhubKeyInput').value.trim();
-  const newsapiVal = document.getElementById('newsapiKeyInput').value.trim();
+  const newsapiVal = ''; // محذوف — تم الاستبدال بـ Alpha Vantage
   let valid = true;
   if (!tdVal)   { document.getElementById('tdStatus').textContent='⚠️ مطلوب'; document.getElementById('tdStatus').style.color='var(--sell)'; valid=false; }
   else          { document.getElementById('tdStatus').textContent='✅ تم الحفظ'; document.getElementById('tdStatus').style.color='var(--buy)'; }
@@ -2626,21 +2634,28 @@ function saveAllKeys() {
   else          { document.getElementById('fredStatus').textContent='✅ تم الحفظ'; document.getElementById('fredStatus').style.color='var(--buy)'; }
   if (finnhubVal) { document.getElementById('finnhubStatus').textContent='✅ Finnhub · أخبار مالية حقيقية'; document.getElementById('finnhubStatus').style.color='var(--buy)'; }
   else            { document.getElementById('finnhubStatus').textContent='⚪ اختياري'; document.getElementById('finnhubStatus').style.color='var(--muted)'; }
-  if (newsapiVal) { document.getElementById('newsapiStatus').textContent='✅ NewsAPI · 80,000+ مصدر إخباري'; document.getElementById('newsapiStatus').style.color='var(--buy)'; }
-  else            { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
+  const avVal2 = document.getElementById('avKeyInput')?.value.trim() || '';
+  if (avVal2) { document.getElementById('newsapiStatus').textContent='✅ Alpha Vantage · أخبار مالية حقيقية'; document.getElementById('newsapiStatus').style.color='var(--buy)'; }
+  else        { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
   if (!valid) return;
-  TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; NEWSAPI_KEY=newsapiVal;
-  localStorage.setItem('td_key', tdVal);
-  localStorage.setItem('fred_key', fredVal);
-  if (finnhubVal) localStorage.setItem('finnhub_key', finnhubVal);
-  if (newsapiVal) localStorage.setItem('newsapi_key', newsapiVal);
+  const avVal = document.getElementById('avKeyInput')?.value.trim() || '';
+  TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; AV_KEY=avVal;
+  _saveKey('td_key',      tdVal);
+  _saveKey('fred_key',    fredVal);
+  _saveKey('finnhub_key', finnhubVal);
+  _saveKey('av_key',      avVal);
+  // حفظ في URL hash كـ fallback
+  try {
+    const h = btoa(encodeURIComponent(JSON.stringify({td:tdVal,fred:fredVal,fh:finnhubVal,av:avVal})));
+    history.replaceState(null,'','#k='+h);
+  } catch(e) {}
   setTimeout(()=>{ document.getElementById('setupModal').classList.add('hidden'); document.getElementById('resetRow').style.display='block'; runAll(); },600);
 }
 function resetKeys() {
   document.getElementById('tdKeyInput').value    = TD_KEY;
   document.getElementById('fredKeyInput').value  = FRED_KEY;
   document.getElementById('finnhubKeyInput').value = FINNHUB_KEY;
-  document.getElementById('newsapiKeyInput').value = NEWSAPI_KEY;
+  if(document.getElementById('avKeyInput')) document.getElementById('avKeyInput').value = AV_KEY;
   ['tdStatus','fredStatus','finnhubStatus','newsapiStatus'].forEach(id => document.getElementById(id).textContent='');
   document.getElementById('setupModal').classList.remove('hidden');
 }
@@ -2659,70 +2674,66 @@ async function fetchTD(path) {
 }
 
 // ══════════════════════════════════════════
-// ██████ BATCH FETCH & CACHE ENGINE ██████
+// ██████ FETCH & CACHE ENGINE ██████
 // ══════════════════════════════════════════
-// طلب واحد لكل إطار زمني يجلب جميع الرموز دفعةً واحدة
-// الخطة المجانية: 8 credits/دقيقة — نستخدم 3 فقط
+// الخطة المجانية: 8 credits/دقيقة
+// 5 طلبات منفصلة (1h لكل رمز) — 4h و1day تُبنى منها رياضياً
+
+function _resample(candles1h, n) {
+  const asc = [...candles1h].reverse();
+  const out = [];
+  for (let i = 0; i + n <= asc.length; i += n) {
+    const g = asc.slice(i, i + n);
+    out.push({
+      datetime: g[g.length-1].datetime,
+      open:  g[0].open,
+      high:  String(Math.max(...g.map(c=>parseFloat(c.high)))),
+      low:   String(Math.min(...g.map(c=>parseFloat(c.low)))),
+      close: g[g.length-1].close,
+    });
+  }
+  return out.reverse();
+}
+
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
-  if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) {
-    return; // الكاش لا يزال صالحاً
-  }
-
+  if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) return;
   if (!TD_KEY) return;
 
-  // ── جميع الرموز المطلوبة في طلب واحد لكل إطار ──
-  // هذا يستهلك 1 credit لكل طلب (batch) بدلاً من credit لكل رمز
-  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD,XAU/USD,XAG/USD';
-  const SYMS_4H   = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
-  const SYMS_1DAY = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
-
-  try {
-    // 3 طلبات فقط — كل طلب يجلب جميع الرموز لإطار واحد
-    const [res1h, res4h, res1d] = await Promise.all([
-      fetchTD(`time_series?symbol=${SYMS_1H}&interval=1h&outputsize=60`),
-      fetchTD(`time_series?symbol=${SYMS_4H}&interval=4h&outputsize=40`),
-      fetchTD(`time_series?symbol=${SYMS_1DAY}&interval=1day&outputsize=30`),
-    ]);
-
-    function parseBatchRes(res, symsStr) {
-      const syms = symsStr.split(',');
-      const out = {};
-      if (res.values) {
-        out[syms[0]] = res.values;
-      } else {
-        syms.forEach(s => {
-          if (res[s] && res[s].values) out[s] = res[s].values;
-        });
-      }
-      return out;
-    }
-
-    _tdCache['1h']   = parseBatchRes(res1h,   SYMS_1H);
-    _tdCache['4h']   = parseBatchRes(res4h,   SYMS_4H);
-    _tdCache['1day'] = parseBatchRes(res1d,   SYMS_1DAY);
-
-    // ── استخراج أسعار Quote من آخر شمعة في الكاش (بدون طلبات quote منفصلة) ──
-    ['EUR/USD','USD/JPY','XAU/USD','XAG/USD','GBP/USD'].forEach(sym => {
-      const vals = _tdCache['1h'][sym];
-      if (vals && vals.length >= 2) {
-        _tdQuoteCache[sym] = {
-          price: parseFloat(vals[0].close),
-          prev:  parseFloat(vals[1].close),
-        };
-      }
-    });
-
-    _tdCacheTime = Date.now();
-
-    console.log('✅ TD Batch Cache refreshed (3 requests):', {
-      '1h':   Object.keys(_tdCache['1h']),
-      '4h':   Object.keys(_tdCache['4h']),
-      '1day': Object.keys(_tdCache['1day']),
-    });
-  } catch(e) {
-    console.warn('⚠️ TD Batch fetch failed:', e.message);
+  async function _fetchSym(sym) {
+    try {
+      const d = await fetchTD(`time_series?symbol=${encodeURIComponent(sym)}&interval=1h&outputsize=96`);
+      return d.values || null;
+    } catch(e) { console.warn(`TD failed [${sym}]:`, e.message); return null; }
   }
+
+  // 5 طلبات فقط بالتوازي
+  const [xau, eur, jpy, xag, gbp] = await Promise.all([
+    _fetchSym('XAU/USD'), _fetchSym('EUR/USD'), _fetchSym('USD/JPY'),
+    _fetchSym('XAG/USD'), _fetchSym('GBP/USD'),
+  ]);
+
+  const map = {'XAU/USD':xau,'EUR/USD':eur,'USD/JPY':jpy,'XAG/USD':xag,'GBP/USD':gbp};
+  Object.entries(map).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
+
+  // بناء 4h و 1day من 1h — صفر credits إضافية
+  ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(s => {
+    const v = _tdCache['1h'][s];
+    if (v && v.length >= 8) {
+      _tdCache['4h'][s]   = _resample(v, 4);
+      _tdCache['1day'][s] = _resample(v, 24);
+    }
+  });
+
+  // Quote cache
+  Object.keys(map).forEach(s => {
+    const v = _tdCache['1h'][s];
+    if (v && v.length >= 2)
+      _tdQuoteCache[s] = { price: parseFloat(v[0].close), prev: parseFloat(v[1].close) };
+  });
+
+  _tdCacheTime = Date.now();
+  console.log('✅ TD Cache (5 req):', Object.keys(_tdCache['1h']));
 }
 
 // helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
@@ -4060,7 +4071,7 @@ function showSentimentSetupPrompt(msg) {
            style="display:block;padding:10px 16px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);border-radius:10px;color:var(--cyan-light);font-size:12px;font-weight:700;text-decoration:none;">
           📡 Finnhub — مجاني · أخبار مالية متخصصة ↗
         </a>
-        <a href="https://newsapi.org/register" target="_blank"
+        <a href="https://www.alphavantage.co/support/#api-key" target="_blank"
            style="display:block;padding:10px 16px;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.3);border-radius:10px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;">
           📰 NewsAPI — مجاني · 80,000+ مصدر إخباري ↗
         </a>
@@ -4072,7 +4083,7 @@ function showSentimentSetupPrompt(msg) {
     </div>`;
 
   // إخفاء باقي الأقسام
-  document.getElementById('sent-nlpText').textContent = 'أضف مفتاح Finnhub أو NewsAPI لعرض التحليل النصي.';
+  document.getElementById('sent-nlpText').textContent = 'أضف مفتاح Finnhub أو Alpha Vantage لعرض التحليل النصي.';
   document.getElementById('sent-fgDesc').textContent = 'Fear & Greed يعتمد على بيانات السعر فقط بدون API للأخبار';
 }
 
@@ -4124,42 +4135,53 @@ async function fetchFinnhubNews(symbol) {
   } catch(e) { console.warn('Finnhub error:', e.message); return []; }
 }
 
-// ── جلب أخبار NewsAPI ──
-async function fetchNewsAPINews(symbol) {
-  if (!NEWSAPI_KEY) return [];
-  const qMap = {
-    XAU: 'gold price OR XAU/USD OR bullion',
-    EUR: 'EUR/USD OR euro dollar OR ECB interest rate',
-    JPY: 'USD/JPY OR yen dollar OR Bank of Japan',
-    USD: 'US dollar OR Federal Reserve OR Fed rate',
+// ── جلب أخبار Alpha Vantage (بديل NewsAPI — مجاني + يدعم CORS من المتصفح) ──
+// مجاني: 25 طلب/يوم — كافٍ للاستخدام الطبيعي
+// احصل على مفتاح مجاني من: https://www.alphavantage.co/support/#api-key
+async function fetchAVNews(symbol) {
+  if (!AV_KEY) return [];
+  const tickerMap = {
+    XAU: 'FOREX:XAUUSD',
+    EUR: 'FOREX:EURUSD',
+    JPY: 'FOREX:USDJPY',
+    USD: 'FOREX:EURUSD',
   };
-  const q = encodeURIComponent(qMap[symbol] || 'forex market');
+  const topics = {
+    XAU: 'finance,gold,commodities',
+    EUR: 'finance,forex,economy_macro',
+    JPY: 'finance,forex,economy_macro',
+    USD: 'finance,forex,economy_macro',
+  };
   try {
-    // NewsAPI لا يدعم CORS من المتصفح مباشرة — نستخدم everything endpoint
-    const url = `https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=6&apiKey=${NEWSAPI_KEY}`;
+    const ticker = tickerMap[symbol] || 'FOREX:EURUSD';
+    const topic  = topics[symbol] || 'finance,forex';
+    const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${ticker}&topics=${topic}&sort=LATEST&limit=8&apikey=${AV_KEY}`;
     const r = await fetch(url);
     if (!r.ok) return [];
     const d = await r.json();
-    if (d.status !== 'ok' || !Array.isArray(d.articles)) return [];
-    return d.articles.slice(0, 6).map(a => ({
+    if (!Array.isArray(d.feed)) return [];
+    return d.feed.slice(0, 6).map(a => ({
       headline: a.title,
-      summary:  a.description || '',
-      source:   a.source?.name || 'NewsAPI',
-      datetime: a.publishedAt ? new Date(a.publishedAt).getTime()/1000 : Date.now()/1000,
+      summary:  a.summary || '',
+      source:   a.source || 'Alpha Vantage',
+      datetime: a.time_published ? new Date(
+        a.time_published.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/, '$1-$2-$3T$4:$5:$6')
+      ).getTime()/1000 : Date.now()/1000,
       url:      a.url,
-      _origin:  'newsapi',
+      sentiment: a.overall_sentiment_label,  // Alpha Vantage يوفر sentiment جاهز
+      _origin:  'alphavantage',
     }));
-  } catch(e) { console.warn('NewsAPI error:', e.message); return []; }
+  } catch(e) { console.warn('Alpha Vantage news error:', e.message); return []; }
 }
 
-// ── دالة موحّدة: Finnhub + NewsAPI فقط — بدون محاكاة ──
+// ── دالة موحّدة: Finnhub + Alpha Vantage — بدون محاكاة ──
 async function fetchSentimentNews(symbol) {
-  const [finnhubNews, newsapiNews] = await Promise.all([
+  const [finnhubNews, avNews] = await Promise.all([
     fetchFinnhubNews(symbol),
-    fetchNewsAPINews(symbol),
+    fetchAVNews(symbol),
   ]);
 
-  const combined = [...finnhubNews, ...newsapiNews];
+  const combined = [...finnhubNews, ...avNews];
 
   // إزالة التكرار
   const unique = combined.filter((item, idx) =>
@@ -4230,14 +4252,14 @@ async function runSentiment() {
     const sym = currentSentSymbol;
 
     // تحقق: هل يوجد API key واحد على الأقل؟
-    if (!FINNHUB_KEY && !NEWSAPI_KEY) {
+    if (!FINNHUB_KEY && !AV_KEY) {
       showSentimentSetupPrompt();
       btn.style.opacity='1'; btn.style.pointerEvents='auto';
       icon.textContent='🔄';
       return;
     }
 
-    // 1. جلب الأخبار من Finnhub + NewsAPI
+    // 1. جلب الأخبار من Finnhub + Alpha Vantage
     const newsResult = await fetchSentimentNews(sym);
     const newsItems  = newsResult.items;
     const isReal     = newsResult.isReal;
@@ -4253,7 +4275,7 @@ async function runSentiment() {
     // مصادر نشطة
     const activeSources = [];
     if (FINNHUB_KEY) activeSources.push('Finnhub');
-    if (NEWSAPI_KEY) activeSources.push('NewsAPI');
+    if (AV_KEY) activeSources.push('Alpha Vantage');
 
     // 2. جلب بيانات السعر للتحليل
     let closes = [];
@@ -4327,7 +4349,7 @@ async function runSentiment() {
     document.getElementById('sent-confVal').className = 'sent-conf-val ' + verdict;
     document.getElementById('sent-sourceNote').textContent = isReal
       ? `📡 ${activeSources.join(' + ')} · ${newsItems.length} خبر محلَّل · بيانات حقيقية ✓`
-      : `🤖 محاكاة ذكية · ${newsItems.length} سيناريو · أضف Finnhub أو NewsAPI للأخبار الحقيقية`;
+      : `🤖 محاكاة ذكية · ${newsItems.length} سيناريو · أضف Finnhub أو Alpha Vantage للأخبار الحقيقية`;
 
     // Fear & Greed
     const fg = calcFearGreed(sym, closes, fredData);
@@ -4383,8 +4405,8 @@ async function runSentiment() {
       const scoreDisp = (n.score >= 0 ? '+' : '') + (n.score * 100).toFixed(0);
       const originBadge = n._origin === 'finnhub'
         ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(6,182,212,0.15);color:var(--cyan-light);">Finnhub</span>`
-        : n._origin === 'newsapi'
-        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(212,168,83,0.15);color:var(--gold);">NewsAPI</span>`
+        : n._origin === 'alphavantage'
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(212,168,83,0.15);color:var(--gold);">AlphaVantage</span>`
         : `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(107,114,128,0.15);color:var(--muted);">محاكاة</span>`;
       return `<div class="sent-news-item">
         <div class="sent-news-emoji">${n.emoji}</div>
@@ -6030,10 +6052,10 @@ async function runDailyBias() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب FRED والـ Batch TD أولاً — 3 credits فقط لـ TD
-  [fredData] = await Promise.all([
-    fetchAllFRED(),
-    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز والأطر
+  // 1. جلب TD و FRED بالتوازي — ننتظر كليهما قبل المتابعة
+  await Promise.all([
+    fetchTDBatchAll(),
+    fetchAllFRED().then(d => { fredData = d; }),
   ]);
 
   // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
@@ -6053,6 +6075,18 @@ async function runAll(){
 // INIT
 // ══════════════════════════════════════════
 window.addEventListener('load',()=>{
+  // استعادة المفاتيح من URL hash إذا فشل storage
+  try {
+    const hash = location.hash;
+    if (hash.startsWith('#k=')) {
+      const p = JSON.parse(decodeURIComponent(atob(hash.slice(3))));
+      if (p.td   && !TD_KEY)      { TD_KEY      = p.td;   _saveKey('td_key',      TD_KEY); }
+      if (p.fred && !FRED_KEY)    { FRED_KEY    = p.fred; _saveKey('fred_key',    FRED_KEY); }
+      if (p.fh   && !FINNHUB_KEY) { FINNHUB_KEY = p.fh;   _saveKey('finnhub_key', FINNHUB_KEY); }
+      if (p.av   && !AV_KEY)      { AV_KEY      = p.av;   _saveKey('av_key',      AV_KEY); }
+    }
+  } catch(e) {}
+
   if (!TD_KEY || !FRED_KEY) {
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('setupModal').classList.remove('hidden');
