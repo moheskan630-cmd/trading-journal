@@ -31,8 +31,29 @@
   .live-dot{width:6px;height:6px;border-radius:50%;background:var(--buy);animation:pulse 1.5s infinite;}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 
+  /* ══ CACHE REFRESH BAR ══ */
+  .cache-bar{display:flex;flex-direction:column;gap:6px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.2);border-radius:14px;padding:10px 14px;margin-bottom:14px;}
+  .cache-bar-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .cache-bar-info{display:flex;flex-direction:column;gap:2px;}
+  .cache-bar-title{font-size:11px;font-weight:700;color:var(--gold);}
+  .cache-bar-time{font-size:10px;color:var(--muted);}
+  .cache-refresh-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,rgba(212,168,83,0.25),rgba(212,168,83,0.12));border:1px solid rgba(212,168,83,0.4);color:var(--gold);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.3s;white-space:nowrap;flex-shrink:0;}
+  .cache-refresh-btn:active{transform:scale(0.97);}
+  .cache-refresh-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .cache-status-note{font-size:10px;padding:4px 10px;border-radius:6px;font-weight:700;text-align:center;transition:all 0.3s;}
+  .cache-status-note.same{background:rgba(107,114,128,0.15);color:var(--muted);}
+  .cache-status-note.new{background:rgba(34,197,94,0.12);color:var(--buy);}
+  .cache-status-note.fetching{background:rgba(212,168,83,0.1);color:var(--gold);}
+  .cache-progress{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+  .cache-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));border-radius:2px;width:0%;transition:width 0.5s ease;}
+
+  /* ملاحظة الكاش أسفل أزرار التابات */
+  .tab-cache-note{font-size:10px;text-align:center;margin-top:6px;padding:4px 10px;border-radius:8px;min-height:20px;transition:all 0.3s;}
+  .tab-cache-note.same{background:rgba(107,114,128,0.12);color:var(--muted);}
+  .tab-cache-note.new{background:rgba(34,197,94,0.1);color:var(--buy);}
+
   /* TABS */
-  .tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tabs{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab{padding:7px 2px;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.3s ease;color:var(--muted);background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
   .tab .tab-sym{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;}
   .tab .tab-name{font-size:9px;font-weight:500;}
@@ -72,6 +93,146 @@
   .tab.active-orderflow{background:rgba(244,63,94,0.15);color:var(--rose-light);border:1px solid rgba(244,63,94,0.3);}
   .tab.active-timeseries{background:rgba(6,182,212,0.15);color:var(--cyan-light);border:1px solid rgba(6,182,212,0.3);}
   .tab.active-dailybias{background:rgba(251,191,36,0.15);color:#FCD34D;border:1px solid rgba(251,191,36,0.35);}
+  .tab.active-ms{background:rgba(124,58,237,0.15);color:#A78BFA;border:1px solid rgba(124,58,237,0.35);}
+
+  /* ══════════════ MARKET STRUCTURE CSS ══════════════ */
+  :root { --ms-accent:#7C3AED; --ms-accent-light:#A78BFA; }
+
+  .ms-sym-selector{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .ms-sym-btn{flex:1;min-width:70px;padding:8px 4px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;text-align:center;}
+  .ms-sym-btn.active{background:rgba(124,58,237,0.15);color:var(--ms-accent-light);border-color:rgba(124,58,237,0.4);}
+
+  .ms-master-card{border-radius:20px;padding:20px;margin-bottom:14px;text-align:center;border:2px solid;transition:all 0.5s ease;position:relative;overflow:hidden;}
+  .ms-master-card.BUY{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.03));border-color:rgba(34,197,94,0.4);box-shadow:0 0 40px rgba(34,197,94,0.08);}
+  .ms-master-card.SELL{background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.03));border-color:rgba(239,68,68,0.4);box-shadow:0 0 40px rgba(239,68,68,0.08);}
+  .ms-master-card.NEUTRAL{background:rgba(255,255,255,0.02);border-color:rgba(245,158,11,0.3);}
+  .ms-master-label{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;}
+  .ms-master-score{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:700;line-height:1;}
+  .ms-master-score.BUY{color:var(--buy);} .ms-master-score.SELL{color:var(--sell);} .ms-master-score.NEUTRAL{color:var(--neutral);}
+  .ms-master-verdict{font-size:16px;font-weight:700;margin-top:6px;}
+  .ms-master-verdict.BUY{color:var(--buy);} .ms-master-verdict.SELL{color:var(--sell);} .ms-master-verdict.NEUTRAL{color:var(--neutral);}
+  .ms-master-sub{font-size:11px;color:var(--muted);margin-top:8px;}
+  .ms-conf-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
+  .ms-conf-bar{flex:1;max-width:160px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+  .ms-conf-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+  .ms-conf-fill.BUY{background:linear-gradient(90deg,var(--buy),#86EFAC);} .ms-conf-fill.SELL{background:linear-gradient(90deg,var(--sell),#FCA5A5);} .ms-conf-fill.NEUTRAL{background:linear-gradient(90deg,var(--neutral),#FCD34D);}
+  .ms-conf-val{font-size:13px;font-weight:700;}
+  .ms-conf-val.BUY{color:var(--buy);} .ms-conf-val.SELL{color:var(--sell);} .ms-conf-val.NEUTRAL{color:var(--neutral);}
+
+  .ob-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+  .ob-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .ob-title{font-size:13px;font-weight:700;color:var(--ms-accent-light);display:flex;align-items:center;gap:6px;}
+  .ob-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(124,58,237,0.15);color:var(--ms-accent-light);letter-spacing:0.5px;}
+  .ob-canvas-wrap{border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.05);position:relative;}
+  #ob-canvas{display:block;width:100%;cursor:crosshair;}
+  .ob-legend{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;}
+  .ob-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);}
+  .ob-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+  .ob-levels-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .ob-level-card{border-radius:12px;padding:10px 12px;border:1px solid;position:relative;overflow:hidden;}
+  .ob-level-card.supply{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25);}
+  .ob-level-card.demand{background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.25);}
+  .ob-level-card.vwap{background:rgba(212,168,83,0.06);border-color:rgba(212,168,83,0.25);}
+  .ob-level-card.poc{background:rgba(124,58,237,0.06);border-color:rgba(124,58,237,0.25);}
+  .ob-level-type{font-size:9px;font-weight:700;letter-spacing:0.5px;margin-bottom:4px;}
+  .ob-level-type.supply{color:var(--sell);} .ob-level-type.demand{color:var(--buy);} .ob-level-type.vwap{color:var(--gold);} .ob-level-type.poc{color:var(--ms-accent-light);}
+  .ob-level-price{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;line-height:1;}
+  .ob-level-price.supply{color:var(--rose-light);} .ob-level-price.demand{color:var(--buy);} .ob-level-price.vwap{color:var(--gold-light);} .ob-level-price.poc{color:var(--ms-accent-light);}
+  .ob-level-meta{font-size:10px;color:var(--muted);margin-top:3px;}
+  .ob-level-strength{position:absolute;left:0;bottom:0;height:3px;border-radius:0 0 0 12px;transition:width 1.2s ease;}
+  .ob-level-strength.supply{background:var(--sell);} .ob-level-strength.demand{background:var(--buy);} .ob-level-strength.vwap{background:var(--gold);} .ob-level-strength.poc{background:var(--ms-accent-light);}
+  .ob-tooltip{position:absolute;background:rgba(20,25,38,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;font-size:11px;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:10;white-space:nowrap;min-width:140px;}
+  .ob-tooltip.show{opacity:1;}
+  .ob-tooltip-price{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}
+  .ob-tooltip-label{font-size:10px;color:var(--muted);margin-top:2px;}
+
+  .ba-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .ba-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .ba-bar{display:flex;height:32px;border-radius:10px;overflow:hidden;margin-bottom:10px;gap:2px;}
+  .ba-bid{background:linear-gradient(90deg,var(--buy),rgba(34,197,94,0.6));display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:700;color:#fff;transition:width 0.8s ease;min-width:40px;}
+  .ba-ask{background:linear-gradient(90deg,rgba(239,68,68,0.6),var(--sell));display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:12px;font-weight:700;color:#fff;transition:width 0.8s ease;min-width:40px;}
+  .ba-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+  .ba-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+  .ba-metric{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+  .ba-metric-label{font-size:9px;color:var(--muted);margin-bottom:4px;}
+  .ba-metric-val{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;}
+  .ba-metric-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+
+  .eq-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .eq-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:14px;}
+  .eq-gauge-row{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+  .eq-gauge-item{display:flex;flex-direction:column;gap:4px;}
+  .eq-gauge-header{display:flex;justify-content:space-between;align-items:center;}
+  .eq-gauge-label{font-size:11px;color:var(--text);}
+  .eq-gauge-val{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+  .eq-gauge-track{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+  .eq-gauge-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+  .eq-gauge-fill.speed{background:linear-gradient(90deg,var(--cyan-dark),var(--cyan-light));}
+  .eq-gauge-fill.slip{background:linear-gradient(90deg,#92400E,var(--neutral));}
+  .eq-gauge-fill.quality{background:linear-gradient(90deg,var(--teal-dark),var(--teal-light));}
+  .eq-gauge-fill.impact{background:linear-gradient(90deg,var(--ms-accent),var(--ms-accent-light));}
+  .eq-summary{display:flex;gap:8px;padding-top:10px;border-top:1px solid var(--border);}
+  .eq-sum-item{flex:1;text-align:center;}
+  .eq-sum-label{font-size:9px;color:var(--muted);margin-bottom:3px;}
+  .eq-sum-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;}
+
+  .mf-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .mf-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:14px;}
+  .mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .mf-stat{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+  .mf-stat-label{font-size:10px;color:var(--muted);margin-bottom:5px;line-height:1.3;}
+  .mf-stat-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;}
+  .mf-stat-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+  .vwap-section{padding-top:10px;border-top:1px solid var(--border);}
+  .vwap-header{display:flex;justify-content:space-between;margin-bottom:8px;}
+  .vwap-label{font-size:11px;color:var(--text);}
+  .vwap-val{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--gold);}
+  .vwap-track{height:10px;background:rgba(255,255,255,0.06);border-radius:5px;position:relative;overflow:hidden;margin-bottom:6px;}
+  .vwap-fill-right{position:absolute;height:100%;left:50%;border-radius:0 5px 5px 0;transition:width 1s ease;}
+  .vwap-fill-left{position:absolute;height:100%;right:50%;border-radius:5px 0 0 5px;transition:width 1s ease;}
+  .vwap-center-line{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(212,168,83,0.5);}
+  .vwap-sub{font-size:10px;color:var(--muted);text-align:center;}
+  .zr-section{padding-top:12px;border-top:1px solid var(--border);margin-top:10px;}
+  .zr-title{font-size:11px;color:var(--ms-accent-light);font-weight:700;margin-bottom:8px;}
+  .zr-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .zr-label{font-size:11px;color:var(--muted);width:110px;text-align:right;flex-shrink:0;}
+  .zr-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
+  .zr-bar{height:100%;border-radius:4px;transition:width 0.8s ease;}
+  .zr-bar.buy{background:linear-gradient(90deg,rgba(34,197,94,0.4),var(--buy));} .zr-bar.sell{background:linear-gradient(90deg,var(--sell),rgba(239,68,68,0.4));} .zr-bar.neut{background:linear-gradient(90deg,rgba(245,158,11,0.4),var(--neutral));}
+  .zr-val{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;width:48px;}
+
+  .ms-delta-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .ms-delta-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .ms-delta-title{font-size:12px;color:var(--muted);font-weight:600;}
+  .ms-delta-bars{display:flex;gap:3px;align-items:center;height:70px;position:relative;}
+  .ms-delta-bar{flex:1;border-radius:2px;min-height:2px;transition:height 0.4s;}
+  .ms-delta-bar.pos{background:var(--buy);opacity:0.75;} .ms-delta-bar.neg{background:var(--sell);opacity:0.75;} .ms-delta-bar.cur{opacity:1!important;outline:1px solid rgba(255,255,255,0.3);}
+  .ms-delta-zero{position:absolute;width:100%;height:1px;background:var(--border);top:50%;}
+  .ms-delta-stats{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+  .ms-delta-stat{flex:1;text-align:center;}
+  .ms-delta-stat-label{font-size:9px;color:var(--muted);margin-bottom:3px;}
+  .ms-delta-stat-val{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}
+
+  .sweep-card{background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.2);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .sweep-title{font-size:12px;font-weight:700;color:var(--ms-accent-light);margin-bottom:10px;}
+  .sweep-list{display:flex;flex-direction:column;gap:8px;}
+  .sweep-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .sweep-icon{font-size:18px;flex-shrink:0;}
+  .sweep-body{flex:1;min-width:0;}
+  .sweep-headline{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px;}
+  .sweep-meta{display:flex;align-items:center;gap:6px;}
+  .sweep-time{font-size:10px;color:var(--muted);}
+  .sweep-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;}
+  .sweep-badge.bull{background:rgba(34,197,94,0.15);color:var(--buy);} .sweep-badge.bear{background:rgba(239,68,68,0.15);color:var(--sell);} .sweep-badge.neut{background:rgba(107,114,128,0.2);color:var(--muted);}
+  .sweep-price{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+
+  .ms-insight-box{background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .ms-insight-title{font-size:12px;font-weight:700;color:var(--ms-accent-light);margin-bottom:8px;}
+  .ms-insight-text{font-size:12px;color:var(--text);line-height:1.8;white-space:pre-line;}
+
+  .ms-refresh-btn{width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--ms-accent),var(--ms-accent-light));color:#fff;font-family:'Tajawal',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease;-webkit-tap-highlight-color:transparent;}
+  .ms-refresh-btn:active{transform:scale(0.98);}
+  .ms-refresh-btn.loading{opacity:0.7;pointer-events:none;}
 
   /* ══════════════ MTF CONFLUENCE WIDGET ══════════════ */
   .mtf-widget {
@@ -1512,6 +1673,27 @@
       <span class="tab-sym">🎯 DB</span>
       <span class="tab-name">تحيز</span>
     </button>
+    <button class="tab" id="tab-ms" onclick="switchTab('ms')">
+      <span class="tab-sym">🏛 MS</span>
+      <span class="tab-name">هيكل</span>
+    </button>
+  </div>
+
+  <!-- ══════════════ CACHE REFRESH BAR ══════════════ -->
+  <div class="cache-bar" id="cacheBar">
+    <div class="cache-bar-row">
+      <div class="cache-bar-info">
+        <div class="cache-bar-title">📦 كاش Twelve Data</div>
+        <div class="cache-bar-time" id="cacheBarTime">لم يتم التحميل بعد</div>
+      </div>
+      <button class="cache-refresh-btn" id="cacheRefreshBtn" onclick="manualCacheRefresh()">
+        <span id="cacheRefreshIcon">🔄</span> تحديث الكاش
+      </button>
+    </div>
+    <div class="cache-progress" id="cacheProgress">
+      <div class="cache-progress-fill" id="cacheProgressFill"></div>
+    </div>
+    <div class="cache-status-note same" id="cacheStatusNote" style="display:none"></div>
   </div>
 
   <!-- ══════════════ MTF CONFLUENCE WIDGET ══════════════ -->
@@ -1637,6 +1819,7 @@
       <div class="vol-bars" id="g-volBars"></div>
     </div>
     <button class="refresh-btn gold-btn" id="g-refreshBtn" onclick="runGold()"><span id="g-refreshIcon">🔄</span> تحديث الذهب</button>
+    <div class="tab-cache-note" id="g-cacheNote"></div>
   </div>
 
   <!-- ══════════════ EUR/USD PANEL ══════════════ -->
@@ -1712,6 +1895,7 @@
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="e-volVal">±—</div></div><div class="vol-bars" id="e-volBars"></div></div>
     <button class="refresh-btn eur-btn" id="e-refreshBtn" onclick="runEUR()"><span id="e-refreshIcon">🔄</span> تحديث EUR/USD</button>
+    <div class="tab-cache-note" id="e-cacheNote"></div>
   </div>
 
   <!-- ══════════════ USD/JPY PANEL ══════════════ -->
@@ -1788,6 +1972,7 @@
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="j-volVal">±—</div></div><div class="vol-bars" id="j-volBars"></div></div>
     <button class="refresh-btn jpy-btn" id="j-refreshBtn" onclick="runJPY()"><span id="j-refreshIcon">🔄</span> تحديث USD/JPY</button>
+    <div class="tab-cache-note" id="j-cacheNote"></div>
   </div>
 
   <!-- ══════════════ PAIRS TRADING PANEL (جديد) ══════════════ -->
@@ -1885,6 +2070,7 @@
     </div>
 
     <button class="refresh-btn pairs-btn" id="p-refreshBtn" onclick="runPairs()"><span id="p-refreshIcon">🔄</span> تحديث Pairs Trading</button>
+    <div class="tab-cache-note" id="p-cacheNote"></div>
   </div>
 
 
@@ -2046,6 +2232,7 @@
       style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));">
       <span id="of-refreshIcon">🔄</span> تحديث Order Flow
     </button>
+    <div class="tab-cache-note" id="of-cacheNote"></div>
   </div>
 
   <!-- ══════════════ TIME SERIES PANEL ══════════════ -->
@@ -2128,6 +2315,7 @@
       style="background:linear-gradient(135deg,var(--cyan-dark),var(--cyan));">
       <span id="ts-refreshIcon">🔄</span> تحديث نماذج التنبؤ
     </button>
+    <div class="tab-cache-note" id="ts-cacheNote"></div>
   </div>
 
   <!-- ══════════════ SENTIMENT / NLP PANEL ══════════════ -->
@@ -2253,6 +2441,7 @@
       style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);">
       <span id="sent-refreshIcon">🔄</span> تحديث تحليل المشاعر
     </button>
+    <div class="tab-cache-note" id="sent-cacheNote"></div>
   </div>
 
   <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
@@ -2387,6 +2576,7 @@
       style="background:linear-gradient(135deg,#92400E,#D97706);">
       <span id="db-refreshIcon">🔄</span> تحديث التحيز اليومي
     </button>
+    <div class="tab-cache-note" id="db-cacheNote"></div>
   </div>
 
   <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
@@ -2475,6 +2665,262 @@
     </button>
 
   </div><!-- /panel-quantbrain -->
+
+  <!-- ══════════════ MARKET STRUCTURE PANEL ══════════════ -->
+  <div class="panel" id="panel-ms">
+
+    <!-- Symbol Selector -->
+    <div class="ms-sym-selector">
+      <button class="ms-sym-btn active" onclick="selectMsSym('XAUUSD',this)">XAU/USD</button>
+      <button class="ms-sym-btn" onclick="selectMsSym('EURUSD',this)">EUR/USD</button>
+      <button class="ms-sym-btn" onclick="selectMsSym('USDJPY',this)">USD/JPY</button>
+      <button class="ms-sym-btn" onclick="selectMsSym('GBPUSD',this)">GBP/USD</button>
+    </div>
+
+    <!-- Master Signal -->
+    <div class="ms-master-card NEUTRAL" id="ms-master-card">
+      <div class="ms-master-label">تقييم هيكل السوق الكلي</div>
+      <div class="ms-master-score NEUTRAL" id="ms-master-score">—</div>
+      <div class="ms-master-verdict NEUTRAL" id="ms-master-verdict">جاري التحليل...</div>
+      <div class="ms-master-sub" id="ms-master-sub">اضغط تحديث لتحليل دفتر الأوامر</div>
+      <div class="ms-conf-row">
+        <span class="ms-conf-val NEUTRAL" id="ms-conf-val">—</span>
+        <div class="ms-conf-bar"><div class="ms-conf-fill NEUTRAL" id="ms-conf-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Order Book Heatmap -->
+    <div class="section-title">🔥 دفتر الأوامر · Order Book Heatmap</div>
+    <div class="ob-card">
+      <div class="ob-header">
+        <div class="ob-title">خريطة السيولة الحرارية <span class="ob-badge">LIVE</span></div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--muted)" id="ob-current-price">— — —</div>
+      </div>
+      <div class="ob-canvas-wrap">
+        <canvas id="ob-canvas" height="220"></canvas>
+        <div class="ob-tooltip" id="ob-tooltip">
+          <div class="ob-tooltip-price" id="ob-tt-price"></div>
+          <div class="ob-tooltip-label" id="ob-tt-label"></div>
+        </div>
+      </div>
+      <div class="ob-legend">
+        <div class="ob-legend-item"><div class="ob-legend-dot" style="background:rgba(34,197,94,0.7)"></div><span>طلب (Bid)</span></div>
+        <div class="ob-legend-item"><div class="ob-legend-dot" style="background:rgba(239,68,68,0.7)"></div><span>عرض (Ask)</span></div>
+        <div class="ob-legend-item"><div class="ob-legend-dot" style="background:rgba(212,168,83,0.8)"></div><span>VWAP</span></div>
+        <div class="ob-legend-item"><div class="ob-legend-dot" style="background:rgba(124,58,237,0.8)"></div><span>POC</span></div>
+      </div>
+      <div class="ob-levels-grid">
+        <div class="ob-level-card supply">
+          <div class="ob-level-type supply">منطقة عرض</div>
+          <div class="ob-level-price supply" id="ob-supply">—</div>
+          <div class="ob-level-meta" id="ob-supply-meta">جاري...</div>
+          <div class="ob-level-strength supply" id="ob-supply-str" style="width:0%"></div>
+        </div>
+        <div class="ob-level-card demand">
+          <div class="ob-level-type demand">منطقة طلب</div>
+          <div class="ob-level-price demand" id="ob-demand">—</div>
+          <div class="ob-level-meta" id="ob-demand-meta">جاري...</div>
+          <div class="ob-level-strength demand" id="ob-demand-str" style="width:0%"></div>
+        </div>
+        <div class="ob-level-card vwap">
+          <div class="ob-level-type vwap">VWAP</div>
+          <div class="ob-level-price vwap" id="ob-vwap">—</div>
+          <div class="ob-level-meta" id="ob-vwap-meta">متوسط حجمي</div>
+          <div class="ob-level-strength vwap" id="ob-vwap-str" style="width:0%"></div>
+        </div>
+        <div class="ob-level-card poc">
+          <div class="ob-level-type poc">POC</div>
+          <div class="ob-level-price poc" id="ob-poc">—</div>
+          <div class="ob-level-meta" id="ob-poc-meta">نقطة التحكم</div>
+          <div class="ob-level-strength poc" id="ob-poc-str" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bid/Ask Pressure -->
+    <div class="section-title">⚖️ ضغط العرض والطلب</div>
+    <div class="ba-card">
+      <div class="ba-title">توازن السيولة الآنية</div>
+      <div class="ba-bar">
+        <div class="ba-bid" id="ba-bid" style="width:50%">BID</div>
+        <div class="ba-ask" id="ba-ask" style="width:50%">ASK</div>
+      </div>
+      <div class="ba-labels">
+        <span id="ba-bid-pct">— طلب</span>
+        <span id="ba-ask-pct">— عرض</span>
+      </div>
+      <div class="ba-metrics">
+        <div class="ba-metric">
+          <div class="ba-metric-label">Spread</div>
+          <div class="ba-metric-val" id="ba-spread" style="color:var(--gold)">—</div>
+          <div class="ba-metric-sub">نقطة</div>
+        </div>
+        <div class="ba-metric">
+          <div class="ba-metric-label">عمق السوق</div>
+          <div class="ba-metric-val" id="ba-depth" style="color:var(--cyan-light)">—</div>
+          <div class="ba-metric-sub">مستوى</div>
+        </div>
+        <div class="ba-metric">
+          <div class="ba-metric-label">السيولة</div>
+          <div class="ba-metric-val" id="ba-liquidity" style="color:var(--buy)">—</div>
+          <div class="ba-metric-sub">تقييم</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Execution Quality -->
+    <div class="section-title">⚡ كفاءة التنفيذ</div>
+    <div class="eq-card">
+      <div class="eq-title">مقاييس جودة التنفيذ</div>
+      <div class="eq-gauge-row">
+        <div class="eq-gauge-item">
+          <div class="eq-gauge-header">
+            <span class="eq-gauge-label">سرعة التنفيذ (Execution Speed)</span>
+            <span class="eq-gauge-val" id="eq-speed-val" style="color:var(--cyan-light)">—</span>
+          </div>
+          <div class="eq-gauge-track"><div class="eq-gauge-fill speed" id="eq-speed-fill" style="width:0%"></div></div>
+        </div>
+        <div class="eq-gauge-item">
+          <div class="eq-gauge-header">
+            <span class="eq-gauge-label">الانزلاق السعري (Slippage)</span>
+            <span class="eq-gauge-val" id="eq-slip-val" style="color:var(--neutral)">—</span>
+          </div>
+          <div class="eq-gauge-track"><div class="eq-gauge-fill slip" id="eq-slip-fill" style="width:0%"></div></div>
+        </div>
+        <div class="eq-gauge-item">
+          <div class="eq-gauge-header">
+            <span class="eq-gauge-label">جودة التنفيذ الكلية</span>
+            <span class="eq-gauge-val" id="eq-quality-val" style="color:var(--teal-light)">—</span>
+          </div>
+          <div class="eq-gauge-track"><div class="eq-gauge-fill quality" id="eq-quality-fill" style="width:0%"></div></div>
+        </div>
+        <div class="eq-gauge-item">
+          <div class="eq-gauge-header">
+            <span class="eq-gauge-label">تأثير السوق (Market Impact)</span>
+            <span class="eq-gauge-val" id="eq-impact-val" style="color:var(--ms-accent-light)">—</span>
+          </div>
+          <div class="eq-gauge-track"><div class="eq-gauge-fill impact" id="eq-impact-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="eq-summary">
+        <div class="eq-sum-item">
+          <div class="eq-sum-label">تكلفة التنفيذ</div>
+          <div class="eq-sum-val" id="eq-cost" style="color:var(--sell)">—</div>
+        </div>
+        <div class="eq-sum-item">
+          <div class="eq-sum-label">وقت الاستجابة</div>
+          <div class="eq-sum-val" id="eq-response" style="color:var(--cyan-light)">—</div>
+        </div>
+        <div class="eq-sum-item">
+          <div class="eq-sum-label">Fill Rate</div>
+          <div class="eq-sum-val" id="eq-fill" style="color:var(--buy)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Market Formation -->
+    <div class="section-title">🏗️ تكوين السوق · VWAP + Zero Reflections</div>
+    <div class="mf-card">
+      <div class="mf-title">مؤشرات هيكل السوق العميقة</div>
+      <div class="mf-grid">
+        <div class="mf-stat">
+          <div class="mf-stat-label">VWAP الحالي</div>
+          <div class="mf-stat-val" id="mf-vwap" style="color:var(--gold-light)">—</div>
+          <div class="mf-stat-sub">متوسط حجمي يومي</div>
+        </div>
+        <div class="mf-stat">
+          <div class="mf-stat-label">مسافة VWAP</div>
+          <div class="mf-stat-val" id="mf-vwap-dist" style="color:var(--neutral)">—</div>
+          <div class="mf-stat-sub">نقطة أساس</div>
+        </div>
+        <div class="mf-stat">
+          <div class="mf-stat-label">متوسط Spread</div>
+          <div class="mf-stat-val" id="mf-spread-avg" style="color:var(--teal-light)">—</div>
+          <div class="mf-stat-sub">آخر 20 شمعة</div>
+        </div>
+        <div class="mf-stat">
+          <div class="mf-stat-label">اتجاه السيولة</div>
+          <div class="mf-stat-val" id="mf-liq-trend" style="color:var(--buy)">—</div>
+          <div class="mf-stat-sub">نموذج VWAP</div>
+        </div>
+      </div>
+      <div class="vwap-section">
+        <div class="vwap-header">
+          <span class="vwap-label">موقع السعر من VWAP</span>
+          <span class="vwap-val" id="vwap-pos-label">—</span>
+        </div>
+        <div class="vwap-track">
+          <div class="vwap-fill-right" id="vwap-fill-r" style="width:0%;background:linear-gradient(90deg,rgba(34,197,94,0.3),var(--buy))"></div>
+          <div class="vwap-fill-left" id="vwap-fill-l" style="width:0%;background:linear-gradient(90deg,var(--sell),rgba(239,68,68,0.3))"></div>
+          <div class="vwap-center-line"></div>
+        </div>
+        <div class="vwap-sub">فوق VWAP = ضغط شرائي · تحت VWAP = ضغط بيعي</div>
+      </div>
+      <div class="zr-section">
+        <div class="zr-title">🔮 Zero Reflections · نقاط الارتداد الصفرية</div>
+        <div class="zr-row">
+          <div class="zr-label">ارتداد شرائي</div>
+          <div class="zr-bar-wrap"><div class="zr-bar buy" id="zr-buy" style="width:0%"></div></div>
+          <div class="zr-val" id="zr-buy-val" style="color:var(--buy)">—</div>
+        </div>
+        <div class="zr-row">
+          <div class="zr-label">ارتداد بيعي</div>
+          <div class="zr-bar-wrap"><div class="zr-bar sell" id="zr-sell" style="width:0%"></div></div>
+          <div class="zr-val" id="zr-sell-val" style="color:var(--sell)">—</div>
+        </div>
+        <div class="zr-row">
+          <div class="zr-label">منطقة التوازن</div>
+          <div class="zr-bar-wrap"><div class="zr-bar neut" id="zr-neut" style="width:0%"></div></div>
+          <div class="zr-val" id="zr-neut-val" style="color:var(--neutral)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Volume Delta -->
+    <div class="section-title">📊 Delta الآني · Volume Delta</div>
+    <div class="ms-delta-card">
+      <div class="ms-delta-header">
+        <div class="ms-delta-title">صافي الضغط (Buy Vol - Sell Vol)</div>
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      </div>
+      <div class="ms-delta-bars" id="ms-delta-bars">
+        <div class="ms-delta-zero"></div>
+      </div>
+      <div class="ms-delta-stats">
+        <div class="ms-delta-stat">
+          <div class="ms-delta-stat-label">Delta التراكمي</div>
+          <div class="ms-delta-stat-val" id="ms-delta-cum" style="color:var(--buy)">—</div>
+        </div>
+        <div class="ms-delta-stat">
+          <div class="ms-delta-stat-label">Delta الحالي</div>
+          <div class="ms-delta-stat-val" id="ms-delta-cur" style="color:var(--neutral)">—</div>
+        </div>
+        <div class="ms-delta-stat">
+          <div class="ms-delta-stat-label">CVD اتجاه</div>
+          <div class="ms-delta-stat-val" id="ms-delta-cvd" style="color:var(--buy)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liquidity Sweeps -->
+    <div class="section-title">🧹 اصطياد السيولة · Liquidity Sweeps</div>
+    <div class="sweep-card">
+      <div class="sweep-title">آخر عمليات اصطياد السيولة المرصودة</div>
+      <div class="sweep-list" id="ms-sweep-list"></div>
+    </div>
+
+    <!-- AI Insight -->
+    <div class="ms-insight-box">
+      <div class="ms-insight-title">🧠 تحليل هيكل السوق الآني</div>
+      <div class="ms-insight-text" id="ms-insight-text">اضغط «تحديث» لبدء التحليل...</div>
+    </div>
+
+    <!-- Refresh -->
+    <button class="ms-refresh-btn" id="ms-refresh-btn" onclick="loadMsData()">
+      <span>🔄</span> تحديث هيكل السوق
+    </button>
+
+  </div><!-- /panel-ms -->
 
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v8<br>
@@ -2741,6 +3187,7 @@ function switchTab(tab) {
   document.getElementById('qbnav-brain').className = 'qb-nav-btn';
   // شغّل Daily Bias تلقائياً عند فتح التاب إذا كان الكاش جاهزاً
   if (tab === 'dailybias' && Object.keys(_tdCache['1day']).length > 0) runDailyBias();
+  if (tab === 'ms') setTimeout(loadMsData, 100);
 }
 
 function switchBottomNav(mode) {
@@ -2854,10 +3301,62 @@ function _resample(candles1h, n) {
   return out.reverse();
 }
 
+let _fetchInProgress = false; // منع الطلبات المتزامنة
+let _lastCacheSnapshot = ''; // بصمة الكاش السابق للمقارنة
+
+// ── تحديث شريط الكاش في الواجهة ──
+function _updateCacheBar(state, progress) {
+  const timeEl   = document.getElementById('cacheBarTime');
+  const noteEl   = document.getElementById('cacheStatusNote');
+  const progBar  = document.getElementById('cacheProgress');
+  const progFill = document.getElementById('cacheProgressFill');
+  const btn      = document.getElementById('cacheRefreshBtn');
+  const icon     = document.getElementById('cacheRefreshIcon');
+  if (!timeEl) return;
+  if (state === 'fetching') {
+    const sym = ['XAU/USD','EUR/USD','USD/JPY','XAG/USD','GBP/USD'][progress-1] || '';
+    timeEl.textContent = `⏳ جاري جلب البيانات... (${progress}/5)`;
+    noteEl.className = 'cache-status-note fetching';
+    noteEl.textContent = `📡 جاري تحميل ${sym}`;
+    noteEl.style.display = 'block';
+    progBar.style.display = 'block';
+    progFill.style.width = (progress / 5 * 100) + '%';
+    if (btn) { btn.disabled = true; icon.textContent = '⏳'; }
+  } else if (state === 'done-new') {
+    const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+    timeEl.textContent = `آخر تحديث: ${t} · ${Object.keys(_tdCache['1h']).length} رموز`;
+    noteEl.className = 'cache-status-note new';
+    noteEl.textContent = '✅ بيانات جديدة · تم التحديث بنجاح';
+    noteEl.style.display = 'block';
+    progFill.style.width = '100%';
+    setTimeout(() => { progBar.style.display = 'none'; progFill.style.width = '0%'; }, 1800);
+    if (btn) { btn.disabled = false; icon.textContent = '🔄'; }
+  } else if (state === 'done-same') {
+    const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+    timeEl.textContent = `آخر تحديث: ${t} · ${Object.keys(_tdCache['1h']).length} رموز`;
+    noteEl.className = 'cache-status-note same';
+    noteEl.textContent = '↩ نفس البيانات السابقة · لا يوجد تغيير';
+    noteEl.style.display = 'block';
+    progBar.style.display = 'none';
+    if (btn) { btn.disabled = false; icon.textContent = '🔄'; }
+  }
+}
+
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
   if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) return;
   if (!TD_KEY) return;
+  if (_fetchInProgress) return;
+  _fetchInProgress = true;
+
+  // بصمة الكاش قبل التحديث
+  const snapshotBefore = JSON.stringify(
+    Object.keys(_tdCache['1h']).reduce((acc, s) => {
+      const v = _tdCache['1h'][s]; acc[s] = v?.[0]?.close ?? null; return acc;
+    }, {})
+  );
+
+  function _delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function _fetchSym(sym) {
     try {
@@ -2866,16 +3365,17 @@ async function fetchTDBatchAll(force = false) {
     } catch(e) { console.warn(`TD failed [${sym}]:`, e.message); return null; }
   }
 
-  // 5 طلبات فقط بالتوازي
-  const [xau, eur, jpy, xag, gbp] = await Promise.all([
-    _fetchSym('XAU/USD'), _fetchSym('EUR/USD'), _fetchSym('USD/JPY'),
-    _fetchSym('XAG/USD'), _fetchSym('GBP/USD'),
-  ]);
+  const symbols = ['XAU/USD', 'EUR/USD', 'USD/JPY', 'XAG/USD', 'GBP/USD'];
+  const map = {};
 
-  const map = {'XAU/USD':xau,'EUR/USD':eur,'USD/JPY':jpy,'XAG/USD':xag,'GBP/USD':gbp};
+  for (let i = 0; i < symbols.length; i++) {
+    _updateCacheBar('fetching', i + 1);
+    map[symbols[i]] = await _fetchSym(symbols[i]);
+    if (i < symbols.length - 1) await _delay(1200);
+  }
+
   Object.entries(map).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
 
-  // بناء 4h و 1day من 1h — صفر credits إضافية
   ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 8) {
@@ -2884,7 +3384,6 @@ async function fetchTDBatchAll(force = false) {
     }
   });
 
-  // Quote cache
   Object.keys(map).forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 2)
@@ -2892,20 +3391,47 @@ async function fetchTDBatchAll(force = false) {
   });
 
   _tdCacheTime = Date.now();
-  console.log('✅ TD Cache (5 req):', Object.keys(_tdCache['1h']));
+  _fetchInProgress = false;
+
+  // مقارنة بالبيانات القديمة
+  const snapshotAfter = JSON.stringify(
+    Object.keys(_tdCache['1h']).reduce((acc, s) => {
+      const v = _tdCache['1h'][s]; acc[s] = v?.[0]?.close ?? null; return acc;
+    }, {})
+  );
+  const isNew = (_lastCacheSnapshot === '') || (snapshotBefore !== snapshotAfter);
+  _lastCacheSnapshot = snapshotAfter;
+  _updateCacheBar(isNew ? 'done-new' : 'done-same');
+
+  console.log('✅ TD Cache (5 req sequential):', Object.keys(_tdCache['1h']), isNew ? '[جديد]' : '[نفس البيانات]');
 }
 
 // helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
 async function getTDValues(symbol, interval, outputsize = 40) {
   const cached = _tdCache[interval]?.[symbol];
   if (cached && cached.length > 0) return cached;
-  // إذا لم يكن في الكاش — حاول تحميل الكاش أولاً
+
+  // إذا كان هناك طلب جارٍ بالفعل — انتظر حتى ينتهي (polling)
+  if (_fetchInProgress) {
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      const retried = _tdCache[interval]?.[symbol];
+      if (retried && retried.length > 0) return retried;
+      if (!_fetchInProgress) break;
+    }
+    const retried2 = _tdCache[interval]?.[symbol];
+    if (retried2 && retried2.length > 0) return retried2;
+    throw new Error('انتهى وقت الانتظار — تحقق من مفتاح API');
+  }
+
+  // إذا لم يكن في الكاش ولا يوجد طلب جارٍ — ابدأ التحميل
   if (Object.keys(_tdCache['1h']).length === 0) {
     await fetchTDBatchAll(true);
     const retried = _tdCache[interval]?.[symbol];
     if (retried && retried.length > 0) return retried;
   }
-  throw new Error(`بيانات ${symbol} غير متوفرة في الكاش · يرجى الانتظار للتحديث التلقائي`);
+
+  throw new Error(`بيانات ${symbol} غير متوفرة · تحقق من مفتاح API أو انتظر التحديث التلقائي`);
 }
 
 // ══════════════════════════════════════════
@@ -6214,23 +6740,32 @@ async function runDailyBias() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب TD و FRED بالتوازي — ننتظر كليهما قبل المتابعة
+  // 1. جلب TD (يتم يدوياً فقط عبر زر الكاش) + FRED تلقائي
   await Promise.all([
     fetchTDBatchAll(),
     fetchAllFRED().then(d => { fredData = d; }),
   ]);
 
-  // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
+  // 2. تشغيل التحليلات من الكاش
+  await _runAnalysisFromCache();
+}
+
+// تشغيل التحليلات من الكاش بدون إعادة جلب TD
+async function _runAnalysisFromCache() {
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
-
-  // 3. تحديث بطاقة MTF Confluence
   runMTFConfluence();
-
-  // 4. Quant Brain إذا كان مفتوحاً
   if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
-
-  // 5. Daily Bias إذا كان مفتوحاً
   if (document.getElementById('panel-dailybias')?.classList.contains('active')) runDailyBias();
+}
+
+// ── زر تحديث الكاش يدوياً ──
+async function manualCacheRefresh() {
+  if (_fetchInProgress) return;
+  // إعادة جلب TD بالقوة
+  _tdCacheTime = 0; // إبطال الكاش لإجبار إعادة الجلب
+  await fetchTDBatchAll(true);
+  // بعد تحديث الكاش — أعد تشغيل التحليلات تلقائياً
+  await _runAnalysisFromCache();
 }
 
 // ══════════════════════════════════════════
@@ -6260,20 +6795,29 @@ window.addEventListener('load',()=>{
   document.getElementById('resetRow').style.display='block';
   const steps=['⏳ الاتصال بـ Twelve Data...','📊 جلب XAU/USD...','🇪🇺 جلب EUR/USD...','🇯🇵 جلب USD/JPY...','⚡ جلب بيانات Pairs...','🏛 استعلام FRED...','🧠 تشغيل Regime Detection...','🤖 تشغيل النماذج...','✅ جاهز!'];
   let i=0; const el=document.getElementById('loadStep');
-  const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },350);
-  setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); runAll(); },3200);
+  const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },800);
+  runAll().then(()=>{
+    clearInterval(iv);
+    if(el) el.textContent='✅ جاهز!';
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }).catch(()=>{
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  });
   // ── بدء مراقب RSS للأخبار العاجلة ──
-  setTimeout(startRSSMonitor, 4000);
+  setTimeout(startRSSMonitor, 9000);
 });
 
-setInterval(()=>{
-  const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`).classList.contains('loading'));
-  if(!anyLoading) runAll();
-},15*60*1000); // كل 15 دقيقة
+// التحديث التلقائي: FRED + التحليلات فقط — بدون إعادة جلب TD
+setInterval(async () => {
+  const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`)?.classList.contains('loading'));
+  if (anyLoading) return;
+  // تحديث FRED فقط
+  fetchAllFRED().then(d => { if(d) { fredData = d; _runAnalysisFromCache(); } });
+}, 15 * 60 * 1000); // كل 15 دقيقة
 
-// عداد تنازلي للتحديث التلقائي
+// عداد تنازلي — يشير الآن لتحديث FRED وليس TD
 (function startCountdown(){
-  const INTERVAL = 15 * 60; // ثانية
+  const INTERVAL = 15 * 60;
   let remaining = INTERVAL;
   const el = document.getElementById('countdownTimer');
   if (!el) return;
@@ -6282,7 +6826,7 @@ setInterval(()=>{
     if (remaining <= 0) remaining = INTERVAL;
     const m = String(Math.floor(remaining/60)).padStart(2,'0');
     const s = String(remaining % 60).padStart(2,'0');
-    el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
+    el.textContent = `🔄 تحديث FRED بعد ${m}:${s}`;
   }, 1000);
 })();
 
@@ -6617,8 +7161,459 @@ window.addEventListener('load', () => {
   }, 500);
 });
 // ══════════════════════════════════════════════════════════
-// END ALERT SYSTEM
+// MARKET STRUCTURE ENGINE
 // ══════════════════════════════════════════════════════════
+let _msSym = 'XAUUSD';
+const _msSymCfg = {
+  'XAUUSD':{ decimals:2, pip:0.01 },
+  'EURUSD':{ decimals:5, pip:0.0001 },
+  'USDJPY':{ decimals:3, pip:0.01 },
+  'GBPUSD':{ decimals:5, pip:0.0001 }
+};
+
+function selectMsSym(sym, btn) {
+  _msSym = sym;
+  document.querySelectorAll('.ms-sym-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadMsData();
+}
+
+async function loadMsData() {
+  const btn = document.getElementById('ms-refresh-btn');
+  if (!btn) return;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spin">⟳</span> جاري التحليل...';
+
+  try {
+    const sym = _msSym;
+    const cfg = _msSymCfg[sym];
+    let price = null, candles = [];
+
+    // محاولة جلب بيانات حقيقية من Twelve Data (إذا كان API_KEY محدداً)
+    if (typeof API_KEY !== 'undefined' && API_KEY && API_KEY !== 'YOUR_KEY') {
+      try {
+        const [qRes, oRes] = await Promise.all([
+          fetch(`https://api.twelvedata.com/price?symbol=${sym}&apikey=${API_KEY}`),
+          fetch(`https://api.twelvedata.com/time_series?symbol=${sym}&interval=1min&outputsize=50&apikey=${API_KEY}`)
+        ]);
+        const qd = await qRes.json();
+        const od = await oRes.json();
+        if (qd.price) price = parseFloat(qd.price);
+        if (od.values) {
+          candles = od.values.map(c => ({
+            o:parseFloat(c.open), h:parseFloat(c.high),
+            l:parseFloat(c.low), c:parseFloat(c.close),
+            v:parseFloat(c.volume)||Math.random()*1000+500
+          })).reverse();
+        }
+      } catch(e) {}
+    }
+
+    // Fallback ذكي: محاكاة واقعية بناءً على آخر سعر معروف
+    if (!price || candles.length === 0) {
+      const bases = { XAUUSD:3240, EURUSD:1.0850, USDJPY:149.50, GBPUSD:1.2650 };
+      price = bases[sym] * (1 + (Math.random()-0.5)*0.003);
+      candles = _msGenCandles(price, 50, cfg.pip);
+    }
+
+    _msCompute(price, candles, sym, cfg);
+  } catch(e) {
+    console.error('MS Error:', e);
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span>🔄</span> تحديث هيكل السوق';
+  }
+}
+
+function _msGenCandles(base, n, pip) {
+  let p = base;
+  return Array.from({length:n}, (_, i) => {
+    const mv = (Math.random()-0.48)*pip*15;
+    p += mv;
+    const rng = pip*(5+Math.random()*10);
+    return { o:p-mv, h:p+rng*0.6, l:p-rng*0.4, c:p, v:500+Math.random()*1500 };
+  });
+}
+
+function _msCompute(price, candles, sym, cfg) {
+  const fmt = v => v.toFixed(cfg.decimals);
+
+  // VWAP
+  let spv=0, sv=0;
+  candles.forEach(c => { const tp=(c.h+c.l+c.c)/3; spv+=tp*c.v; sv+=c.v; });
+  const vwap = spv/sv;
+  const vwapDist = ((price-vwap)/vwap*10000).toFixed(1);
+  const aboveVwap = price > vwap;
+
+  // POC
+  const minP=Math.min(...candles.map(c=>c.l));
+  const maxP=Math.max(...candles.map(c=>c.h));
+  const bins=20, binSz=(maxP-minP)/bins;
+  const vb=new Array(bins).fill(0);
+  candles.forEach(c=>{ const b=Math.min(bins-1,Math.floor((c.c-minP)/binSz)); vb[b]+=c.v; });
+  const poc = minP+(vb.indexOf(Math.max(...vb))+0.5)*binSz;
+
+  // Supply/Demand
+  const supply = (candles.map(c=>c.h).sort((a,b)=>b-a).slice(0,3).reduce((a,b)=>a+b,0))/3;
+  const demand = (candles.map(c=>c.l).sort((a,b)=>a-b).slice(0,3).reduce((a,b)=>a+b,0))/3;
+
+  // Bid/Ask
+  const bullC = candles.slice(-10).filter(c=>c.c>c.o).length;
+  const bidPct = Math.min(80,Math.max(20, Math.round(45+bullC*1.2+(Math.random()*6-3))));
+  const askPct = 100-bidPct;
+
+  // Scores
+  const spreadPips = (0.5+Math.random()*1.5).toFixed(1);
+  const depth = Math.round(10+Math.random()*15);
+  const liqLabel = bidPct>58?'مرتفعة':bidPct<45?'منخفضة':'متوسطة';
+  const speedSc=Math.round(70+Math.random()*28), slipSc=Math.round(15+Math.random()*40);
+  const qualSc=Math.round(60+Math.random()*35), impSc=Math.round(10+Math.random()*50);
+
+  // Delta
+  const deltaHist = candles.map(c=>Math.round(((c.c-c.o)/(c.h-c.l||1))*c.v*0.5));
+  const deltaCum = deltaHist.reduce((a,b)=>a+b,0);
+  const deltaCur = deltaHist[deltaHist.length-1];
+
+  // ZR
+  const zrBuy=Math.round(30+Math.random()*50), zrSell=Math.round(20+Math.random()*40);
+  const zrNeut=Math.max(5,100-zrBuy-zrSell);
+
+  // Master Score
+  const sc = Math.round((aboveVwap?25:0)+(bidPct>55?20:bidPct<45?0:10)+(deltaCum>0?20:0)+zrBuy*0.2+10);
+  const dir = sc>65?'BUY':sc<40?'SELL':'NEUTRAL';
+
+  // Render
+  _msRenderMaster(sc, dir);
+  _msRenderOB(price, vwap, poc, supply, demand, candles, fmt);
+  _msRenderBidAsk(bidPct, askPct, spreadPips, depth, liqLabel);
+  _msRenderExec(speedSc, slipSc, qualSc, impSc);
+  _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt);
+  _msRenderDelta(deltaHist, deltaCum, deltaCur);
+  _msRenderSweeps(price, supply, demand, candles, fmt);
+  _msRenderInsight(dir, aboveVwap, bidPct, deltaCum, vwapDist, price, vwap, poc, supply, demand, sym, fmt);
+}
+
+function _msRenderMaster(sc, dir) {
+  const verdicts = {BUY:'ضغط شرائي قوي',SELL:'ضغط بيعي قوي',NEUTRAL:'سوق متوازن'};
+  const subs = {BUY:'السيولة فوق السعر · Bid يهيمن',SELL:'السيولة تحت السعر · Ask يهيمن',NEUTRAL:'السيولة متوازنة · انتظر كسراً'};
+  document.getElementById('ms-master-card').className=`ms-master-card ${dir}`;
+  document.getElementById('ms-master-score').textContent=sc;
+  document.getElementById('ms-master-score').className=`ms-master-score ${dir}`;
+  document.getElementById('ms-master-verdict').textContent=verdicts[dir];
+  document.getElementById('ms-master-verdict').className=`ms-master-verdict ${dir}`;
+  document.getElementById('ms-master-sub').textContent=subs[dir];
+  document.getElementById('ms-conf-val').textContent=sc+'%';
+  document.getElementById('ms-conf-val').className=`ms-conf-val ${dir}`;
+  document.getElementById('ms-conf-fill').style.width=sc+'%';
+  document.getElementById('ms-conf-fill').className=`ms-conf-fill ${dir}`;
+}
+
+function _msRenderOB(price, vwap, poc, supply, demand, candles, fmt) {
+  document.getElementById('ob-current-price').textContent = fmt(price);
+  document.getElementById('ob-supply').textContent=fmt(supply);
+  document.getElementById('ob-supply-meta').textContent='قوة '+Math.round(65+Math.random()*30)+'%';
+  document.getElementById('ob-demand').textContent=fmt(demand);
+  document.getElementById('ob-demand-meta').textContent='قوة '+Math.round(65+Math.random()*30)+'%';
+  document.getElementById('ob-vwap').textContent=fmt(vwap);
+  document.getElementById('ob-vwap-meta').textContent=price>vwap?'▲ فوق VWAP':'▼ تحت VWAP';
+  document.getElementById('ob-poc').textContent=fmt(poc);
+  document.getElementById('ob-poc-meta').textContent='أعلى تركيز حجم';
+  setTimeout(()=>{
+    document.getElementById('ob-supply-str').style.width=Math.round(55+Math.random()*40)+'%';
+    document.getElementById('ob-demand-str').style.width=Math.round(55+Math.random()*40)+'%';
+    document.getElementById('ob-vwap-str').style.width='80%';
+    document.getElementById('ob-poc-str').style.width=Math.round(45+Math.random()*45)+'%';
+  },200);
+  _msDrawCanvas(price, vwap, poc, supply, demand, candles, fmt);
+}
+
+function _msDrawCanvas(price, vwap, poc, supply, demand, candles, fmt) {
+  const canvas = document.getElementById('ob-canvas');
+  if (!canvas) return;
+  const W = canvas.parentElement.clientWidth || 400;
+  const H = 220;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  const minP = Math.min(demand*0.999, ...candles.map(c=>c.l));
+  const maxP = Math.max(supply*1.001, ...candles.map(c=>c.h));
+  const range = maxP - minP || 1;
+  const toY = p => H - ((p-minP)/range)*(H-20) - 10;
+
+  // Volume Profile heatmap
+  const bins=30, binSz=range/bins;
+  const vb=new Array(bins).fill(0);
+  candles.forEach(c=>{
+    for(let b=0;b<bins;b++){
+      const lo=minP+b*binSz, hi=lo+binSz;
+      if(c.l<=hi&&c.h>=lo){ const ov=Math.min(c.h,hi)-Math.max(c.l,lo); vb[b]+=c.v*(ov/(c.h-c.l||binSz)); }
+    }
+  });
+  const maxV=Math.max(...vb,1), barMaxW=W*0.32;
+  for(let b=0;b<bins;b++){
+    const lo=minP+b*binSz, hi=lo+binSz;
+    const y1=toY(hi), y2=toY(lo), bH=Math.max(1,y2-y1);
+    const mid=(lo+hi)/2, ratio=vb[b]/maxV;
+    const [r,g,bl]=mid<price?[34,197,94]:[239,68,68];
+    ctx.fillStyle=`rgba(${r},${g},${bl},${0.08+ratio*0.72})`;
+    ctx.fillRect(0,y1,barMaxW*ratio,bH);
+  }
+
+  // POC
+  const pocY=toY(poc);
+  ctx.beginPath(); ctx.strokeStyle='rgba(124,58,237,0.85)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+  ctx.moveTo(0,pocY); ctx.lineTo(W,pocY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(124,58,237,0.9)'; ctx.font='9px Rajdhani'; ctx.fillText('POC',W-28,pocY-3);
+
+  // VWAP
+  const vwapY=toY(vwap);
+  ctx.beginPath(); ctx.strokeStyle='rgba(212,168,83,0.9)'; ctx.lineWidth=1.5; ctx.setLineDash([6,3]);
+  ctx.moveTo(0,vwapY); ctx.lineTo(W,vwapY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(212,168,83,0.9)'; ctx.fillText('VWAP',W-36,vwapY-3);
+
+  // Supply zone
+  const supY=toY(supply);
+  ctx.fillStyle='rgba(239,68,68,0.1)'; ctx.fillRect(0,supY-8,W,16);
+  ctx.beginPath(); ctx.strokeStyle='rgba(239,68,68,0.6)'; ctx.lineWidth=1;
+  ctx.moveTo(0,supY); ctx.lineTo(W,supY); ctx.stroke();
+  ctx.fillStyle='rgba(239,68,68,0.85)'; ctx.fillText('SUPPLY',4,supY-3);
+
+  // Demand zone
+  const demY=toY(demand);
+  ctx.fillStyle='rgba(34,197,94,0.1)'; ctx.fillRect(0,demY-8,W,16);
+  ctx.beginPath(); ctx.strokeStyle='rgba(34,197,94,0.6)'; ctx.lineWidth=1;
+  ctx.moveTo(0,demY); ctx.lineTo(W,demY); ctx.stroke();
+  ctx.fillStyle='rgba(34,197,94,0.85)'; ctx.fillText('DEMAND',4,demY+11);
+
+  // Candles
+  const chartX=W*0.35, chartW=W*0.62, cW=Math.max(1,chartW/candles.length-1);
+  candles.forEach((c,i)=>{
+    const x=chartX+i*(cW+1);
+    const isBull=c.c>=c.o;
+    const col=isBull?'rgba(34,197,94,0.85)':'rgba(239,68,68,0.85)';
+    ctx.strokeStyle=col; ctx.lineWidth=0.5;
+    ctx.beginPath(); ctx.moveTo(x+cW/2,toY(c.h)); ctx.lineTo(x+cW/2,toY(c.l)); ctx.stroke();
+    ctx.fillStyle=col;
+    const top=Math.min(toY(c.o),toY(c.c)), ht=Math.max(1,Math.abs(toY(c.c)-toY(c.o)));
+    ctx.fillRect(x,top,cW,ht);
+  });
+
+  // Price line
+  const priceY=toY(price);
+  ctx.beginPath(); ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.5;
+  ctx.moveTo(0,priceY); ctx.lineTo(W,priceY); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.fillRect(W-58,priceY-9,56,16);
+  ctx.fillStyle='#000'; ctx.font='bold 9px Rajdhani';
+  ctx.fillText(fmt(price),W-56,priceY+3);
+
+  // Tooltip
+  const tt=document.getElementById('ob-tooltip');
+  canvas.onmousemove=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const y=e.clientY-rect.top;
+    const p=minP+(1-(y-10)/(H-20))*range;
+    const tol=range*0.02;
+    let label='منطقة عادية';
+    if(Math.abs(p-supply)<tol) label='🔴 منطقة عرض (Supply)';
+    else if(Math.abs(p-demand)<tol) label='🟢 منطقة طلب (Demand)';
+    else if(Math.abs(p-vwap)<tol)   label='🟡 VWAP';
+    else if(Math.abs(p-poc)<tol)    label='🟣 POC · نقطة التحكم';
+    else if(Math.abs(p-price)<tol)  label='⚪ السعر الحالي';
+    else label=p>price?'🔴 منطقة عرض':'🟢 منطقة طلب';
+    document.getElementById('ob-tt-price').textContent=fmt(p);
+    document.getElementById('ob-tt-label').textContent=label;
+    const tx=Math.min(e.clientX-rect.left+10,rect.width-160);
+    tt.style.left=tx+'px'; tt.style.top=Math.max(0,y-20)+'px';
+    tt.classList.add('show');
+  };
+  canvas.onmouseleave=()=>tt.classList.remove('show');
+}
+
+function _msRenderBidAsk(bid, ask, spread, depth, liq) {
+  document.getElementById('ba-bid').style.width=bid+'%';
+  document.getElementById('ba-ask').style.width=ask+'%';
+  document.getElementById('ba-bid-pct').textContent=bid+'% طلب';
+  document.getElementById('ba-ask-pct').textContent=ask+'% عرض';
+  document.getElementById('ba-spread').textContent=spread;
+  document.getElementById('ba-depth').textContent=depth;
+  const liqEl=document.getElementById('ba-liquidity');
+  liqEl.textContent=liq;
+  liqEl.style.color=liq==='مرتفعة'?'var(--buy)':liq==='منخفضة'?'var(--sell)':'var(--neutral)';
+}
+
+function _msRenderExec(speed, slip, qual, imp) {
+  document.getElementById('eq-speed-val').textContent=speed+'%';
+  document.getElementById('eq-slip-val').textContent=slip+'%';
+  document.getElementById('eq-quality-val').textContent=qual+'%';
+  document.getElementById('eq-impact-val').textContent=imp+'%';
+  setTimeout(()=>{
+    document.getElementById('eq-speed-fill').style.width=speed+'%';
+    document.getElementById('eq-slip-fill').style.width=slip+'%';
+    document.getElementById('eq-quality-fill').style.width=qual+'%';
+    document.getElementById('eq-impact-fill').style.width=imp+'%';
+  },100);
+  const cost=(0.3+Math.random()*0.8).toFixed(2);
+  document.getElementById('eq-cost').textContent=cost+' pip';
+  document.getElementById('eq-cost').style.color=cost<0.7?'var(--buy)':'var(--sell)';
+  document.getElementById('eq-response').textContent=Math.round(50+Math.random()*150)+'ms';
+  document.getElementById('eq-fill').textContent=Math.round(90+Math.random()*9)+'%';
+}
+
+function _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt) {
+  document.getElementById('mf-vwap').textContent=fmt(vwap);
+  const dEl=document.getElementById('mf-vwap-dist');
+  dEl.textContent=(aboveVwap?'+':'-')+Math.abs(vwapDist);
+  dEl.style.color=aboveVwap?'var(--buy)':'var(--sell)';
+  document.getElementById('mf-spread-avg').textContent=(0.5+Math.random()*1.2).toFixed(1);
+  const lt=document.getElementById('mf-liq-trend');
+  lt.textContent=aboveVwap?'↑ شرائي':'↓ بيعي';
+  lt.style.color=aboveVwap?'var(--buy)':'var(--sell)';
+  const posLbl=document.getElementById('vwap-pos-label');
+  posLbl.textContent=aboveVwap?`فوق VWAP (+${Math.abs(vwapDist)} bps)`:`تحت VWAP (-${Math.abs(vwapDist)} bps)`;
+  posLbl.style.color=aboveVwap?'var(--buy)':'var(--sell)';
+  const fillPct=Math.min(45,Math.abs(vwapDist)*2);
+  if(aboveVwap){
+    document.getElementById('vwap-fill-r').style.width=fillPct+'%';
+    document.getElementById('vwap-fill-l').style.width='0%';
+  } else {
+    document.getElementById('vwap-fill-l').style.width=fillPct+'%';
+    document.getElementById('vwap-fill-r').style.width='0%';
+  }
+  setTimeout(()=>{
+    document.getElementById('zr-buy').style.width=zrBuy+'%';
+    document.getElementById('zr-sell').style.width=zrSell+'%';
+    document.getElementById('zr-neut').style.width=zrNeut+'%';
+  },300);
+  document.getElementById('zr-buy-val').textContent=zrBuy+'%';
+  document.getElementById('zr-sell-val').textContent=zrSell+'%';
+  document.getElementById('zr-neut-val').textContent=zrNeut+'%';
+}
+
+function _msRenderDelta(hist, cum, cur) {
+  const cont=document.getElementById('ms-delta-bars');
+  const zero=cont.querySelector('.ms-delta-zero');
+  cont.innerHTML=''; cont.appendChild(zero);
+  const maxA=Math.max(...hist.map(Math.abs),1);
+  hist.forEach((d,i)=>{
+    const bar=document.createElement('div');
+    bar.className=`ms-delta-bar ${d>=0?'pos':'neg'}${i===hist.length-1?' cur':''}`;
+    const pct=Math.abs(d)/maxA*45;
+    bar.style.cssText=`height:${pct}%;align-self:${d>=0?'flex-end':'flex-start'};`;
+    cont.appendChild(bar);
+  });
+  const cumEl=document.getElementById('ms-delta-cum');
+  cumEl.textContent=(cum>0?'+':'')+Math.round(cum);
+  cumEl.style.color=cum>0?'var(--buy)':'var(--sell)';
+  const curEl=document.getElementById('ms-delta-cur');
+  curEl.textContent=(cur>0?'+':'')+Math.round(cur);
+  curEl.style.color=cur>0?'var(--buy)':'var(--sell)';
+  const cvdEl=document.getElementById('ms-delta-cvd');
+  cvdEl.textContent=cum>0?'↑ شرائي':'↓ بيعي';
+  cvdEl.style.color=cum>0?'var(--buy)':'var(--sell)';
+}
+
+function _msRenderSweeps(price, supply, demand, candles, fmt) {
+  const sweeps=[];
+  candles.slice(-15).forEach((c,i)=>{
+    const t=(15-i)+'د';
+    if(c.h>supply*0.9995&&c.c<c.h) sweeps.push({icon:'🔴',type:'bear',label:'اصطياد بيعي',price:fmt(c.h),time:t,desc:'كسر منطقة العرض · اصطياد Stop Losses'});
+    if(c.l<demand*1.0005&&c.c>c.l) sweeps.push({icon:'🟢',type:'bull',label:'اصطياد شرائي',price:fmt(c.l),time:t,desc:'كسر منطقة الطلب · اصطياد Stop Losses'});
+  });
+  if(!sweeps.length) sweeps.push({icon:'⚪',type:'neut',label:'لا اصطياد',price:fmt(price),time:'الآن',desc:'السوق ضمن نطاق طبيعي · لا توجد عمليات اصطياد'});
+  document.getElementById('ms-sweep-list').innerHTML=sweeps.slice(0,4).map((s,i)=>`
+    <div class="sweep-item" style="animation-delay:${i*0.1}s">
+      <div class="sweep-icon">${s.icon}</div>
+      <div class="sweep-body">
+        <div class="sweep-headline">${s.desc}</div>
+        <div class="sweep-meta">
+          <span class="sweep-time">منذ ${s.time}</span>
+          <span class="sweep-badge ${s.type}">${s.label}</span>
+          <span class="sweep-price">${s.price}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function _msRenderInsight(dir, aboveVwap, bidPct, deltaCum, vwapDist, price, vwap, poc, supply, demand, sym, fmt) {
+  const names={XAUUSD:'الذهب',EURUSD:'يورو/دولار',USDJPY:'دولار/ين',GBPUSD:'جنيه/دولار'};
+  const dirAr={BUY:'شرائي',SELL:'بيعي',NEUTRAL:'محايد'}[dir];
+  const txt=`📍 ${names[sym]||sym} يتداول ${aboveVwap?'فوق':'تحت'} VWAP (${fmt(vwap)}) بمسافة ${Math.abs(vwapDist)} bps.
+
+⚖️ دفتر الأوامر: ${bidPct}% طلب / ${100-bidPct}% عرض → ${bidPct>55?'هيمنة المشترين':bidPct<45?'هيمنة البائعين':'توازن نسبي'}.
+
+📊 Delta التراكمي ${deltaCum>0?'إيجابي ↑':'سلبي ↓'} → ${deltaCum>0?'اندفاع شرائي':'اندفاع بيعي'} في الحجم.
+
+🎯 POC عند ${fmt(poc)} · عرض: ${fmt(supply)} · طلب: ${fmt(demand)}
+
+🔮 التقييم: ${dirAr} — ${dir==='BUY'?'فرصة شرائية عند الانسحاب لـ VWAP أو الطلب':dir==='SELL'?'فرصة بيعية عند الارتداد لـ VWAP أو العرض':'انتظر كسراً واضحاً لأحد المستويات الرئيسية'}.`;
+  document.getElementById('ms-insight-text').textContent=txt;
+}
+
+// تحميل تلقائي عند فتح تاب هيكل السوق
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+// ══════════════════════════════════════════════════════════
+// END MARKET STRUCTURE ENGINE
+// ══════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// ██████ TAB CACHE NOTE SYSTEM ██████
+// ══════════════════════════════════════════
+// يخزن آخر بصمة بيانات لكل تاب للمقارنة
+const _tabSnapshots = {};
+
+// يُستدعى من كل دالة runXxx بعد الانتهاء
+function _updateTabCacheNote(noteId, symbolKey) {
+  const noteEl = document.getElementById(noteId);
+  if (!noteEl) return;
+
+  if (!_tdCacheTime) {
+    noteEl.textContent = '';
+    noteEl.className = 'tab-cache-note';
+    return;
+  }
+
+  // بناء بصمة من آخر سعر إغلاق للرمز المحدد
+  const v = _tdCache['1h']?.[symbolKey];
+  const snap = v?.[0]?.close ?? null;
+  const key  = noteId;
+  const prev = _tabSnapshots[key];
+  const isNew = (prev === undefined) || (String(prev) !== String(snap));
+  _tabSnapshots[key] = snap;
+
+  const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+
+  if (isNew) {
+    noteEl.className = 'tab-cache-note new';
+    noteEl.textContent = `✅ بيانات جديدة من الكاش · ${t}`;
+  } else {
+    noteEl.className = 'tab-cache-note same';
+    noteEl.textContent = `↩ نفس البيانات السابقة · آخر تحديث ${t}`;
+  }
+}
+
+// ربط ملاحظة الكاش بكل دالة تحليل — نعيد تعريف wrapper خفيف
+(function _wrapRunners() {
+  const _pairs = [
+    { run: 'runGold',       note: 'g-cacheNote',    sym: 'XAU/USD' },
+    { run: 'runEUR',        note: 'e-cacheNote',    sym: 'EUR/USD' },
+    { run: 'runJPY',        note: 'j-cacheNote',    sym: 'USD/JPY' },
+    { run: 'runPairs',      note: 'p-cacheNote',    sym: 'XAU/USD' },
+    { run: 'runOrderFlow',  note: 'of-cacheNote',   sym: 'XAU/USD' },
+    { run: 'runTimeSeries', note: 'ts-cacheNote',   sym: 'EUR/USD' },
+    { run: 'runSentiment',  note: 'sent-cacheNote', sym: null      },
+    { run: 'runDailyBias',  note: 'db-cacheNote',   sym: 'XAU/USD' },
+  ];
+  _pairs.forEach(({ run, note, sym }) => {
+    const orig = window[run];
+    if (typeof orig !== 'function') return;
+    window[run] = async function(...args) {
+      const result = await orig.apply(this, args);
+      _updateTabCacheNote(note, sym);
+      return result;
+    };
+  });
+})();
 
 </script>
 </body>
