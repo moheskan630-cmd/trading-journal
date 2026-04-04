@@ -1703,7 +1703,7 @@
         📊 MTF CONFLUENCE
         <span class="mtf-badge">MULTI-TIMEFRAME</span>
       </div>
-      <div class="mtf-sym-selector">
+      <div class="mtf-sym-selector" id="mtf-sym-selector" style="display:none;">
         <button class="mtf-sym-btn active" id="mtfbtn-eur" onclick="selectMTFSym('EUR')">EUR</button>
         <button class="mtf-sym-btn" id="mtfbtn-jpy" onclick="selectMTFSym('JPY')">JPY</button>
       </div>
@@ -3185,6 +3185,39 @@ function switchTab(tab) {
   // تأكد أننا في وضع Main
   document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
   document.getElementById('qbnav-brain').className = 'qb-nav-btn';
+
+  // ── إدارة MTF widget ──
+  const mtfWidget = document.getElementById('mtf-widget');
+  const mtfSelector = document.getElementById('mtf-sym-selector');
+  if (mtfWidget) {
+    if (tab === 'gold') {
+      // الذهب: أخفِ أزرار الاختيار — اعرض XAU تلقائياً
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'none';
+      currentMTFSym = 'XAU';
+      runMTFConfluence();
+    } else if (tab === 'eur') {
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'flex';
+      document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
+      const eurBtn = document.getElementById('mtfbtn-eur');
+      if (eurBtn) eurBtn.classList.add('active');
+      currentMTFSym = 'EUR';
+      runMTFConfluence();
+    } else if (tab === 'jpy') {
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'flex';
+      document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
+      const jpyBtn = document.getElementById('mtfbtn-jpy');
+      if (jpyBtn) jpyBtn.classList.add('active');
+      currentMTFSym = 'JPY';
+      runMTFConfluence();
+    } else {
+      // كل التابات الأخرى: أخفِ MTF كلياً
+      mtfWidget.style.display = 'none';
+    }
+  }
+
   // شغّل Daily Bias تلقائياً عند فتح التاب إذا كان الكاش جاهزاً
   if (tab === 'dailybias' && Object.keys(_tdCache['1day']).length > 0) runDailyBias();
   if (tab === 'ms') setTimeout(loadMsData, 100);
@@ -3456,7 +3489,7 @@ function calcMTFSignal(values) {
 async function runMTFConfluence() {
   // لا تحديث إذا الكاش فارغ
   const tdSym = currentMTFSym === 'EUR' ? 'EUR/USD' :
-                currentMTFSym === 'XAU' ? 'XAU/USD' : 'USD/JPY';
+                currentMTFSym === 'JPY' ? 'USD/JPY' : 'XAU/USD';
 
   // حسب الكاش المتاح
   const v1d = _tdCache['1day']?.[tdSym];
@@ -6753,7 +6786,13 @@ async function runAll(){
 // تشغيل التحليلات من الكاش بدون إعادة جلب TD
 async function _runAnalysisFromCache() {
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
-  runMTFConfluence();
+  // تشغيل MTF فقط للتابات المدعومة
+  if (['gold','eur','jpy'].includes(currentTab)) {
+    if (currentTab === 'gold') currentMTFSym = 'XAU';
+    else if (currentTab === 'eur') currentMTFSym = 'EUR';
+    else if (currentTab === 'jpy') currentMTFSym = 'JPY';
+    runMTFConfluence();
+  }
   if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
   if (document.getElementById('panel-dailybias')?.classList.contains('active')) runDailyBias();
 }
@@ -7209,11 +7248,10 @@ async function loadMsData() {
       } catch(e) {}
     }
 
-    // Fallback ذكي: محاكاة واقعية بناءً على آخر سعر معروف
+    // لا توجد بيانات حقيقية — عرض رسالة بدلاً من بيانات وهمية
     if (!price || candles.length === 0) {
-      const bases = { XAUUSD:3240, EURUSD:1.0850, USDJPY:149.50, GBPUSD:1.2650 };
-      price = bases[sym] * (1 + (Math.random()-0.5)*0.003);
-      candles = _msGenCandles(price, 50, cfg.pip);
+      _msShowNoData();
+      return;
     }
 
     _msCompute(price, candles, sym, cfg);
@@ -7222,6 +7260,60 @@ async function loadMsData() {
   } finally {
     btn.classList.remove('loading');
     btn.innerHTML = '<span>🔄</span> تحديث هيكل السوق';
+  }
+}
+
+function _msShowNoData() {
+  const dash = '—';
+  const noMsg = 'لا توجد بيانات حالياً';
+
+  // بطاقة الحكم الرئيسية
+  const card = document.getElementById('ms-master-card');
+  if (card) card.className = 'ms-master-card NEUTRAL';
+  ['ms-master-score','ms-master-verdict'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = id === 'ms-master-score' ? dash : noMsg; el.className = el.className.split(' ')[0] + ' NEUTRAL'; }
+  });
+  const sub = document.getElementById('ms-master-sub');
+  if (sub) sub.textContent = 'أدخل مفتاح Twelve Data واضغط تحديث';
+  const cf = document.getElementById('ms-conf-fill');
+  if (cf) { cf.style.width = '0%'; cf.className = 'ms-conf-fill NEUTRAL'; }
+  const cv = document.getElementById('ms-conf-val');
+  if (cv) { cv.textContent = dash; cv.className = 'ms-conf-val NEUTRAL'; }
+
+  // مستويات OB
+  ['ob-supply','ob-demand','ob-vwap','ob-poc',
+   'ob-supply-meta','ob-demand-meta','ob-vwap-meta','ob-poc-meta',
+   'ba-bid-pct','ba-ask-pct','ba-spread','ba-depth','ba-liquidity',
+   'eq-speed-val','eq-slip-val','eq-quality-val','eq-impact-val',
+   'eq-cost','eq-response','eq-fill',
+   'mf-vwap','mf-vwap-dist','mf-spread-avg','mf-liq-trend','vwap-pos-label',
+   'zr-buy-val','zr-sell-val','zr-neut-val',
+   'ms-delta-cum','ms-delta-cur','ms-delta-cvd'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = dash; el.style.color = 'var(--muted)'; }
+  });
+
+  // Sweep list
+  const sl = document.getElementById('ms-sweep-list');
+  if (sl) sl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">${noMsg}</div>`;
+
+  // Insight
+  const ins = document.getElementById('ms-insight-text');
+  if (ins) ins.textContent = 'أدخل مفتاح Twelve Data API واضغط تحديث لعرض التحليل.';
+
+  // Canvas
+  const canvas = document.getElementById('ob-canvas');
+  if (canvas) {
+    const W = canvas.parentElement?.clientWidth || 400, H = 220;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(107,114,128,0.4)';
+    ctx.font = '14px Tajawal'; ctx.textAlign = 'center';
+    ctx.fillText(noMsg, W/2, H/2 - 8);
+    ctx.font = '11px Tajawal'; ctx.fillStyle = 'rgba(107,114,128,0.6)';
+    ctx.fillText('أدخل مفتاح API واضغط تحديث', W/2, H/2 + 14);
   }
 }
 
