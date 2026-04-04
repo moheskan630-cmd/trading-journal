@@ -2500,10 +2500,19 @@
 // ══════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════
-let TD_KEY   = localStorage.getItem('td_key')   || '';
-let FRED_KEY = localStorage.getItem('fred_key') || '';
-let FINNHUB_KEY = localStorage.getItem('finnhub_key') || '';
-let NEWSAPI_KEY = localStorage.getItem('newsapi_key') || '';
+// ── تخزين المفاتيح: sessionStorage أولاً ← localStorage ← فارغ ──
+function _loadKey(k) {
+  try { return sessionStorage.getItem(k) || localStorage.getItem(k) || ''; }
+  catch(e) { return ''; }
+}
+function _saveKey(k, v) {
+  try { sessionStorage.setItem(k, v); } catch(e) {}
+  try { localStorage.setItem(k, v);   } catch(e) {}
+}
+let TD_KEY      = _loadKey('td_key');
+let FRED_KEY    = _loadKey('fred_key');
+let FINNHUB_KEY = _loadKey('finnhub_key');
+let NEWSAPI_KEY = _loadKey('newsapi_key');
 const TD_BASE   = 'https://api.twelvedata.com';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 
@@ -2630,10 +2639,15 @@ function saveAllKeys() {
   else            { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
   if (!valid) return;
   TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; NEWSAPI_KEY=newsapiVal;
-  localStorage.setItem('td_key', tdVal);
-  localStorage.setItem('fred_key', fredVal);
-  if (finnhubVal) localStorage.setItem('finnhub_key', finnhubVal);
-  if (newsapiVal) localStorage.setItem('newsapi_key', newsapiVal);
+  _saveKey('td_key',      tdVal);
+  _saveKey('fred_key',    fredVal);
+  _saveKey('finnhub_key', finnhubVal);
+  _saveKey('newsapi_key', newsapiVal);
+  // حفظ المفاتيح في URL hash كـ fallback إضافي
+  try {
+    const h = btoa(encodeURIComponent(JSON.stringify({td:tdVal,fred:fredVal,fh:finnhubVal,na:newsapiVal})));
+    history.replaceState(null,'','#k='+h);
+  } catch(e) {}
   setTimeout(()=>{ document.getElementById('setupModal').classList.add('hidden'); document.getElementById('resetRow').style.display='block'; runAll(); },600);
 }
 function resetKeys() {
@@ -2659,94 +2673,67 @@ async function fetchTD(path) {
 }
 
 // ══════════════════════════════════════════
-// ██████ BATCH FETCH & CACHE ENGINE ██████
+// ██████ FETCH & CACHE ENGINE ██████
 // ══════════════════════════════════════════
 // الخطة المجانية: 8 credits/دقيقة
-// الحل: 5 طلبات 1h فقط — ثم نبني 4h و1day منها رياضياً بدون credits إضافية
+// 5 طلبات (1h لكل رمز) — 4h و1day تُبنى منها رياضياً
 
-// دمج شمعات 1h → شمعات إطار أكبر (كل N شمعة → شمعة واحدة)
-function resampleCandles(candles1h, groupSize) {
-  // candles1h مرتبة من الأحدث للأقدم (كما تُرجعها TD)
-  const reversed = [...candles1h].reverse(); // من الأقدم للأحدث
-  const result = [];
-  for (let i = 0; i + groupSize <= reversed.length; i += groupSize) {
-    const chunk = reversed.slice(i, i + groupSize);
-    result.push({
-      datetime: chunk[chunk.length - 1].datetime,
-      open:  chunk[0].open,
-      high:  String(Math.max(...chunk.map(c => parseFloat(c.high)))),
-      low:   String(Math.min(...chunk.map(c => parseFloat(c.low)))),
-      close: chunk[chunk.length - 1].close,
+function _resample(candles1h, n) {
+  // candles مرتبة أحدث → أقدم، ندمج كل n شمعة → شمعة واحدة
+  const asc = [...candles1h].reverse();
+  const out = [];
+  for (let i = 0; i + n <= asc.length; i += n) {
+    const g = asc.slice(i, i + n);
+    out.push({
+      datetime: g[g.length-1].datetime,
+      open:  g[0].open,
+      high:  String(Math.max(...g.map(c=>parseFloat(c.high)))),
+      low:   String(Math.min(...g.map(c=>parseFloat(c.low)))),
+      close: g[g.length-1].close,
     });
   }
-  return result.reverse(); // أعد ترتيبها من الأحدث للأقدم
+  return out.reverse();
 }
 
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
-  if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) {
-    return; // الكاش لا يزال صالحاً
-  }
-
+  if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) return;
   if (!TD_KEY) return;
 
-  // دالة جلب آمنة — لا توقف التطبيق عند فشل رمز واحد
-  async function fetchSafe(sym) {
+  async function _fetchSym(sym) {
     try {
-      // outputsize=96 تعطينا 4 أيام كاملة من الشمعات الساعية
       const d = await fetchTD(`time_series?symbol=${encodeURIComponent(sym)}&interval=1h&outputsize=96`);
       return d.values || null;
-    } catch(e) {
-      console.warn(`⚠️ TD fetch failed [${sym}]:`, e.message);
-      return null;
-    }
+    } catch(e) { console.warn(`TD failed [${sym}]:`, e.message); return null; }
   }
 
-  // ── 5 طلبات فقط (كل رمز طلب واحد 1h) ──
+  // 5 طلبات متوازية فقط
   const [xau, eur, jpy, xag, gbp] = await Promise.all([
-    fetchSafe('XAU/USD'),
-    fetchSafe('EUR/USD'),
-    fetchSafe('USD/JPY'),
-    fetchSafe('XAG/USD'),
-    fetchSafe('GBP/USD'),
+    _fetchSym('XAU/USD'), _fetchSym('EUR/USD'), _fetchSym('USD/JPY'),
+    _fetchSym('XAG/USD'), _fetchSym('GBP/USD'),
   ]);
 
-  // ملء كاش 1h
-  if (xau) _tdCache['1h']['XAU/USD'] = xau;
-  if (eur) _tdCache['1h']['EUR/USD'] = eur;
-  if (jpy) _tdCache['1h']['USD/JPY'] = jpy;
-  if (xag) _tdCache['1h']['XAG/USD'] = xag;
-  if (gbp) _tdCache['1h']['GBP/USD'] = gbp;
+  const map1h = { 'XAU/USD':xau, 'EUR/USD':eur, 'USD/JPY':jpy, 'XAG/USD':xag, 'GBP/USD':gbp };
+  Object.entries(map1h).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
 
-  // ── بناء 4h و1day من 1h بدون أي طلبات إضافية ──
-  // 4h = كل 4 شمعات 1h مدموجة
-  // 1day = كل 24 شمعة 1h مدموجة
-  ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(sym => {
-    const v1h = _tdCache['1h'][sym];
-    if (v1h && v1h.length >= 8) {
-      _tdCache['4h'][sym]   = resampleCandles(v1h, 4);
-      _tdCache['1day'][sym] = resampleCandles(v1h, 24);
+  // بناء 4h و 1day من 1h بدون طلبات إضافية
+  ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(s => {
+    const v = _tdCache['1h'][s];
+    if (v && v.length >= 8) {
+      _tdCache['4h'][s]   = _resample(v, 4);
+      _tdCache['1day'][s] = _resample(v, 24);
     }
   });
 
-  // ── Quote cache من آخر شمعتين ──
-  ['XAU/USD','EUR/USD','USD/JPY','XAG/USD','GBP/USD'].forEach(sym => {
-    const vals = _tdCache['1h'][sym];
-    if (vals && vals.length >= 2) {
-      _tdQuoteCache[sym] = {
-        price: parseFloat(vals[0].close),
-        prev:  parseFloat(vals[1].close),
-      };
-    }
+  // Quote cache من آخر شمعتين
+  Object.keys(map1h).forEach(s => {
+    const v = _tdCache['1h'][s];
+    if (v && v.length >= 2)
+      _tdQuoteCache[s] = { price: parseFloat(v[0].close), prev: parseFloat(v[1].close) };
   });
 
   _tdCacheTime = Date.now();
-
-  console.log('✅ TD Cache refreshed (5 requests only):', {
-    '1h':   Object.keys(_tdCache['1h']),
-    '4h':   Object.keys(_tdCache['4h']),
-    '1day': Object.keys(_tdCache['1day']),
-  });
+  console.log('✅ TD Cache (5 req):', Object.keys(_tdCache['1h']));
 }
 
 // helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
@@ -6054,9 +6041,9 @@ async function runDailyBias() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب TD أولاً ثم FRED — بالتوازي لكن ننتظر كليهما قبل المتابعة
+  // 1. جلب TD و FRED بالتوازي — ننتظر كليهما قبل المتابعة
   await Promise.all([
-    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز (5 طلبات فقط)
+    fetchTDBatchAll(),
     fetchAllFRED().then(d => { fredData = d; }),
   ]);
 
@@ -6077,6 +6064,18 @@ async function runAll(){
 // INIT
 // ══════════════════════════════════════════
 window.addEventListener('load',()=>{
+  // محاولة استعادة المفاتيح من URL hash إذا فشل localStorage/sessionStorage
+  try {
+    const hash = location.hash;
+    if (hash.startsWith('#k=')) {
+      const parsed = JSON.parse(decodeURIComponent(atob(hash.slice(3))));
+      if (parsed.td  && !TD_KEY)      { TD_KEY      = parsed.td;  _saveKey('td_key',      TD_KEY); }
+      if (parsed.fred && !FRED_KEY)   { FRED_KEY    = parsed.fred; _saveKey('fred_key',   FRED_KEY); }
+      if (parsed.fh  && !FINNHUB_KEY) { FINNHUB_KEY = parsed.fh;  _saveKey('finnhub_key', FINNHUB_KEY); }
+      if (parsed.na  && !NEWSAPI_KEY) { NEWSAPI_KEY = parsed.na;  _saveKey('newsapi_key', NEWSAPI_KEY); }
+    }
+  } catch(e) {}
+
   if (!TD_KEY || !FRED_KEY) {
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('setupModal').classList.remove('hidden');
