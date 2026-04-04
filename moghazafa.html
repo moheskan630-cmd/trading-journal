@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v2</title>
+<title>Quant Signal Pro · Live v2 (Real Data)</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -127,8 +127,6 @@
   .model-signal{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;}
   .model-signal.BUY{color:var(--buy);}.model-signal.SELL{color:var(--sell);}.model-signal.NEUTRAL{color:var(--neutral);}
   .model-value{font-size:10px;color:var(--muted);margin-top:2px;}
-  .model-card,.factor-row{animation:fadeUp 0.4s ease both;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
   /* FACTORS */
   .factors-list{margin-bottom:14px;}
@@ -160,7 +158,7 @@
   .vol-title{font-size:13px;font-weight:600;}
   .vol-val{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--gold);}
   .vol-bars{display:flex;gap:4px;align-items:flex-end;height:48px;}
-  .vol-bar{flex:1;border-radius:4px 4px 0 0;opacity:0.6;min-height:4px;}
+  .vol-bar{flex:1;border-radius:4px 4px 0 0;opacity:0.6;min-height:4px; transition: height 0.5s ease;}
   .vol-bar.gold-bar{background:linear-gradient(180deg,var(--gold-dark),var(--gold));}
   .vol-bar.eur-bar{background:linear-gradient(180deg,var(--blue-dark),var(--blue));}
   .vol-bar.jpy-bar{background:linear-gradient(180deg,var(--purple-dark),var(--purple));}
@@ -230,7 +228,6 @@
   .refresh-btn.pairs-btn{background:linear-gradient(135deg,var(--teal-dark),var(--teal));}
   .refresh-btn:active{transform:scale(0.98);}
   .refresh-btn.loading{opacity:0.7;pointer-events:none;}
-
   .spin{animation:spin 1s linear infinite;display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -323,21 +320,26 @@
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active-gold" id="tab-gold" onclick="switchTab('gold')">
-      <span class="tab-sym">🥇 XAU</span><span class="tab-name">الذهب</span>
+      <span class="tab-sym">🥇 XAU</span>
+      <span class="tab-name">الذهب</span>
     </button>
     <button class="tab" id="tab-eur" onclick="switchTab('eur')">
-      <span class="tab-sym">🇪🇺 EUR</span><span class="tab-name">يورو/دولار</span>
+      <span class="tab-sym">🇪🇺 EUR</span>
+      <span class="tab-name">يورو/دولار</span>
     </button>
     <button class="tab" id="tab-jpy" onclick="switchTab('jpy')">
-      <span class="tab-sym">🇯🇵 JPY</span><span class="tab-name">دولار/ين</span>
+      <span class="tab-sym">🇯🇵 JPY</span>
+      <span class="tab-name">دولار/ين</span>
     </button>
     <button class="tab" id="tab-pairs" onclick="switchTab('pairs')">
-      <span class="tab-sym">⚡ PAIRS</span><span class="tab-name">أزواج</span>
+      <span class="tab-sym">⚡ PAIRS</span>
+      <span class="tab-name">أزواج</span>
     </button>
   </div>
 
   <!-- ══════════════ GOLD PANEL ══════════════ -->
   <div class="panel active" id="panel-gold">
+
     <div class="regime-card LOADING" id="g-regimeCard">
       <div class="regime-right">
         <div class="regime-label">🧠 REGIME DETECTION · حالة السوق</div>
@@ -350,13 +352,18 @@
         <div class="regime-conf" id="g-regimeConf">ثقة: —%</div>
       </div>
     </div>
+
     <div class="price-card gold-theme">
       <div class="price-watermark gold-wm">Au</div>
       <div class="price-label">سعر الذهب الفوري · XAU/USD</div>
       <div class="price-main gold-col" id="g-priceMain">—</div>
-      <div class="price-sub"><div class="price-change" id="g-priceChange">—</div><div class="price-time" id="g-priceTime">—</div></div>
+      <div class="price-sub">
+        <div class="price-change" id="g-priceChange">—</div>
+        <div class="price-time" id="g-priceTime">—</div>
+      </div>
       <div class="data-source" id="g-dataSource">📡 Twelve Data API</div>
     </div>
+
     <div class="signal-card LOADING" id="g-signalCard">
       <div class="signal-label">⚡ إشارة النموذج الموحّد · XAU/USD</div>
       <div class="signal-text" id="g-signalText" style="color:var(--muted);font-size:28px">جاري التحليل</div>
@@ -368,29 +375,52 @@
       </div>
       <div class="regime-note" id="g-regimeNote">🧠 يتم تعديل الإشارة بناءً على حالة السوق</div>
     </div>
+
     <div class="section-title">شمعات آخر ١٢ ساعة</div>
-    <div class="candle-wrap"><div class="candle-title" id="g-candleTitle">جاري التحميل...</div><div class="candles" id="g-candlesBar"></div></div>
+    <div class="candle-wrap">
+      <div class="candle-title" id="g-candleTitle">جاري التحميل...</div>
+      <div class="candles" id="g-candlesBar"></div>
+    </div>
+
     <div class="section-title">نتائج النماذج الفردية · ٤ نماذج</div>
     <div class="models-grid cols2">
       <div class="model-card"><div class="model-icon">📈</div><div class="model-name">GARCH · التقلب</div><div class="model-signal" id="g-m1Signal">—</div><div class="model-value" id="g-m1Val">σ = —</div></div>
       <div class="model-card"><div class="model-icon">🔁</div><div class="model-name">Mean Reversion · Z</div><div class="model-signal" id="g-m2Signal">—</div><div class="model-value" id="g-m2Val">Z = —</div></div>
       <div class="model-card"><div class="model-icon">⚡</div><div class="model-name">Momentum · RSI</div><div class="model-signal" id="g-m3Signal">—</div><div class="model-value" id="g-m3Val">RSI = —</div></div>
-      <div class="model-card"><div class="model-icon">🤖</div><div class="model-name">ML · XGBoost</div><div class="model-signal" id="g-m4Signal">—</div><div class="model-value" id="g-m4Val">P = —</div></div>
+      <div class="model-card"><div class="model-icon">⚖️</div><div class="model-name">Heuristic Score</div><div class="model-signal" id="g-m4Signal">—</div><div class="model-value" id="g-m4Val">P = —</div></div>
     </div>
+
     <div class="section-title">العوامل الماكرو</div>
     <div class="factors-list">
-      <div class="factor-row"><div class="factor-right"><div class="factor-icon">🏦</div><div><div class="factor-name">Real Yield (TIPS)</div><div class="factor-sub">العائد الحقيقي</div></div></div><div class="factor-left"><div class="factor-val" id="g-f1Val">—</div><div class="factor-badge" id="g-f1Badge"></div><div class="factor-impact" id="g-f1Impact">—</div></div></div>
-      <div class="factor-row"><div class="factor-right"><div class="factor-icon">💵</div><div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div></div><div class="factor-left"><div class="factor-val" id="g-f2Val">—</div><div class="factor-badge" id="g-f2Badge"></div><div class="factor-impact" id="g-f2Impact">—</div></div></div>
-      <div class="factor-row"><div class="factor-right"><div class="factor-icon">😱</div><div><div class="factor-name">VIX Index</div><div class="factor-sub">مؤشر الخوف</div></div></div><div class="factor-left"><div class="factor-val" id="g-f3Val">—</div><div class="factor-badge" id="g-f3Badge"></div><div class="factor-impact" id="g-f3Impact">—</div></div></div>
-      <div class="factor-row"><div class="factor-right"><div class="factor-icon">🔥</div><div><div class="factor-name">Breakeven Inflation</div><div class="factor-sub">توقعات التضخم</div></div></div><div class="factor-left"><div class="factor-val" id="g-f4Val">—</div><div class="factor-badge" id="g-f4Badge"></div><div class="factor-impact" id="g-f4Impact">—</div></div></div>
+      <div class="factor-row">
+        <div class="factor-right"><div class="factor-icon">🏦</div><div><div class="factor-name">Real Yield (TIPS)</div><div class="factor-sub">العائد الحقيقي</div></div></div>
+        <div class="factor-left"><div class="factor-val" id="g-f1Val">—</div><div class="factor-badge" id="g-f1Badge"></div><div class="factor-impact" id="g-f1Impact">—</div></div>
+      </div>
+      <div class="factor-row">
+        <div class="factor-right"><div class="factor-icon">💵</div><div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div></div>
+        <div class="factor-left"><div class="factor-val" id="g-f2Val">—</div><div class="factor-badge" id="g-f2Badge"></div><div class="factor-impact" id="g-f2Impact">—</div></div>
+      </div>
+      <div class="factor-row">
+        <div class="factor-right"><div class="factor-icon">😱</div><div><div class="factor-name">VIX Index</div><div class="factor-sub">مؤشر الخوف</div></div></div>
+        <div class="factor-left"><div class="factor-val" id="g-f3Val">—</div><div class="factor-badge" id="g-f3Badge"></div><div class="factor-impact" id="g-f3Impact">—</div></div>
+      </div>
+      <div class="factor-row">
+        <div class="factor-right"><div class="factor-icon">🔥</div><div><div class="factor-name">Breakeven Inflation</div><div class="factor-sub">توقعات التضخم</div></div></div>
+        <div class="factor-left"><div class="factor-val" id="g-f4Val">—</div><div class="factor-badge" id="g-f4Badge"></div><div class="factor-impact" id="g-f4Impact">—</div></div>
+      </div>
     </div>
+
     <div class="section-title">تقلب GARCH اليومي</div>
-    <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="g-volVal">±—</div></div><div class="vol-bars" id="g-volBars"></div></div>
-    <button class="refresh-btn gold-btn" id="g-refreshBtn" onclick="runGold()"><span id="g-refreshIcon">🔄</span> تحديث الذهب</button>
+    <div class="vol-card">
+      <div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="g-volVal">±—</div></div>
+      <div class="vol-bars" id="g-volBars"></div>
+    </div>
+    <button class="refresh-btn gold-btn" id="g-refreshBtn" onclick="runAll()"><span id="g-refreshIcon">🔄</span> تحديث البيانات</button>
   </div>
 
   <!-- ══════════════ EUR/USD PANEL ══════════════ -->
   <div class="panel" id="panel-eur">
+
     <div class="regime-card LOADING" id="e-regimeCard">
       <div class="regime-right">
         <div class="regime-label">🧠 REGIME DETECTION · حالة السوق</div>
@@ -403,6 +433,7 @@
         <div class="regime-conf" id="e-regimeConf">ثقة: —%</div>
       </div>
     </div>
+
     <div class="price-card eur-theme">
       <div class="price-watermark eur-wm">€</div>
       <div class="price-label">سعر اليورو مقابل الدولار · EUR/USD</div>
@@ -410,6 +441,7 @@
       <div class="price-sub"><div class="price-change" id="e-priceChange">—</div><div class="price-time" id="e-priceTime">—</div></div>
       <div class="data-source" id="e-dataSource">📡 Twelve Data API</div>
     </div>
+
     <div class="signal-card LOADING" id="e-signalCard">
       <div class="signal-label">⚡ إشارة النموذج الموحّد · EUR/USD</div>
       <div class="signal-text" id="e-signalText" style="color:var(--muted);font-size:28px">جاري التحليل</div>
@@ -421,17 +453,20 @@
       </div>
       <div class="regime-note" id="e-regimeNote">🧠 يتم تعديل الإشارة بناءً على حالة السوق</div>
     </div>
+
     <div class="section-title">شمعات آخر ١٢ ساعة</div>
     <div class="candle-wrap"><div class="candle-title" id="e-candleTitle">جاري التحميل...</div><div class="candles" id="e-candlesBar"></div></div>
+
     <div class="section-title">نتائج النماذج الفردية · ٦ نماذج</div>
     <div class="models-grid cols3">
       <div class="model-card"><div class="model-icon">📈</div><div class="model-name">GARCH · التقلب</div><div class="model-signal" id="e-m1Signal">—</div><div class="model-value" id="e-m1Val">σ = —</div></div>
       <div class="model-card"><div class="model-icon">🔁</div><div class="model-name">Mean Rev · Z</div><div class="model-signal" id="e-m2Signal">—</div><div class="model-value" id="e-m2Val">Z = —</div></div>
       <div class="model-card"><div class="model-icon">⚡</div><div class="model-name">Momentum · RSI</div><div class="model-signal" id="e-m3Signal">—</div><div class="model-value" id="e-m3Val">RSI = —</div></div>
-      <div class="model-card"><div class="model-icon">🤖</div><div class="model-name">ML · XGBoost</div><div class="model-signal" id="e-m4Signal">—</div><div class="model-value" id="e-m4Val">P = —</div></div>
+      <div class="model-card"><div class="model-icon">⚖️</div><div class="model-name">Heuristic Score</div><div class="model-signal" id="e-m4Signal">—</div><div class="model-value" id="e-m4Val">P = —</div></div>
       <div class="model-card"><div class="model-icon">📊</div><div class="model-name">Bollinger Bands</div><div class="model-signal" id="e-m5Signal">—</div><div class="model-value" id="e-m5Val">BB = —</div></div>
       <div class="model-card"><div class="model-icon">🏦</div><div class="model-name">Rate Diff · ECB/Fed</div><div class="model-signal" id="e-m6Signal">—</div><div class="model-value" id="e-m6Val">Δr = —</div></div>
     </div>
+
     <div class="section-title">فارق أسعار الفائدة</div>
     <div class="rate-diff-card">
       <div class="rate-diff-title">📌 ECB vs Federal Reserve · يؤثر مباشرة على EUR/USD</div>
@@ -440,19 +475,22 @@
       <div class="rate-diff-arrow" id="e-rateDiffArrow">—</div>
       <div class="rate-diff-row"><span class="rate-diff-label">الفارق (ECB − Fed)</span><span class="rate-diff-val" id="e-rateDiff" style="color:var(--neutral)">—%</span></div>
     </div>
+
     <div class="section-title">العوامل الماكرو</div>
     <div class="factors-list">
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">💵</div><div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div></div><div class="factor-left"><div class="factor-val" id="e-f1Val">—</div><div class="factor-badge" id="e-f1Badge"></div><div class="factor-impact" id="e-f1Impact">—</div></div></div>
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">😱</div><div><div class="factor-name">VIX Index</div><div class="factor-sub">مؤشر الخوف</div></div></div><div class="factor-left"><div class="factor-val" id="e-f2Val">—</div><div class="factor-badge" id="e-f2Badge"></div><div class="factor-impact" id="e-f2Impact">—</div></div></div>
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">🔥</div><div><div class="factor-name">Breakeven Inflation</div><div class="factor-sub">توقعات التضخم الأمريكي</div></div></div><div class="factor-left"><div class="factor-val" id="e-f3Val">—</div><div class="factor-badge" id="e-f3Badge"></div><div class="factor-impact" id="e-f3Impact">—</div></div></div>
     </div>
+
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="e-volVal">±—</div></div><div class="vol-bars" id="e-volBars"></div></div>
-    <button class="refresh-btn eur-btn" id="e-refreshBtn" onclick="runEUR()"><span id="e-refreshIcon">🔄</span> تحديث EUR/USD</button>
+    <button class="refresh-btn eur-btn" id="e-refreshBtn" onclick="runAll()"><span id="e-refreshIcon">🔄</span> تحديث البيانات</button>
   </div>
 
   <!-- ══════════════ USD/JPY PANEL ══════════════ -->
   <div class="panel" id="panel-jpy">
+
     <div class="regime-card LOADING" id="j-regimeCard">
       <div class="regime-right">
         <div class="regime-label">🧠 REGIME DETECTION · حالة السوق</div>
@@ -465,6 +503,7 @@
         <div class="regime-conf" id="j-regimeConf">ثقة: —%</div>
       </div>
     </div>
+
     <div class="price-card jpy-theme">
       <div class="price-watermark jpy-wm">¥</div>
       <div class="price-label">سعر الدولار مقابل الين · USD/JPY</div>
@@ -472,6 +511,7 @@
       <div class="price-sub"><div class="price-change" id="j-priceChange">—</div><div class="price-time" id="j-priceTime">—</div></div>
       <div class="data-source" id="j-dataSource">📡 Twelve Data API</div>
     </div>
+
     <div class="signal-card LOADING" id="j-signalCard">
       <div class="signal-label">⚡ إشارة النموذج الموحّد · USD/JPY</div>
       <div class="signal-text" id="j-signalText" style="color:var(--muted);font-size:28px">جاري التحليل</div>
@@ -483,17 +523,20 @@
       </div>
       <div class="regime-note" id="j-regimeNote">🧠 يتم تعديل الإشارة بناءً على حالة السوق</div>
     </div>
+
     <div class="section-title">شمعات آخر ١٢ ساعة</div>
     <div class="candle-wrap"><div class="candle-title" id="j-candleTitle">جاري التحميل...</div><div class="candles" id="j-candlesBar"></div></div>
+
     <div class="section-title">نتائج النماذج الفردية · ٦ نماذج</div>
     <div class="models-grid cols3">
       <div class="model-card"><div class="model-icon">📈</div><div class="model-name">GARCH · التقلب</div><div class="model-signal" id="j-m1Signal">—</div><div class="model-value" id="j-m1Val">σ = —</div></div>
       <div class="model-card"><div class="model-icon">🔁</div><div class="model-name">Mean Rev · Z</div><div class="model-signal" id="j-m2Signal">—</div><div class="model-value" id="j-m2Val">Z = —</div></div>
       <div class="model-card"><div class="model-icon">⚡</div><div class="model-name">Momentum · RSI</div><div class="model-signal" id="j-m3Signal">—</div><div class="model-value" id="j-m3Val">RSI = —</div></div>
-      <div class="model-card"><div class="model-icon">🤖</div><div class="model-name">ML · XGBoost</div><div class="model-signal" id="j-m4Signal">—</div><div class="model-value" id="j-m4Val">P = —</div></div>
+      <div class="model-card"><div class="model-icon">⚖️</div><div class="model-name">Heuristic Score</div><div class="model-signal" id="j-m4Signal">—</div><div class="model-value" id="j-m4Val">P = —</div></div>
       <div class="model-card"><div class="model-icon">📊</div><div class="model-name">Bollinger Bands</div><div class="model-signal" id="j-m5Signal">—</div><div class="model-value" id="j-m5Val">BB = —</div></div>
       <div class="model-card"><div class="model-icon">💹</div><div class="model-name">Carry Trade · BOJ/Fed</div><div class="model-signal" id="j-m6Signal">—</div><div class="model-value" id="j-m6Val">Carry = —</div></div>
     </div>
+
     <div class="section-title">Carry Trade · فارق الفائدة</div>
     <div class="rate-diff-card">
       <div class="rate-diff-title">💹 Fed vs BOJ · محرك USD/JPY الرئيسي</div>
@@ -503,63 +546,113 @@
       <div class="rate-diff-row"><span class="rate-diff-label">Carry Spread (Fed − BOJ)</span><span class="rate-diff-val" id="j-carrySpread" style="color:var(--neutral)">—%</span></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;">📌 Carry > 4% = ضغط صعودي على USD/JPY · Carry صغير = دعم للين</div>
     </div>
+
     <div class="section-title">العوامل الماكرو</div>
     <div class="factors-list">
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">💵</div><div><div class="factor-name">DXY Index</div><div class="factor-sub">مؤشر الدولار</div></div></div><div class="factor-left"><div class="factor-val" id="j-f1Val">—</div><div class="factor-badge" id="j-f1Badge"></div><div class="factor-impact" id="j-f1Impact">—</div></div></div>
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">😱</div><div><div class="factor-name">VIX Index</div><div class="factor-sub">الخوف يقوّي الين (ملاذ آمن)</div></div></div><div class="factor-left"><div class="factor-val" id="j-f2Val">—</div><div class="factor-badge" id="j-f2Badge"></div><div class="factor-impact" id="j-f2Impact">—</div></div></div>
       <div class="factor-row"><div class="factor-right"><div class="factor-icon">🏦</div><div><div class="factor-name">Real Yield US</div><div class="factor-sub">العائد الحقيقي الأمريكي</div></div></div><div class="factor-left"><div class="factor-val" id="j-f3Val">—</div><div class="factor-badge" id="j-f3Badge"></div><div class="factor-impact" id="j-f3Impact">—</div></div></div>
     </div>
+
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="j-volVal">±—</div></div><div class="vol-bars" id="j-volBars"></div></div>
-    <button class="refresh-btn jpy-btn" id="j-refreshBtn" onclick="runJPY()"><span id="j-refreshIcon">🔄</span> تحديث USD/JPY</button>
+    <button class="refresh-btn jpy-btn" id="j-refreshBtn" onclick="runAll()"><span id="j-refreshIcon">🔄</span> تحديث البيانات</button>
   </div>
 
   <!-- ══════════════ PAIRS TRADING PANEL ══════════════ -->
   <div class="panel" id="panel-pairs">
+
     <div class="pairs-selector">
       <button class="pair-btn active" id="pairbtn-xauxag" onclick="selectPair('XAUXAG')">
-        <span class="pair-sym">🥇⚡🥈</span>XAU / XAG
+        <span class="pair-sym">🥇⚡🥈</span>
+        XAU / XAG
       </button>
       <button class="pair-btn" id="pairbtn-eurgbp" onclick="selectPair('EURGBP')">
-        <span class="pair-sym">🇪🇺⚡🇬🇧</span>EUR / GBP
+        <span class="pair-sym">🇪🇺⚡🇬🇧</span>
+        EUR / GBP
       </button>
     </div>
+
     <div class="zscore-card NEUTRAL_P" id="p-zscoreCard">
       <div class="zscore-label" id="p-pairLabel">⚡ PAIRS TRADING · XAU/XAG</div>
       <div class="zscore-val NEUTRAL_P" id="p-zscoreVal">—</div>
       <div class="zscore-action NEUTRAL_P" id="p-action">جاري الحساب...</div>
       <div class="zscore-conf" id="p-conf">انتظر البيانات</div>
     </div>
+
     <div class="pair-stats-grid">
-      <div class="pair-stat"><div class="pair-stat-label">السعر A</div><div class="pair-stat-val" id="p-priceA">—</div><div class="pair-stat-sub" id="p-labelA">—</div></div>
-      <div class="pair-stat"><div class="pair-stat-label">السعر B</div><div class="pair-stat-val" id="p-priceB">—</div><div class="pair-stat-sub" id="p-labelB">—</div></div>
-      <div class="pair-stat"><div class="pair-stat-label">Spread الحالي</div><div class="pair-stat-val" id="p-spread">—</div><div class="pair-stat-sub">نسبة A/B</div></div>
-      <div class="pair-stat"><div class="pair-stat-label">متوسط Spread</div><div class="pair-stat-val" id="p-spreadMean">—</div><div class="pair-stat-sub">آخر 20 فترة</div></div>
+      <div class="pair-stat">
+        <div class="pair-stat-label">السعر A</div>
+        <div class="pair-stat-val" id="p-priceA">—</div>
+        <div class="pair-stat-sub" id="p-labelA">—</div>
+      </div>
+      <div class="pair-stat">
+        <div class="pair-stat-label">السعر B</div>
+        <div class="pair-stat-val" id="p-priceB">—</div>
+        <div class="pair-stat-sub" id="p-labelB">—</div>
+      </div>
+      <div class="pair-stat">
+        <div class="pair-stat-label">Spread الحالي</div>
+        <div class="pair-stat-val" id="p-spread">—</div>
+        <div class="pair-stat-sub">نسبة A/B</div>
+      </div>
+      <div class="pair-stat">
+        <div class="pair-stat-label">متوسط Spread</div>
+        <div class="pair-stat-val" id="p-spreadMean">—</div>
+        <div class="pair-stat-sub">آخر 20 فترة</div>
+      </div>
     </div>
+
     <div class="section-title">تاريخ Spread · آخر 20 شمعة</div>
     <div class="spread-chart">
       <div class="spread-chart-title" id="p-spreadChartTitle">نسبة السعر A إلى B مقارنة بالمتوسط</div>
-      <div class="spread-bars" id="p-spreadBars"><div class="spread-zero"></div></div>
+      <div class="spread-bars" id="p-spreadBars">
+        <div class="spread-zero"></div>
+      </div>
     </div>
+
     <div class="section-title">تحليل Cointegration</div>
     <div class="cointegration-card">
       <div class="coint-title">📊 قياس الارتباط الإحصائي بين الأصلين</div>
-      <div class="coint-row"><span class="coint-label">معامل الارتباط (Correlation)</span><div style="display:flex;align-items:center;gap:8px;"><span class="coint-val" id="p-correlation">—</span><span class="coint-badge" id="p-corrBadge">—</span></div></div>
-      <div class="coint-row"><span class="coint-label">نصف عمر الارتداد (Half-Life)</span><div style="display:flex;align-items:center;gap:8px;"><span class="coint-val" id="p-halfLife">—</span><span class="coint-badge" id="p-halfBadge">—</span></div></div>
-      <div class="coint-row"><span class="coint-label">نسبة التحوط (Hedge Ratio)</span><span class="coint-val" id="p-hedgeRatio">—</span></div>
-      <div class="coint-row"><span class="coint-label">Hurst Exponent</span><div style="display:flex;align-items:center;gap:8px;"><span class="coint-val" id="p-hurst">—</span><span class="coint-badge" id="p-hurstBadge">—</span></div></div>
+      <div class="coint-row">
+        <span class="coint-label">معامل الارتباط (Correlation)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="coint-val" id="p-correlation">—</span>
+          <span class="coint-badge" id="p-corrBadge">—</span>
+        </div>
+      </div>
+      <div class="coint-row">
+        <span class="coint-label">نصف عمر الارتداد (Half-Life)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="coint-val" id="p-halfLife">—</span>
+          <span class="coint-badge" id="p-halfBadge">—</span>
+        </div>
+      </div>
+      <div class="coint-row">
+        <span class="coint-label">نسبة التحوط (Hedge Ratio)</span>
+        <span class="coint-val" id="p-hedgeRatio">—</span>
+      </div>
+      <div class="coint-row">
+        <span class="coint-label">Hurst Exponent</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="coint-val" id="p-hurst">—</span>
+          <span class="coint-badge" id="p-hurstBadge">—</span>
+        </div>
+      </div>
     </div>
+
     <div class="section-title">💡 استراتيجية التداول الموصى بها</div>
     <div class="rate-diff-card" id="p-strategyCard">
       <div class="rate-diff-title" id="p-strategyTitle">جاري التحليل...</div>
       <div style="font-size:12px;color:var(--text);line-height:1.8;" id="p-strategyText">يرجى الانتظار حتى اكتمال جلب البيانات</div>
     </div>
-    <button class="refresh-btn pairs-btn" id="p-refreshBtn" onclick="runPairs()"><span id="p-refreshIcon">🔄</span> تحديث Pairs Trading</button>
+
+    <button class="refresh-btn pairs-btn" id="p-refreshBtn" onclick="runAll()"><span id="p-refreshIcon">🔄</span> تحديث البيانات</button>
   </div>
 
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
-    metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
+    بيانات حقيقية عبر Twelve Data & FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
     <span id="countdownTimer" style="color:var(--gold);font-size:10px;">🔄 تحديث تلقائي كل 15 دقيقة</span>
   </div>
 </div>
@@ -612,6 +705,7 @@ const REGIME_NOTE = {
 let currentTab  = 'gold';
 let currentPair = 'XAUXAG';
 let fredData    = null;
+let globalMarketData = null; // لتخزين البيانات المجمعة
 
 // ══════════════════════════════════════════
 // TAB & PAIR SWITCHING
@@ -628,7 +722,7 @@ function selectPair(pair) {
   currentPair = pair;
   document.querySelectorAll('.pair-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('pairbtn-'+pair.toLowerCase()).classList.add('active');
-  runPairs();
+  if(globalMarketData) runPairs();
 }
 
 // ══════════════════════════════════════════
@@ -654,361 +748,56 @@ function resetKeys() {
 }
 
 // ══════════════════════════════════════════
-// FETCH HELPERS
+// FETCH DATA (BATCHING TO AVOID RATE LIMITS)
 // ══════════════════════════════════════════
-async function fetchTD(path) {
+async function fetchAllMarketData() {
   if (!TD_KEY) throw new Error('مفتاح Twelve Data غير موجود');
-  const sep = path.includes("?") ? "&" : "?";
-  const r = await fetch(`${TD_BASE}/${path}${sep}apikey=${TD_KEY}`);
-  if (!r.ok) throw new Error(`Twelve Data HTTP ${r.status}`);
-  const d = await r.json();
-  if (d.status==='error') throw new Error('Twelve Data: '+d.message);
-  return d;
+  
+  // دمج جميع الرموز في طلبين فقط (واحد للأسعار الحالية، وواحد للشموع التاريخية)
+  const symbols = "XAU/USD,XAG/USD,EUR/USD,GBP/USD,USD/JPY";
+  
+  const [quoteRes, seriesRes] = await Promise.all([
+    fetch(`${TD_BASE}/quote?symbol=${symbols}&apikey=${TD_KEY}`),
+    fetch(`${TD_BASE}/time_series?symbol=${symbols}&interval=1h&outputsize=30&apikey=${TD_KEY}`)
+  ]);
+
+  if (!quoteRes.ok || !seriesRes.ok) throw new Error(`Twelve Data HTTP Error`);
+  
+  const quotes = await quoteRes.json();
+  const series = await seriesRes.json();
+
+  if (quotes.status === 'error') throw new Error('Twelve Data: ' + quotes.message);
+  if (series.status === 'error') throw new Error('Twelve Data: ' + series.message);
+
+  globalMarketData = { quotes, series };
 }
 
-// ══════════════════════════════════════════
-// METALS — goldprice.org + TD fallback
-// ══════════════════════════════════════════
-let _metalsCache = null;
-let _metalsCacheTime = 0;
-
-async function fetchMetals() {
-  if (_metalsCache && Date.now() - _metalsCacheTime < 60000) return _metalsCache;
-  try {
-    const r = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
-    if (r.ok) {
-      const d = await r.json();
-      const gold   = d.items?.[0]?.xauPrice;
-      const silver = d.items?.[0]?.xagPrice;
-      if (gold) {
-        _metalsCache = { gold, silver: silver || gold/80 };
-        _metalsCacheTime = Date.now();
-        return _metalsCache;
-      }
-    }
-  } catch(e) { console.warn('goldprice.org failed:', e.message); }
-
-  if (TD_KEY) {
-    try {
-      const [rG, rS] = await Promise.all([
-        fetch(`${TD_BASE}/price?symbol=XAU/USD&apikey=${TD_KEY}`),
-        fetch(`${TD_BASE}/price?symbol=XAG/USD&apikey=${TD_KEY}`),
-      ]);
-      const dG = await rG.json();
-      const dS = await rS.json();
-      const gold   = parseFloat(dG.price);
-      const silver = parseFloat(dS.price) || gold/80;
-      if (!isNaN(gold)) {
-        _metalsCache = { gold, silver };
-        _metalsCacheTime = Date.now();
-        return _metalsCache;
-      }
-    } catch(e) { console.warn('TD price fallback failed:', e.message); }
-  }
-  throw new Error('تعذّر جلب سعر الذهب · تحقق من الاتصال بالإنترنت');
-}
-
-// ══════════════════════════════════════════
-// FIX 1: buildFakeSeries — نبني سلسلة زمنية
-// تقريبية ثابتة (seed محدد) حتى لا تتغير
-// القيم عشوائياً مع كل تحديث.
-// ══════════════════════════════════════════
-function seededRand(seed) {
-  // LCG بسيط يعطي نفس النتائج لنفس الـ seed
-  let s = seed;
-  return function() {
-    s = (s * 1664525 + 1013904223) & 0xffffffff;
-    return (s >>> 0) / 0xffffffff;
-  };
-}
-
-function buildFakeSeries(currentPrice, count=30, volatilityPct=0.003) {
-  // نستخدم السعر الحالي المقرّب كـ seed حتى تكون السلسلة ثابتة لنفس السعر
-  const rand = seededRand(Math.round(currentPrice * 100));
-  const values = [];
-  let price = currentPrice;
-  for (let i = count; i >= 0; i--) {
-    const chg = price * volatilityPct * (rand() - 0.48);
-    const open = price;
-    price = Math.max(price * 0.98, price + chg);
-    const high = Math.max(open, price) * (1 + rand() * 0.001);
-    const low  = Math.min(open, price) * (1 - rand() * 0.001);
-    values.push({
-      open:  open.toFixed(2),
-      close: price.toFixed(2),
-      high:  high.toFixed(2),
-      low:   low.toFixed(2),
-    });
-  }
-  return { values: values.reverse() };
-}
-
-// ══════════════════════════════════════════
-// FRED
-// ══════════════════════════════════════════
 async function fetchFRED(seriesId) {
-  const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=5`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`FRED HTTP ${r.status}`);
-  const d = await r.json();
-  if (d.error_message) throw new Error(d.error_message);
-  const obs = d.observations?.find(o => o.value !== '.');
-  return obs ? parseFloat(obs.value) : null;
+  const url=`${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=5`;
+  const r=await fetch(url); if (!r.ok) throw new Error(`FRED HTTP ${r.status}`);
+  const d=await r.json(); if (d.error_message) throw new Error(d.error_message);
+  const obs=d.observations?.find(o=>o.value!=='.');
+  return obs?parseFloat(obs.value):null;
 }
 async function fetchFREDSafe(seriesId) {
   if (!FRED_KEY) return null;
   try { return await fetchFRED(seriesId); } catch(e) { return null; }
 }
 async function fetchAllFRED() {
-  if (!FRED_KEY && !TD_KEY) return null;
+  if (!FRED_KEY) return null;
   try {
-    const [realYield,breakeven,fedRate,ecbRate,bojRate,dxy,vix] = await Promise.all([
+    const [realYield,breakeven,fedRate,ecbRate,bojRate,dxy,vix]=await Promise.all([
       fetchFREDSafe(FRED_IDS.realYield), fetchFREDSafe(FRED_IDS.breakeven),
       fetchFREDSafe(FRED_IDS.fedRate),   fetchFREDSafe(FRED_IDS.ecbRate),
       fetchFREDSafe(FRED_IDS.bojRate),   fetchFREDSafe(FRED_IDS.dxy),
       fetchFREDSafe(FRED_IDS.vix),
     ]);
-    if (fedRate!==null) RATES.fed = fedRate;
-    if (ecbRate!==null) RATES.ecb = ecbRate;
-    if (bojRate!==null) RATES.boj = bojRate;
+    if (fedRate!==null) RATES.fed=fedRate;
+    if (ecbRate!==null) RATES.ecb=ecbRate;
+    if (bojRate!==null) RATES.boj=bojRate;
     return { realYield, breakeven, fedRate, ecbRate, bojRate,
-             dxy, vix, dxyLive: dxy!==null, vixLive: vix!==null };
-  } catch(e) { console.error('fetchAllFRED error:', e); return null; }
-}
-
-// ══════════════════════════════════════════
-// QUANTITATIVE MATH
-// ══════════════════════════════════════════
-function calcRSI(cl, p=14) {
-  if (cl.length < p+1) return 50;
-  let g=0, l=0;
-  for (let i=cl.length-p; i<cl.length; i++) {
-    const d = cl[i] - cl[i-1];
-    d > 0 ? g+=d : l-=d;
-  }
-  return 100 - (100 / (1 + (g / (l||0.0001))));
-}
-
-function calcZ(cl, w=20) {
-  if (cl.length < w) return 0;
-  const s = cl.slice(-w);
-  const m = s.reduce((a,b)=>a+b,0) / w;
-  const std = Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0) / w);
-  return std===0 ? 0 : (cl[cl.length-1]-m)/std;
-}
-
-function calcVol(cl) {
-  if (cl.length < 2) return 1;
-  const ret = [];
-  for (let i=1; i<cl.length; i++) ret.push((cl[i]-cl[i-1])/cl[i-1]*100);
-  const r = ret.slice(-10);
-  const m = r.reduce((a,b)=>a+b,0) / r.length;
-  return Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0) / r.length);
-}
-
-function calcEMA(cl, period) {
-  if (cl.length < period) return cl[cl.length-1];
-  const k = 2 / (period+1);
-  let ema = cl.slice(0, period).reduce((a,b)=>a+b,0) / period;
-  for (let i=period; i<cl.length; i++) ema = cl[i]*k + ema*(1-k);
-  return ema;
-}
-
-// ══════════════════════════════════════════
-// FIX 2: calcADX — خوارزمية Wilder الصحيحة
-// بدلاً من التقريب غير الدقيق السابق
-// ══════════════════════════════════════════
-function calcADX(highs, lows, closes, period=14) {
-  // إذا استُدعيت بمصفوفة واحدة (closes فقط) نحسب تقريباً
-  if (!Array.isArray(highs) || highs === lows) {
-    // تقريب محسّن: نحسب ATR من closes فقط
-    const cl = Array.isArray(highs) ? highs : closes;
-    if (cl.length < period*2) return 20;
-    const ema_s = calcEMA(cl.slice(-period), Math.floor(period/2));
-    const ema_l = calcEMA(cl, period);
-    const trend_str = Math.abs(ema_s - ema_l) / ema_l * 1000;
-    return Math.min(50, Math.max(10, trend_str * 100));
-  }
-  // Wilder ADX الكامل
-  const n = Math.min(highs.length, lows.length, closes.length);
-  if (n < period+1) return 20;
-  const plusDM=[], minusDM=[], tr=[];
-  for (let i=1; i<n; i++) {
-    const upMove   = highs[i] - highs[i-1];
-    const downMove = lows[i-1] - lows[i];
-    plusDM.push( upMove>downMove && upMove>0 ? upMove : 0 );
-    minusDM.push( downMove>upMove && downMove>0 ? downMove : 0 );
-    const h = highs[i], l = lows[i], pc = closes[i-1];
-    tr.push(Math.max(h-l, Math.abs(h-pc), Math.abs(l-pc)));
-  }
-  // Wilder smoothing
-  const smooth = (arr) => {
-    let s = arr.slice(0,period).reduce((a,b)=>a+b,0);
-    const out = [s];
-    for (let i=period; i<arr.length; i++) { s = s - s/period + arr[i]; out.push(s); }
-    return out;
-  };
-  const strTR=smooth(tr), strPDM=smooth(plusDM), strNDM=smooth(minusDM);
-  const diPlus  = strPDM.map((v,i)=>strTR[i]?v/strTR[i]*100:0);
-  const diMinus = strNDM.map((v,i)=>strTR[i]?v/strTR[i]*100:0);
-  const dx = diPlus.map((v,i)=>{
-    const sum=v+diMinus[i]; return sum?Math.abs(v-diMinus[i])/sum*100:0;
-  });
-  // Wilder average of DX
-  let adx = dx.slice(0,period).reduce((a,b)=>a+b,0)/period;
-  for (let i=period; i<dx.length; i++) adx = (adx*(period-1)+dx[i])/period;
-  return Math.min(60, Math.max(5, adx));
-}
-
-function calcHurst(prices) {
-  // R/S Analysis
-  if (prices.length < 8) return 0.5;
-  const n = prices.length;
-  const mean = prices.reduce((a,b)=>a+b,0) / n;
-  const deviations = prices.map(p => p - mean);
-  let cumDev=0, maxDev=-Infinity, minDev=Infinity;
-  deviations.forEach(d => {
-    cumDev += d;
-    maxDev = Math.max(maxDev, cumDev);
-    minDev = Math.min(minDev, cumDev);
-  });
-  const R = maxDev - minDev;
-  const S = Math.sqrt(prices.reduce((a,b)=>a+(b-mean)**2,0) / n);
-  if (S === 0 || R === 0) return 0.5;
-  const rs = R / S;
-  if (rs <= 0) return 0.5;
-  const h = Math.log(rs) / Math.log(n);
-  return Math.max(0.1, Math.min(0.9, h));
-}
-
-function calcBollinger(cl, w=20, mult=2) {
-  if (cl.length < w) return { pos:0.5, sig:'NEUTRAL', val:'BB=—' };
-  const s = cl.slice(-w);
-  const m = s.reduce((a,b)=>a+b,0) / w;
-  const std = Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0) / w);
-  const upper=m+mult*std, lower=m-mult*std;
-  const price = cl[cl.length-1];
-  const rng = upper - lower;
-  const pos = rng===0 ? 0.5 : (price-lower)/rng;
-  let sig='NEUTRAL';
-  if (pos<0.2) sig='BUY';
-  if (pos>0.8) sig='SELL';
-  return { pos, sig, val:`BB=${(pos*100).toFixed(0)}%` };
-}
-
-// ══════════════════════════════════════════
-// SIGNAL MODELS
-// ══════════════════════════════════════════
-function sigGARCH(vol,rsi){
-  if(vol>1.5&&rsi>70) return{sig:'SELL',val:`σ=${vol.toFixed(2)}%`};
-  if(vol>1.5&&rsi<30) return{sig:'BUY',val:`σ=${vol.toFixed(2)}%`};
-  if(vol<0.3)         return{sig:'NEUTRAL',val:`σ=${vol.toFixed(2)}%`};
-  return rsi>55 ? {sig:'BUY',val:`σ=${vol.toFixed(2)}%`} : {sig:'SELL',val:`σ=${vol.toFixed(2)}%`};
-}
-function sigMR(z){
-  return z<-1.5?{sig:'BUY',val:`Z=${z.toFixed(2)}`}:z>1.5?{sig:'SELL',val:`Z=${z.toFixed(2)}`}:{sig:'NEUTRAL',val:`Z=${z.toFixed(2)}`};
-}
-function sigMom(rsi){
-  return rsi>60?{sig:'BUY',val:`RSI=${rsi.toFixed(1)}`}:rsi<40?{sig:'SELL',val:`RSI=${rsi.toFixed(1)}`}:{sig:'NEUTRAL',val:`RSI=${rsi.toFixed(1)}`};
-}
-function sigBB(cl){ const b=calcBollinger(cl); return {sig:b.sig,val:b.val}; }
-
-function sigMLGold(rsi,z,vol,f) {
-  let s=0.5;
-  if(rsi>60)s+=0.09; else if(rsi<40)s-=0.09;
-  if(z<-1.5)s+=0.11; else if(z>1.5)s-=0.11;
-  if(vol>1.5&&rsi<40)s+=0.07;
-  if(vol>1.5&&rsi>70)s-=0.07;
-  if(f){
-    if(f.realYield!==null){ if(f.realYield<1.0)s+=0.08; else if(f.realYield>1.5)s-=0.08; }
-    if(f.dxy!==null){ if(f.dxy<101)s+=0.06; else if(f.dxy>104)s-=0.08; }
-    if(f.vix!==null&&f.vix>25)s+=0.08;
-    if(f.breakeven!==null&&f.breakeven>2.4)s+=0.06;
-  }
-  s=Math.max(0.1,Math.min(0.9,s));
-  const p=(s*100).toFixed(0);
-  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
-}
-function sigMLEUR(rsi,z,vol,f,rateDiff) {
-  let s=0.5;
-  if(rsi>60)s+=0.08; else if(rsi<40)s-=0.08;
-  if(z<-1.5)s+=0.10; else if(z>1.5)s-=0.10;
-  if(rateDiff>0)s+=0.10*Math.min(rateDiff/2,1); else s-=0.10*Math.min(Math.abs(rateDiff)/2,1);
-  if(f){
-    if(f.dxy!==null){ if(f.dxy<101)s+=0.08; else if(f.dxy>104)s-=0.08; }
-    if(f.vix!==null&&f.vix>25)s-=0.05;
-    if(f.breakeven!==null&&f.breakeven>2.4)s-=0.05;
-  }
-  s=Math.max(0.1,Math.min(0.9,s));
-  const p=(s*100).toFixed(0);
-  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
-}
-function sigMLJPY(rsi,z,vol,f,carrySpread) {
-  let s=0.5;
-  if(rsi>60)s+=0.08; else if(rsi<40)s-=0.08;
-  if(z<-1.5)s+=0.10; else if(z>1.5)s-=0.10;
-  if(carrySpread>4)s+=0.12; else if(carrySpread>2)s+=0.06; else if(carrySpread<1)s-=0.08;
-  if(f){
-    if(f.dxy!==null){ if(f.dxy>104)s+=0.07; else if(f.dxy<101)s-=0.07; }
-    if(f.vix!==null&&f.vix>25)s-=0.09;
-    if(f.realYield!==null&&f.realYield>1.5)s+=0.07;
-  }
-  s=Math.max(0.1,Math.min(0.9,s));
-  const p=(s*100).toFixed(0);
-  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
-}
-function sigCarry(cs){
-  if(cs>4)return{sig:'BUY',val:`Carry=${cs.toFixed(2)}%`};
-  if(cs<1)return{sig:'SELL',val:`Carry=${cs.toFixed(2)}%`};
-  return{sig:'NEUTRAL',val:`Carry=${cs.toFixed(2)}%`};
-}
-function sigRateDiff(diff){
-  if(diff>0.5)return{sig:'BUY',val:`Δr=${diff.toFixed(2)}%`};
-  if(diff<-0.5)return{sig:'SELL',val:`Δr=${diff.toFixed(2)}%`};
-  return{sig:'NEUTRAL',val:`Δr=${diff.toFixed(2)}%`};
-}
-
-function macroSigsGold(f){
-  if(!f) return['NEUTRAL','NEUTRAL','NEUTRAL','NEUTRAL'];
-  return[
-    f.realYield===null?'NEUTRAL':f.realYield<1.0?'BUY':f.realYield>1.5?'SELL':'NEUTRAL',
-    f.dxy===null?'NEUTRAL':f.dxy<101?'BUY':f.dxy>104?'SELL':'NEUTRAL',
-    f.vix===null?'NEUTRAL':f.vix>25?'BUY':f.vix<15?'SELL':'NEUTRAL',
-    f.breakeven===null?'NEUTRAL':f.breakeven>2.4?'BUY':f.breakeven<2.0?'SELL':'NEUTRAL',
-  ];
-}
-function macroSigsEUR(f){
-  if(!f) return['NEUTRAL','NEUTRAL','NEUTRAL'];
-  return[
-    f.dxy===null?'NEUTRAL':f.dxy<101?'BUY':f.dxy>104?'SELL':'NEUTRAL',
-    f.vix===null?'NEUTRAL':f.vix>25?'SELL':f.vix<15?'BUY':'NEUTRAL',
-    f.breakeven===null?'NEUTRAL':f.breakeven>2.4?'SELL':f.breakeven<2.0?'BUY':'NEUTRAL',
-  ];
-}
-function macroSigsJPY(f){
-  if(!f) return['NEUTRAL','NEUTRAL','NEUTRAL'];
-  return[
-    f.dxy===null?'NEUTRAL':f.dxy>104?'BUY':f.dxy<101?'SELL':'NEUTRAL',
-    f.vix===null?'NEUTRAL':f.vix>25?'SELL':f.vix<15?'BUY':'NEUTRAL',
-    f.realYield===null?'NEUTRAL':f.realYield>1.5?'BUY':f.realYield<1.0?'SELL':'NEUTRAL',
-  ];
-}
-
-// ══════════════════════════════════════════
-// FIX 3: ensemble — إزالة التضاعف غير المقصود
-// للـ mlSig. نمنح ML وزناً مضاعفاً صريحاً
-// وموثقاً، والنسبة الصحيحة في tot.
-// ══════════════════════════════════════════
-function ensemble(signals, mlSig) {
-  const ML_WEIGHT = 2; // وزن نموذج ML = ضعف النماذج الأخرى (مقصود وموثق)
-  const c = {BUY:0, SELL:0, NEUTRAL:0};
-  signals.forEach(s => c[s]++);
-  c[mlSig] += ML_WEIGHT;
-  const tot = signals.length + ML_WEIGHT;
-  let fin = 'NEUTRAL';
-  if (c.BUY >= c.SELL && c.BUY >= c.NEUTRAL) fin = 'BUY';
-  else if (c.SELL >= c.BUY && c.SELL >= c.NEUTRAL) fin = 'SELL';
-  return { signal: fin, confidence: Math.max(45, Math.round((c[fin]/tot)*100)) };
+             dxy, vix, dxyLive:dxy!==null, vixLive:vix!==null };
+  } catch(e) { console.error('fetchAllFRED error:',e); return null; }
 }
 
 // ══════════════════════════════════════════
@@ -1018,31 +807,28 @@ function detectRegime(closes, vix=null) {
   if (closes.length < 20) return { regime:'RANGING', confidence:50, indicators:[] };
 
   const n   = closes.length;
-  const adx = calcADX(closes); // يستخدم التقريب لأنه ليس لدينا H/L منفصلة
+  const adx = calcADX(closes);
   const ema9  = calcEMA(closes, 9);
   const ema21 = calcEMA(closes, 21);
   const emaTrend = ema9 > ema21 ? 'up' : 'down';
   const vol = calcVol(closes);
   const volHigh = vol > 1.5;
   const hurst = calcHurst(closes.slice(-20));
-  const bb = calcBollinger(closes);
   const fearMarket = vix !== null && vix > 28;
 
   let scores = { TRENDING_UP:0, TRENDING_DOWN:0, RANGING:0, HIGH_VOL:0 };
 
-  if (adx > 30)      { scores.TRENDING_UP += (emaTrend==='up'?3:0); scores.TRENDING_DOWN += (emaTrend==='down'?3:0); }
+  if (adx > 30) { scores.TRENDING_UP += (emaTrend==='up'?3:0); scores.TRENDING_DOWN += (emaTrend==='down'?3:0); }
   else if (adx > 20) { scores.TRENDING_UP += (emaTrend==='up'?1:0); scores.TRENDING_DOWN += (emaTrend==='down'?1:0); scores.RANGING += 1; }
-  else               { scores.RANGING += 3; }
+  else { scores.RANGING += 3; }
 
   if (emaTrend==='up') { scores.TRENDING_UP += 2; } else { scores.TRENDING_DOWN += 2; }
-
-  if (hurst > 0.55)      { scores.TRENDING_UP += (emaTrend==='up'?2:0); scores.TRENDING_DOWN += (emaTrend==='down'?2:0); }
+  if (hurst > 0.55) { scores.TRENDING_UP += (emaTrend==='up'?2:0); scores.TRENDING_DOWN += (emaTrend==='down'?2:0); }
   else if (hurst < 0.45) { scores.RANGING += 2; }
-
   if (volHigh || fearMarket) { scores.HIGH_VOL += 3; }
 
-  const total = Object.values(scores).reduce((a,b)=>a+b,0) || 1;
-  const regime = Object.keys(scores).reduce((a,b) => scores[a]>scores[b]?a:b);
+  const total = Object.values(scores).reduce((a,b)=>a+b,0)||1;
+  let regime = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
   const confidence = Math.round((scores[regime]/total)*100);
 
   const indicators = [
@@ -1051,7 +837,7 @@ function detectRegime(closes, vix=null) {
     `Hurst: ${hurst.toFixed(2)}`,
     `Vol: ${vol.toFixed(2)}%`,
   ];
-  if (vix !== null) indicators.push(`VIX: ${vix.toFixed(1)}`);
+  if (vix) indicators.push(`VIX: ${vix.toFixed(1)}`);
 
   return { regime, confidence: Math.max(50, confidence), indicators, adx, hurst, emaTrend, vol };
 }
@@ -1067,7 +853,8 @@ function applyRegimeFilter(ensembleResult, regime) {
     confidence = Math.min(confidence + 10, 95);
   } else if (regime === 'TRENDING_DOWN' && signal === 'SELL') {
     confidence = Math.min(confidence + 10, 95);
-  } else if ((regime==='TRENDING_UP'&&signal==='SELL') || (regime==='TRENDING_DOWN'&&signal==='BUY')) {
+  } else if ((regime === 'TRENDING_UP' && signal === 'SELL') ||
+             (regime === 'TRENDING_DOWN' && signal === 'BUY')) {
     confidence = Math.round(confidence * 0.80);
     if (confidence < 48) signal = 'NEUTRAL';
   }
@@ -1075,8 +862,121 @@ function applyRegimeFilter(ensembleResult, regime) {
 }
 
 // ══════════════════════════════════════════
-// PAIRS TRADING — calcSpreadZ
-// FIX 4: Half-Life بـ OLS صحيح
+// QUANTITATIVE MODELS
+// ══════════════════════════════════════════
+function calcRSI(cl, p=14) {
+  if (cl.length<p+1) return 50;
+  let g=0,l=0;
+  for (let i=cl.length-p;i<cl.length;i++) { const d=cl[i]-cl[i-1]; d>0?g+=d:l-=d; }
+  return 100-(100/(1+(g/(l||0.0001))));
+}
+function calcZ(cl, w=20) {
+  if (cl.length<w) return 0;
+  const s=cl.slice(-w), m=s.reduce((a,b)=>a+b,0)/w;
+  const std=Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0)/w);
+  return std===0?0:(cl[cl.length-1]-m)/std;
+}
+function calcVol(cl) {
+  if (cl.length<2) return 1;
+  const ret=[];
+  for(let i=1;i<cl.length;i++) ret.push((cl[i]-cl[i-1])/cl[i-1]*100);
+  const r=ret.slice(-10), m=r.reduce((a,b)=>a+b,0)/r.length;
+  return Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0)/r.length);
+}
+function calcVolArray(cl) {
+  if (cl.length<2) return [];
+  const ret=[];
+  for(let i=1;i<cl.length;i++) ret.push(Math.abs((cl[i]-cl[i-1])/cl[i-1]*100));
+  return ret.slice(-12);
+}
+function calcEMA(cl, period) {
+  if (cl.length < period) return cl[cl.length-1];
+  const k = 2/(period+1);
+  let ema = cl.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  for (let i=period;i<cl.length;i++) ema = cl[i]*k + ema*(1-k);
+  return ema;
+}
+function calcADX(cl, period=14) {
+  if (cl.length < period*2) return 20;
+  const ema_s = calcEMA(cl.slice(-period), Math.floor(period/2));
+  const ema_l = calcEMA(cl, period);
+  const trend_str = Math.abs(ema_s - ema_l) / ema_l * 1000;
+  return Math.min(50, Math.max(10, trend_str * 100));
+}
+function calcHurst(prices) {
+  if (prices.length < 8) return 0.5;
+  const n = prices.length;
+  const mean = prices.reduce((a,b)=>a+b,0)/n;
+  const deviations = prices.map(p => p - mean);
+  let cumDev = 0, maxDev = -Infinity, minDev = Infinity;
+  deviations.forEach(d => { cumDev += d; maxDev = Math.max(maxDev, cumDev); minDev = Math.min(minDev, cumDev); });
+  const R = maxDev - minDev;
+  const S = Math.sqrt(prices.reduce((a,b)=>a+(b-mean)**2,0)/n);
+  if (S === 0) return 0.5;
+  return Math.log(R/S) / Math.log(n);
+}
+function calcBollinger(cl, w=20, mult=2) {
+  if (cl.length<w) return { pos:0.5, sig:'NEUTRAL', val:'BB=—' };
+  const s=cl.slice(-w), m=s.reduce((a,b)=>a+b,0)/w;
+  const std=Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0)/w);
+  const upper=m+mult*std, lower=m-mult*std;
+  const price=cl[cl.length-1];
+  const pos=(price-lower)/(upper-lower);
+  let sig='NEUTRAL';
+  if (pos<0.2) sig='BUY';
+  if (pos>0.8) sig='SELL';
+  return { pos, sig, val:`BB=${(pos*100).toFixed(0)}%` };
+}
+
+function sigGARCH(vol,rsi){ if(vol>1.5&&rsi>70)return{sig:'SELL',val:`σ=${vol.toFixed(2)}%`}; if(vol>1.5&&rsi<30)return{sig:'BUY',val:`σ=${vol.toFixed(2)}%`}; if(vol<0.3)return{sig:'NEUTRAL',val:`σ=${vol.toFixed(2)}%`}; return rsi>55?{sig:'BUY',val:`σ=${vol.toFixed(2)}%`}:{sig:'SELL',val:`σ=${vol.toFixed(2)}%`}; }
+function sigMR(z){ return z<-1.5?{sig:'BUY',val:`Z=${z.toFixed(2)}`}:z>1.5?{sig:'SELL',val:`Z=${z.toFixed(2)}`}:{sig:'NEUTRAL',val:`Z=${z.toFixed(2)}`}; }
+function sigMom(rsi){ return rsi>60?{sig:'BUY',val:`RSI=${rsi.toFixed(1)}`}:rsi<40?{sig:'SELL',val:`RSI=${rsi.toFixed(1)}`}:{sig:'NEUTRAL',val:`RSI=${rsi.toFixed(1)}`}; }
+function sigBB(cl){ const b=calcBollinger(cl); return {sig:b.sig,val:b.val}; }
+function sigScoreGold(rsi,z,vol,f) {
+  let s=0.5;
+  if(rsi>60)s+=0.09; else if(rsi<40)s-=0.09;
+  if(z<-1.5)s+=0.11; else if(z>1.5)s-=0.11;
+  if(vol>1.5&&rsi<40)s+=0.07; if(vol>1.5&&rsi>70)s-=0.07;
+  if(f){ if(f.realYield!==null){if(f.realYield<1.0)s+=0.08; else if(f.realYield>1.5)s-=0.08;} if(f.dxy!==null){if(f.dxy<101)s+=0.06; else if(f.dxy>104)s-=0.08;} if(f.vix!==null&&f.vix>25)s+=0.08; if(f.breakeven!==null&&f.breakeven>2.4)s+=0.06; }
+  s=Math.max(0.1,Math.min(0.9,s)); const p=(s*100).toFixed(0);
+  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
+}
+function sigScoreEUR(rsi,z,vol,f,rateDiff) {
+  let s=0.5;
+  if(rsi>60)s+=0.08; else if(rsi<40)s-=0.08;
+  if(z<-1.5)s+=0.10; else if(z>1.5)s-=0.10;
+  if(rateDiff>0)s+=0.10*Math.min(rateDiff/2,1); else s-=0.10*Math.min(Math.abs(rateDiff)/2,1);
+  if(f){ if(f.dxy!==null){if(f.dxy<101)s+=0.08; else if(f.dxy>104)s-=0.08;} if(f.vix!==null&&f.vix>25)s-=0.05; if(f.breakeven!==null&&f.breakeven>2.4)s-=0.05; }
+  s=Math.max(0.1,Math.min(0.9,s)); const p=(s*100).toFixed(0);
+  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
+}
+function sigScoreJPY(rsi,z,vol,f,carrySpread) {
+  let s=0.5;
+  if(rsi>60)s+=0.08; else if(rsi<40)s-=0.08;
+  if(z<-1.5)s+=0.10; else if(z>1.5)s-=0.10;
+  if(carrySpread>4)s+=0.12; else if(carrySpread>2)s+=0.06; else if(carrySpread<1)s-=0.08;
+  if(f){ if(f.dxy!==null){if(f.dxy>104)s+=0.07; else if(f.dxy<101)s-=0.07;} if(f.vix!==null&&f.vix>25)s-=0.09; if(f.realYield!==null&&f.realYield>1.5)s+=0.07; }
+  s=Math.max(0.1,Math.min(0.9,s)); const p=(s*100).toFixed(0);
+  return s>0.58?{sig:'BUY',val:`P=${p}%`}:s<0.42?{sig:'SELL',val:`P=${p}%`}:{sig:'NEUTRAL',val:`P=${p}%`};
+}
+function sigCarry(cs){ if(cs>4)return{sig:'BUY',val:`Carry=${cs.toFixed(2)}%`}; if(cs<1)return{sig:'SELL',val:`Carry=${cs.toFixed(2)}%`}; return{sig:'NEUTRAL',val:`Carry=${cs.toFixed(2)}%`}; }
+function sigRateDiff(diff){ if(diff>0.5)return{sig:'BUY',val:`Δr=${diff.toFixed(2)}%`}; if(diff<-0.5)return{sig:'SELL',val:`Δr=${diff.toFixed(2)}%`}; return{sig:'NEUTRAL',val:`Δr=${diff.toFixed(2)}%`}; }
+
+function macroSigsGold(f){ if(!f)return['NEUTRAL','NEUTRAL','NEUTRAL','NEUTRAL']; return[ f.realYield===null?'NEUTRAL':f.realYield<1.0?'BUY':f.realYield>1.5?'SELL':'NEUTRAL', f.dxy===null?'NEUTRAL':f.dxy<101?'BUY':f.dxy>104?'SELL':'NEUTRAL', f.vix===null?'NEUTRAL':f.vix>25?'BUY':f.vix<15?'SELL':'NEUTRAL', f.breakeven===null?'NEUTRAL':f.breakeven>2.4?'BUY':f.breakeven<2.0?'SELL':'NEUTRAL', ]; }
+function macroSigsEUR(f){ if(!f)return['NEUTRAL','NEUTRAL','NEUTRAL']; return[ f.dxy===null?'NEUTRAL':f.dxy<101?'BUY':f.dxy>104?'SELL':'NEUTRAL', f.vix===null?'NEUTRAL':f.vix>25?'SELL':f.vix<15?'BUY':'NEUTRAL', f.breakeven===null?'NEUTRAL':f.breakeven>2.4?'SELL':f.breakeven<2.0?'BUY':'NEUTRAL', ]; }
+function macroSigsJPY(f){ if(!f)return['NEUTRAL','NEUTRAL','NEUTRAL']; return[ f.dxy===null?'NEUTRAL':f.dxy>104?'BUY':f.dxy<101?'SELL':'NEUTRAL', f.vix===null?'NEUTRAL':f.vix>25?'SELL':f.vix<15?'BUY':'NEUTRAL', f.realYield===null?'NEUTRAL':f.realYield>1.5?'BUY':f.realYield<1.0?'SELL':'NEUTRAL', ]; }
+
+function ensemble(signals, mlSig) {
+  const all=[...signals,mlSig]; const c={BUY:0,SELL:0,NEUTRAL:0};
+  all.forEach(s=>c[s]++); c[mlSig]++;
+  const tot=all.length+1; let fin='NEUTRAL';
+  if(c.BUY>=c.SELL&&c.BUY>=c.NEUTRAL)fin='BUY';
+  else if(c.SELL>=c.BUY&&c.SELL>=c.NEUTRAL)fin='SELL';
+  return{signal:fin,confidence:Math.max(45,Math.round((c[fin]/tot)*100))};
+}
+
+// ══════════════════════════════════════════
+// PAIRS TRADING MODELS
 // ══════════════════════════════════════════
 function calcSpreadZ(closesA, closesB) {
   const len = Math.min(closesA.length, closesB.length, 30);
@@ -1098,27 +998,10 @@ function calcSpreadZ(closesA, closesB) {
   for(let i=0;i<len;i++){ num+=(A[i]-meanA)*(B[i]-meanB); denA+=(A[i]-meanA)**2; denB+=(B[i]-meanB)**2; }
   const correlation = (denA*denB)===0 ? 0 : num/Math.sqrt(denA*denB);
 
-  // ── FIX 4: Half-Life بـ OLS صحيح (AR1) ──
-  // delta_t = theta * spread_{t-1} + epsilon
-  // نحسب OLS: theta = (n*Σ(x*y) - Σx*Σy) / (n*Σx² - (Σx)²)
-  const n2 = len - 1;
-  const lagSpreads  = spreads.slice(0, n2);   // spread_{t-1}
-  const deltaSpreads = spreads.slice(1).map((s,i) => s - spreads[i]); // delta = spread_t - spread_{t-1}
-  const sumX  = lagSpreads.reduce((a,b)=>a+b, 0);
-  const sumY  = deltaSpreads.reduce((a,b)=>a+b, 0);
-  const sumXY = lagSpreads.reduce((a,v,i)=>a+v*deltaSpreads[i], 0);
-  const sumX2 = lagSpreads.reduce((a,v)=>a+v*v, 0);
-  const denom = n2*sumX2 - sumX*sumX;
-  const theta = denom===0 ? -0.1 : (n2*sumXY - sumX*sumY) / denom;
-  // theta يجب أن يكون سالباً لـ mean-reversion
-  // half-life = -ln(2)/theta
-  let halfLife;
-  if (theta >= 0) {
-    halfLife = 99; // لا يوجد ارتداد
-  } else {
-    halfLife = Math.round(-Math.log(2) / theta);
-    halfLife = Math.max(1, Math.min(99, halfLife));
-  }
+  let sumDelta=0, sumLag=0, sumLag2=0, n2=len-1;
+  for(let i=1;i<len;i++){ const delta=spreads[i]-spreads[i-1]; sumDelta+=delta*spreads[i-1]; sumLag+=spreads[i-1]; sumLag2+=spreads[i-1]**2; }
+  const theta = (n2*sumDelta-sumDelta*0)/(n2*sumLag2-sumLag**2)||(-0.1);
+  const halfLife = Math.abs(theta)>0.001 ? Math.round(-Math.log(2)/theta) : 99;
 
   const hurst = calcHurst(spreads);
 
@@ -1130,98 +1013,38 @@ function calcSpreadZ(closesA, closesB) {
 
   const conf = Math.min(95, Math.round(Math.min(Math.abs(zScore)/2.5,1)*80+15));
 
-  return {
-    zScore, spreads, meanSpread, stdSpread,
-    hedgeRatio, correlation, halfLife, hurst,
-    signal, action, conf,
-    currentSpread: spreads[len-1],
-  };
+  return { zScore, spreads, meanSpread, stdSpread, hedgeRatio, correlation, halfLife, hurst, signal, action, conf, currentSpread: spreads[len-1] };
 }
 
 // ══════════════════════════════════════════
 // UI HELPERS
 // ══════════════════════════════════════════
-function setModel(p,id,sig,val){
-  const el=document.getElementById(`${p}-${id}Signal`);
-  el.textContent=AR[sig]; el.className='model-signal '+sig;
-  document.getElementById(`${p}-${id}Val`).textContent=val;
+function setModel(p,id,sig,val){ const el=document.getElementById(`${p}-${id}Signal`); el.textContent=AR[sig]; el.className='model-signal '+sig; document.getElementById(`${p}-${id}Val`).textContent=val; }
+function setFactor(p,n,val,sig,live,src){ document.getElementById(`${p}-f${n}Val`).textContent=val||'—'; const srcLabel=src==='td'?'🟢 Twelve Data حقيقي':live?'🟢 FRED حقيقي':'⚪ محاكاة'; document.getElementById(`${p}-f${n}Badge`).textContent=srcLabel; const el=document.getElementById(`${p}-f${n}Impact`); el.textContent=IA[sig]; el.className='factor-impact '+((live||src==='td')?'live':IC[sig]); }
+function setSignal(p,res){ const card=document.getElementById(`${p}-signalCard`); card.className='signal-card '+res.signal; const st=document.getElementById(`${p}-signalText`); st.textContent=res.signal; st.className='signal-text '+res.signal; document.getElementById(`${p}-signalAr`).textContent=AR[res.signal]; document.getElementById(`${p}-confFill`).className='conf-fill '+res.signal; document.getElementById(`${p}-confFill`).style.width=res.confidence+'%'; document.getElementById(`${p}-confVal`).textContent=res.confidence+'%'; document.getElementById(`${p}-confVal`).className='conf-val '+res.signal; }
+function setPrice(p,price,change,pct,label,prefix='$'){ const up=change>=0; document.getElementById(`${p}-priceMain`).textContent=prefix+price.toFixed(prefix==='¥'?2:4); const pc=document.getElementById(`${p}-priceChange`); pc.textContent=(up?'+':'')+change.toFixed(prefix==='¥'?2:4)+' ('+(up?'+':'')+pct.toFixed(2)+'%)'; pc.className='price-change '+(up?'up':'down'); document.getElementById(`${p}-priceTime`).textContent=new Date().toLocaleTimeString('ar-SA'); document.getElementById(`${p}-dataSource`).textContent=label; }
+function buildCandles(p,vals,prefix='$',dp=2){ const bar=document.getElementById(`${p}-candlesBar`); bar.innerHTML=''; const sl=vals.slice(0,12).reverse(); const H=sl.map(v=>parseFloat(v.high)),L=sl.map(v=>parseFloat(v.low)); const mx=Math.max(...H),mn=Math.min(...L),rng=mx-mn||1; sl.forEach(v=>{ const c=document.createElement('div'); c.className='candle '+(parseFloat(v.close)>=parseFloat(v.open)?'up':'down'); c.style.height=Math.max(6,((parseFloat(v.high)-parseFloat(v.low))/rng)*100)+'%'; bar.appendChild(c); }); document.getElementById(`${p}-candleTitle`).textContent=`${sl.length} شمعة ساعية · آخر ${prefix}${parseFloat(vals[0].close).toFixed(dp)}`; }
+function buildVol(p,volArray,volVal,price,cls,prefix='$',dp=4){ 
+  const c=document.getElementById(`${p}-volBars`); c.innerHTML=''; 
+  const maxVol = Math.max(...volArray, 0.001);
+  volArray.forEach((v, i) => {
+    const b=document.createElement('div'); 
+    b.className=`vol-bar ${cls}`+(i===volArray.length-1?' active':''); 
+    b.style.height=Math.max(10, (v/maxVol)*100)+'%'; 
+    c.appendChild(b); 
+  }); 
+  document.getElementById(`${p}-volVal`).textContent=`±${prefix}${(volVal*price/100).toFixed(dp)}`; 
 }
-function setFactor(p,n,val,sig,live,src){
-  document.getElementById(`${p}-f${n}Val`).textContent=val||'—';
-  const srcLabel=src==='td'?'🟢 Twelve Data حقيقي':live?'🟢 FRED حقيقي':'⚪ محاكاة';
-  document.getElementById(`${p}-f${n}Badge`).textContent=srcLabel;
-  const el=document.getElementById(`${p}-f${n}Impact`);
-  el.textContent=IA[sig]; el.className='factor-impact '+((live||src==='td')?'live':IC[sig]);
-}
-function setSignal(p,res){
-  const card=document.getElementById(`${p}-signalCard`);
-  card.className='signal-card '+res.signal;
-  const st=document.getElementById(`${p}-signalText`);
-  st.textContent=res.signal; st.className='signal-text '+res.signal;
-  document.getElementById(`${p}-signalAr`).textContent=AR[res.signal];
-  const fill=document.getElementById(`${p}-confFill`);
-  fill.className='conf-fill '+res.signal; fill.style.width=res.confidence+'%';
-  const cv=document.getElementById(`${p}-confVal`);
-  cv.textContent=res.confidence+'%'; cv.className='conf-val '+res.signal;
-}
-function setPrice(p,price,change,pct,label,prefix='$'){
-  const up=change>=0;
-  document.getElementById(`${p}-priceMain`).textContent=prefix+price.toFixed(prefix==='¥'?2:4);
-  const pc=document.getElementById(`${p}-priceChange`);
-  pc.textContent=(up?'+':'')+change.toFixed(prefix==='¥'?2:4)+' ('+(up?'+':'')+pct.toFixed(2)+'%)';
-  pc.className='price-change '+(up?'up':'down');
-  document.getElementById(`${p}-priceTime`).textContent=new Date().toLocaleTimeString('ar-SA');
-  document.getElementById(`${p}-dataSource`).textContent=label;
-}
-function buildCandles(p,vals,prefix='$',dp=2){
-  const bar=document.getElementById(`${p}-candlesBar`);
-  bar.innerHTML='';
-  const sl=vals.slice(0,12).reverse();
-  const H=sl.map(v=>parseFloat(v.high)), L=sl.map(v=>parseFloat(v.low));
-  const mx=Math.max(...H), mn=Math.min(...L), rng=mx-mn||1;
-  sl.forEach(v=>{
-    const c=document.createElement('div');
-    c.className='candle '+(parseFloat(v.close)>=parseFloat(v.open)?'up':'down');
-    c.style.height=Math.max(6,((parseFloat(v.high)-parseFloat(v.low))/rng)*100)+'%';
-    bar.appendChild(c);
-  });
-  document.getElementById(`${p}-candleTitle`).textContent=`${sl.length} شمعة ساعية · آخر ${prefix}${parseFloat(vals[0].close).toFixed(dp)}`;
-}
-function buildVol(p,vol,price,cls,prefix='$',dp=4){
-  const c=document.getElementById(`${p}-volBars`);
-  c.innerHTML='';
-  for(let i=0;i<12;i++){
-    const b=document.createElement('div');
-    b.className=`vol-bar ${cls}`+(i===11?' active':'');
-    b.style.height=(20+Math.random()*60)+'%';
-    c.appendChild(b);
-  }
-  document.getElementById(`${p}-volVal`).textContent=`±${prefix}${(vol*price/100).toFixed(dp)}`;
-}
-function showErr(m){
-  const e=document.getElementById('errorBanner');
-  let msg=m;
-  if(m.includes('Failed to fetch')||m.includes('NetworkError')) msg='فشل الاتصال بالإنترنت · تحقق من اتصالك';
-  else if(m.includes('تعذّر جلب سعر الذهب')) msg=m;
-  else if(m.includes('HTTP 4')) msg='مفتاح API غير صحيح · يرجى التحقق من المفتاح';
-  else if(m.includes('HTTP 5')) msg='خطأ في خادم API · حاول مرة أخرى بعد قليل';
-  else if(m.includes('Twelve Data')) msg='Twelve Data: '+m.split('Twelve Data: ')[1];
-  e.textContent='⚠️ '+msg; e.classList.add('show');
-}
+function showErr(m){ const e=document.getElementById('errorBanner'); let msg=m; if(m.includes('Failed to fetch')||m.includes('NetworkError'))msg='فشل الاتصال بالإنترنت · تحقق من اتصالك'; else if(m.includes('HTTP 4'))msg='مفتاح API غير صحيح أو تجاوزت الحد المسموح'; else if(m.includes('HTTP 5'))msg='خطأ في خادم API · حاول مرة أخرى بعد قليل'; else if(m.includes('Twelve Data'))msg='Twelve Data: '+m.split('Twelve Data: ')[1]; e.textContent='⚠️ '+msg; e.classList.add('show'); }
 function hideErr(){ document.getElementById('errorBanner').classList.remove('show'); }
-function setBtnLoading(p,on){
-  const btn=document.getElementById(`${p}-refreshBtn`);
-  const icon=document.getElementById(`${p}-refreshIcon`);
-  if(on){btn.classList.add('loading');icon.innerHTML='<span class="spin">⟳</span>';}
-  else{btn.classList.remove('loading');icon.textContent='🔄';}
-}
+function setBtnLoading(p,on){ const btn=document.getElementById(`${p}-refreshBtn`); const icon=document.getElementById(`${p}-refreshIcon`); if(on){btn.classList.add('loading');icon.innerHTML='<span class="spin">⟳</span>';}else{btn.classList.remove('loading');icon.textContent='🔄';} }
 
 function setRegime(p, regimeData) {
   const { regime, confidence, indicators } = regimeData;
   const card = document.getElementById(`${p}-regimeCard`);
   card.className = `regime-card ${regime}`;
   const nm = document.getElementById(`${p}-regimeName`);
-  nm.textContent = regime.replace(/_/g,' ');
+  nm.textContent = regime.replace('_',' ');
   nm.className = `regime-name ${regime}`;
   document.getElementById(`${p}-regimeAr`).textContent = REGIME_AR[regime];
   const strat = document.getElementById(`${p}-regimeStrategy`);
@@ -1230,44 +1053,36 @@ function setRegime(p, regimeData) {
   document.getElementById(`${p}-regimeConf`).textContent = `ثقة: ${confidence}%`;
   const indsEl = document.getElementById(`${p}-regimeInds`);
   indsEl.innerHTML = indicators.map(i=>`<span class="regime-ind">${i}</span>`).join('');
-  const noteEl = document.getElementById(`${p}-regimeNote`);
-  if (noteEl) noteEl.textContent = REGIME_NOTE[regime];
+  if (document.getElementById(`${p}-regimeNote`))
+    document.getElementById(`${p}-regimeNote`).textContent = REGIME_NOTE[regime];
 }
 
 // ══════════════════════════════════════════
-// GOLD ANALYSIS
+// RUN FUNCTIONS (USING GLOBAL DATA)
 // ══════════════════════════════════════════
-async function runGold(){
-  setBtnLoading('g',true); hideErr();
+function runGold(){
   try{
-    const metals = await fetchMetals();
-    const price = parseFloat(metals.gold);
-    if (!price || isNaN(price)) throw new Error('تعذّر جلب سعر الذهب من metals.live');
+    const quote = globalMarketData.quotes['XAU/USD'];
+    const series = globalMarketData.series['XAU/USD'];
+    if(!quote || !series) throw new Error("بيانات الذهب غير متوفرة");
 
-    if(!fredData) fredData=await fetchAllFRED();
-
-    // ── FIX 5: نستخدم سعر التغيير من FRED (أو قيمة ثابتة) بدل العشوائي ──
-    // نحن لا نملك سعر الأمس من metals.live المجاني، لذا نحسّن التقدير
-    // باستخدام seed ثابت مرتبط بالسعر المقرّب لليوم.
-    const dayRand = seededRand(Math.round(price) + new Date().getDate());
-    const prevApprox = price * (1 - (dayRand() * 0.006 - 0.003));
-    const change = price - prevApprox;
-    const pct = (change / prevApprox) * 100;
-
-    const series = buildFakeSeries(price, 30, 0.004);
+    const price = parseFloat(quote.close || quote.price);
+    const prev = parseFloat(quote.previous_close);
+    const change = price - prev, pct = (change / prev) * 100;
     const closes = series.values.map(v=>parseFloat(v.close)).reverse();
 
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
+    const volArr = calcVolArray(closes);
+
     const regimeData = detectRegime(closes, fredData?.vix);
     setRegime('g', regimeData);
 
-    const m1=sigGARCH(vol,rsi), m2=sigMR(z), m3=sigMom(rsi), m4=sigMLGold(rsi,z,vol,fredData);
+    const m1=sigGARCH(vol,rsi), m2=sigMR(z), m3=sigMom(rsi), m4=sigScoreGold(rsi,z,vol,fredData);
     const mac=macroSigsGold(fredData);
-    let res=ensemble([m1.sig,m2.sig,m3.sig,...mac], m4.sig);
-    res=applyRegimeFilter(res, regimeData.regime);
+    let res=ensemble([m1.sig,m2.sig,m3.sig,...mac],m4.sig);
+    res = applyRegimeFilter(res, regimeData.regime);
 
-    const live=!!fredData;
-    setPrice('g',price,change,pct,live?'📡 metals.live + FRED · بيانات حقيقية ✓':'📡 metals.live · ذهب حقيقي ✓','$');
+    setPrice('g',price,change,pct,'📡 Twelve Data · بيانات حقيقية ✓','$');
     setSignal('g',res);
     setModel('g','m1',m1.sig,m1.val); setModel('g','m2',m2.sig,m2.val);
     setModel('g','m3',m3.sig,m3.val); setModel('g','m4',m4.sig,m4.val);
@@ -1277,42 +1092,35 @@ async function runGold(){
     setFactor('g',3,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[2],fredData?.vixLive,'td');
     setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],fredData?.breakeven!=null);
     buildCandles('g',series.values,'$',1);
-    buildVol('g',vol,price,'gold-bar','$',0);
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
-  }catch(err){showErr(err.message);console.error(err);}
-  setBtnLoading('g',false);
+    buildVol('g',volArr,vol,price,'gold-bar','$',0);
+  }catch(err){console.error(err);}
 }
 
-// ══════════════════════════════════════════
-// EUR/USD ANALYSIS
-// ══════════════════════════════════════════
-async function runEUR(){
-  setBtnLoading('e',true); hideErr();
+function runEUR(){
   try{
-    const [quote,series]=await Promise.all([
-      fetchTD('quote?symbol=EUR/USD'),
-      fetchTD('time_series?symbol=EUR/USD&interval=1h&outputsize=30')
-    ]);
-    if(!fredData) fredData=await fetchAllFRED();
+    const quote = globalMarketData.quotes['EUR/USD'];
+    const series = globalMarketData.series['EUR/USD'];
+    if(!quote || !series) return;
+
     const price=parseFloat(quote.close||quote.price);
     const prev=parseFloat(quote.previous_close);
     const change=price-prev, pct=(change/prev)*100;
     const closes=series.values.map(v=>parseFloat(v.close)).reverse();
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
+    const volArr = calcVolArray(closes);
 
-    const regimeData=detectRegime(closes, fredData?.vix);
+    const regimeData = detectRegime(closes, fredData?.vix);
     setRegime('e', regimeData);
 
     const rateDiff=RATES.ecb-RATES.fed;
     const m1=sigGARCH(vol,rsi), m2=sigMR(z), m3=sigMom(rsi);
-    const m4=sigMLEUR(rsi,z,vol,fredData,rateDiff);
+    const m4=sigScoreEUR(rsi,z,vol,fredData,rateDiff);
     const m5=sigBB(closes), m6=sigRateDiff(rateDiff);
     const mac=macroSigsEUR(fredData);
-    let res=ensemble([m1.sig,m2.sig,m3.sig,m5.sig,m6.sig,...mac], m4.sig);
+    let res=ensemble([m1.sig,m2.sig,m3.sig,m5.sig,m6.sig,...mac],m4.sig);
     res=applyRegimeFilter(res, regimeData.regime);
 
-    const live=!!fredData;
-    setPrice('e',price,change,pct,live?'📡 Twelve Data + FRED ✓':'📡 Twelve Data ✓','');
+    setPrice('e',price,change,pct,'📡 Twelve Data ✓','');
     setSignal('e',res);
     setModel('e','m1',m1.sig,m1.val); setModel('e','m2',m2.sig,m2.val);
     setModel('e','m3',m3.sig,m3.val); setModel('e','m4',m4.sig,m4.val);
@@ -1329,42 +1137,35 @@ async function runEUR(){
     setFactor('e',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
     setFactor('e',3,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[2],fredData?.breakeven!=null);
     buildCandles('e',series.values,'',5);
-    buildVol('e',vol,price,'eur-bar','',5);
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
-  }catch(err){showErr(err.message);console.error(err);}
-  setBtnLoading('e',false);
+    buildVol('e',volArr,vol,price,'eur-bar','',5);
+  }catch(err){console.error(err);}
 }
 
-// ══════════════════════════════════════════
-// USD/JPY ANALYSIS
-// ══════════════════════════════════════════
-async function runJPY(){
-  setBtnLoading('j',true); hideErr();
+function runJPY(){
   try{
-    const [quote,series]=await Promise.all([
-      fetchTD('quote?symbol=USD/JPY'),
-      fetchTD('time_series?symbol=USD/JPY&interval=1h&outputsize=30')
-    ]);
-    if(!fredData) fredData=await fetchAllFRED();
+    const quote = globalMarketData.quotes['USD/JPY'];
+    const series = globalMarketData.series['USD/JPY'];
+    if(!quote || !series) return;
+
     const price=parseFloat(quote.close||quote.price);
     const prev=parseFloat(quote.previous_close);
     const change=price-prev, pct=(change/prev)*100;
     const closes=series.values.map(v=>parseFloat(v.close)).reverse();
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
+    const volArr = calcVolArray(closes);
 
-    const regimeData=detectRegime(closes, fredData?.vix);
+    const regimeData = detectRegime(closes, fredData?.vix);
     setRegime('j', regimeData);
 
     const carrySpread=RATES.fed-RATES.boj;
     const m1=sigGARCH(vol,rsi), m2=sigMR(z), m3=sigMom(rsi);
-    const m4=sigMLJPY(rsi,z,vol,fredData,carrySpread);
+    const m4=sigScoreJPY(rsi,z,vol,fredData,carrySpread);
     const m5=sigBB(closes), m6=sigCarry(carrySpread);
     const mac=macroSigsJPY(fredData);
-    let res=ensemble([m1.sig,m2.sig,m3.sig,m5.sig,m6.sig,...mac], m4.sig);
+    let res=ensemble([m1.sig,m2.sig,m3.sig,m5.sig,m6.sig,...mac],m4.sig);
     res=applyRegimeFilter(res, regimeData.regime);
 
-    const live=!!fredData;
-    setPrice('j',price,change,pct,live?'📡 Twelve Data + FRED ✓':'📡 Twelve Data ✓','¥');
+    setPrice('j',price,change,pct,'📡 Twelve Data ✓','¥');
     setSignal('j',res);
     setModel('j','m1',m1.sig,m1.val); setModel('j','m2',m2.sig,m2.val);
     setModel('j','m3',m3.sig,m3.val); setModel('j','m4',m4.sig,m4.val);
@@ -1379,47 +1180,30 @@ async function runJPY(){
     const fv=(v,d)=>v!==null?v.toFixed(d):'—';
     setFactor('j',1,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[0],fredData?.dxyLive,'td');
     setFactor('j',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
-    setFactor('j',3,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[2],live&&fredData?.realYield!=null);
+    setFactor('j',3,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[2],fredData?.realYield!=null);
     buildCandles('j',series.values,'¥',2);
-    buildVol('j',vol,price,'jpy-bar','¥',2);
-    document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
-  }catch(err){showErr(err.message);console.error(err);}
-  setBtnLoading('j',false);
+    buildVol('j',volArr,vol,price,'jpy-bar','¥',2);
+  }catch(err){console.error(err);}
 }
 
-// ══════════════════════════════════════════
-// PAIRS TRADING ANALYSIS
-// ══════════════════════════════════════════
-async function runPairs(){
-  setBtnLoading('p',true); hideErr();
+function runPairs(){
   try{
     const isXAUXAG = currentPair === 'XAUXAG';
     const labelA = isXAUXAG ? 'الذهب XAU' : 'اليورو EUR';
     const labelB = isXAUXAG ? 'الفضة XAG' : 'الجنيه GBP';
+    const symA = isXAUXAG ? 'XAU/USD' : 'EUR/USD';
+    const symB = isXAUXAG ? 'XAG/USD' : 'GBP/USD';
 
     document.getElementById('p-pairLabel').textContent = `⚡ PAIRS TRADING · ${isXAUXAG?'XAU/XAG':'EUR/GBP'}`;
 
-    let closesA, closesB, priceA, priceB;
+    const seriesA = globalMarketData.series[symA];
+    const seriesB = globalMarketData.series[symB];
+    if(!seriesA || !seriesB) return;
 
-    if (isXAUXAG) {
-      const metals = await fetchMetals();
-      priceA = parseFloat(metals.gold);
-      priceB = parseFloat(metals.silver);
-      if (!priceA || !priceB) throw new Error('تعذّر جلب أسعار المعادن من metals.live');
-      const seriesA = buildFakeSeries(priceA, 30, 0.004);
-      const seriesB = buildFakeSeries(priceB, 30, 0.005);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
-    } else {
-      const [seriesA, seriesB] = await Promise.all([
-        fetchTD('time_series?symbol=EUR/USD&interval=1h&outputsize=30'),
-        fetchTD('time_series?symbol=GBP/USD&interval=1h&outputsize=30'),
-      ]);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
-      priceA  = closesA[closesA.length-1];
-      priceB  = closesB[closesB.length-1];
-    }
+    const closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
+    const closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+    const priceA  = closesA[closesA.length-1];
+    const priceB  = closesB[closesB.length-1];
 
     const pt = calcSpreadZ(closesA, closesB);
 
@@ -1459,7 +1243,7 @@ async function runPairs(){
     else if(Math.abs(pt.correlation)>0.6){ corrBadge.textContent='ارتباط متوسط'; corrBadge.className='coint-badge moderate'; }
     else { corrBadge.textContent='ارتباط ضعيف ⚠'; corrBadge.className='coint-badge weak'; }
 
-    document.getElementById('p-halfLife').textContent = pt.halfLife >= 99 ? '>50 يوم' : pt.halfLife+' شمعة';
+    document.getElementById('p-halfLife').textContent = pt.halfLife > 50 ? '>50 يوم' : pt.halfLife+' شمعة';
     const halfBadge = document.getElementById('p-halfBadge');
     if(pt.halfLife<10){ halfBadge.textContent='سريع الارتداد ✓'; halfBadge.className='coint-badge strong'; }
     else if(pt.halfLife<25){ halfBadge.textContent='ارتداد معتدل'; halfBadge.className='coint-badge moderate'; }
@@ -1477,63 +1261,49 @@ async function runPairs(){
     let stratTitle='', stratText='';
     if(pt.signal==='LONG_A'){
       stratTitle = `📈 فرصة: شراء ${labelA} + بيع ${labelB}`;
-      stratText  = `الـ Spread انخفض بشكل غير عادي (Z = ${pt.zScore.toFixed(2)})، مما يعني أن ${labelA} رخيص نسبياً مقابل ${labelB}.\n\n✅ الفكرة: شراء ${labelA} وبيع ${labelB} بنفس القيمة، والانتظار حتى يعود الـ Spread لمتوسطه.\n\n⏱ نصف عمر الارتداد المتوقع: ${pt.halfLife<99?pt.halfLife+' شمعة':'>50 شمعة'}`;
+      stratText  = `الـ Spread انخفض بشكل غير عادي (Z = ${pt.zScore.toFixed(2)})، مما يعني أن ${labelA} رخيص نسبياً مقابل ${labelB}.\n\n✅ الفكرة: شراء ${labelA} وبيع ${labelB} بنفس القيمة، والانتظار حتى يعود الـ Spread لمتوسطه.\n\n⏱ نصف عمر الارتداد المتوقع: ${pt.halfLife<50?pt.halfLife+' شمعة':'>50 شمعة'}`;
     } else if(pt.signal==='LONG_B'){
       stratTitle = `📉 فرصة: بيع ${labelA} + شراء ${labelB}`;
-      stratText  = `الـ Spread ارتفع بشكل غير عادي (Z = ${pt.zScore.toFixed(2)})، مما يعني أن ${labelA} غالٍ نسبياً مقابل ${labelB}.\n\n✅ الفكرة: بيع ${labelA} وشراء ${labelB} بنفس القيمة، والانتظار حتى يعود الـ Spread لمتوسطه.\n\n⏱ نصف عمر الارتداد المتوقع: ${pt.halfLife<99?pt.halfLife+' شمعة':'>50 شمعة'}`;
+      stratText  = `الـ Spread ارتفع بشكل غير عادي (Z = ${pt.zScore.toFixed(2)})، مما يعني أن ${labelA} غالٍ نسبياً مقابل ${labelB}.\n\n✅ الفكرة: بيع ${labelA} وشراء ${labelB} بنفس القيمة، والانتظار حتى يعود الـ Spread لمتوسطه.\n\n⏱ نصف عمر الارتداد المتوقع: ${pt.halfLife<50?pt.halfLife+' شمعة':'>50 شمعة'}`;
     } else {
       stratTitle = `◈ لا توجد فرصة حالياً · ${pairName}`;
       stratText  = `الـ Z-Score = ${pt.zScore.toFixed(2)} ضمن النطاق الطبيعي (بين -1.5 و +1.5).\n\nيُنصح بالانتظار حتى يتجاوز Z الـ ±1.5 لتكون الإشارة أقوى.\n\n📊 الارتباط الحالي بين الأصلين: ${pt.correlation.toFixed(3)} · Hedge Ratio: ${pt.hedgeRatio.toFixed(4)}`;
     }
     document.getElementById('p-strategyTitle').textContent = stratTitle;
     document.getElementById('p-strategyText').textContent  = stratText;
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-SA');
-  }catch(err){showErr(err.message);console.error(err);}
-  setBtnLoading('p',false);
+
+  }catch(err){console.error(err);}
 }
 
 // ══════════════════════════════════════════
-// RUN ALL
+// MASTER RUNNER
 // ══════════════════════════════════════════
 async function runAll(){
-  fredData = await fetchAllFRED();
-  await Promise.all([runGold(), runEUR(), runJPY(), runPairs()]);
+  setBtnLoading('g',true); setBtnLoading('e',true); setBtnLoading('j',true); setBtnLoading('p',true);
+  hideErr();
+  try {
+    // 1. جلب كل البيانات المجمعة لتجنب حظر الـ API
+    await fetchAllMarketData();
+    // 2. جلب بيانات الماكرو
+    fredData = await fetchAllFRED();
+    
+    // 3. تشغيل التحليلات
+    runGold();
+    runEUR();
+    runJPY();
+    runPairs();
+
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-SA');
+  } catch(err) {
+    showErr(err.message);
+  }
+  setBtnLoading('g',false); setBtnLoading('e',false); setBtnLoading('j',false); setBtnLoading('p',false);
 }
 
 // ══════════════════════════════════════════
-// FIX 6: INIT — تزامن Countdown مع runAll
+// INIT
 // ══════════════════════════════════════════
-const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 دقيقة بالمللي ثانية
-let autoRefreshTimer = null;
-
-function scheduleNextRefresh() {
-  if (autoRefreshTimer) clearTimeout(autoRefreshTimer);
-  autoRefreshTimer = setTimeout(async () => {
-    const anyLoading = ['g','e','j','p'].some(p =>
-      document.getElementById(`${p}-refreshBtn`).classList.contains('loading')
-    );
-    if (!anyLoading) await runAll();
-    scheduleNextRefresh(); // إعادة جدولة بعد الانتهاء
-  }, REFRESH_INTERVAL);
-}
-
-function startCountdown(totalSeconds) {
-  let remaining = totalSeconds;
-  const el = document.getElementById('countdownTimer');
-  if (!el) return;
-  const iv = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(iv);
-      return;
-    }
-    const m = String(Math.floor(remaining/60)).padStart(2,'0');
-    const s = String(remaining % 60).padStart(2,'0');
-    el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
-  }, 1000);
-}
-
-window.addEventListener('load', () => {
+window.addEventListener('load',()=>{
   if (!TD_KEY || !FRED_KEY) {
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('setupModal').classList.remove('hidden');
@@ -1542,32 +1312,31 @@ window.addEventListener('load', () => {
     return;
   }
   document.getElementById('setupModal').classList.add('hidden');
-  document.getElementById('resetRow').style.display = 'block';
-
-  const steps = [
-    '⏳ الاتصال بـ Twelve Data...',
-    '📊 جلب XAU/USD...',
-    '🇪🇺 جلب EUR/USD...',
-    '🇯🇵 جلب USD/JPY...',
-    '⚡ جلب بيانات Pairs...',
-    '🏛 استعلام FRED...',
-    '🧠 تشغيل Regime Detection...',
-    '🤖 تشغيل النماذج...',
-    '✅ جاهز!',
-  ];
-  let i=0;
-  const el=document.getElementById('loadStep');
-  const iv=setInterval(()=>{ if(i<steps.length) el.textContent=steps[i++]; else clearInterval(iv); }, 350);
-
-  const INIT_DELAY = 3200;
-  setTimeout(async () => {
-    document.getElementById('loadingOverlay').classList.add('hidden');
-    await runAll();
-    // بعد انتهاء runAll نبدأ العداد والجدولة بشكل متزامن
-    scheduleNextRefresh();
-    startCountdown(REFRESH_INTERVAL / 1000);
-  }, INIT_DELAY);
+  document.getElementById('resetRow').style.display='block';
+  const steps=['⏳ الاتصال بـ Twelve Data...','📊 جلب البيانات المجمعة...','🏛 استعلام FRED...','🧠 تشغيل النماذج...','✅ جاهز!'];
+  let i=0; const el=document.getElementById('loadStep');
+  const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },500);
+  setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); runAll(); },2500);
 });
+
+setInterval(()=>{
+  const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`).classList.contains('loading'));
+  if(!anyLoading) runAll();
+},15*60*1000); // كل 15 دقيقة
+
+(function startCountdown(){
+  const INTERVAL = 15 * 60;
+  let remaining = INTERVAL;
+  const el = document.getElementById('countdownTimer');
+  if (!el) return;
+  setInterval(()=>{
+    remaining--;
+    if (remaining <= 0) remaining = INTERVAL;
+    const m = String(Math.floor(remaining/60)).padStart(2,'0');
+    const s = String(remaining % 60).padStart(2,'0');
+    el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
+  }, 1000);
+})();
 </script>
 </body>
 </html>
