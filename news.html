@@ -31,6 +31,27 @@
   .live-dot{width:6px;height:6px;border-radius:50%;background:var(--buy);animation:pulse 1.5s infinite;}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 
+  /* ══ CACHE REFRESH BAR ══ */
+  .cache-bar{display:flex;flex-direction:column;gap:6px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.2);border-radius:14px;padding:10px 14px;margin-bottom:14px;}
+  .cache-bar-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .cache-bar-info{display:flex;flex-direction:column;gap:2px;}
+  .cache-bar-title{font-size:11px;font-weight:700;color:var(--gold);}
+  .cache-bar-time{font-size:10px;color:var(--muted);}
+  .cache-refresh-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,rgba(212,168,83,0.25),rgba(212,168,83,0.12));border:1px solid rgba(212,168,83,0.4);color:var(--gold);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.3s;white-space:nowrap;flex-shrink:0;}
+  .cache-refresh-btn:active{transform:scale(0.97);}
+  .cache-refresh-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .cache-status-note{font-size:10px;padding:4px 10px;border-radius:6px;font-weight:700;text-align:center;transition:all 0.3s;}
+  .cache-status-note.same{background:rgba(107,114,128,0.15);color:var(--muted);}
+  .cache-status-note.new{background:rgba(34,197,94,0.12);color:var(--buy);}
+  .cache-status-note.fetching{background:rgba(212,168,83,0.1);color:var(--gold);}
+  .cache-progress{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+  .cache-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));border-radius:2px;width:0%;transition:width 0.5s ease;}
+
+  /* ملاحظة الكاش أسفل أزرار التابات */
+  .tab-cache-note{font-size:10px;text-align:center;margin-top:6px;padding:4px 10px;border-radius:8px;min-height:20px;transition:all 0.3s;}
+  .tab-cache-note.same{background:rgba(107,114,128,0.12);color:var(--muted);}
+  .tab-cache-note.new{background:rgba(34,197,94,0.1);color:var(--buy);}
+
   /* TABS */
   .tabs{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab{padding:7px 2px;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.3s ease;color:var(--muted);background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -1658,6 +1679,23 @@
     </button>
   </div>
 
+  <!-- ══════════════ CACHE REFRESH BAR ══════════════ -->
+  <div class="cache-bar" id="cacheBar">
+    <div class="cache-bar-row">
+      <div class="cache-bar-info">
+        <div class="cache-bar-title">📦 كاش Twelve Data</div>
+        <div class="cache-bar-time" id="cacheBarTime">لم يتم التحميل بعد</div>
+      </div>
+      <button class="cache-refresh-btn" id="cacheRefreshBtn" onclick="manualCacheRefresh()">
+        <span id="cacheRefreshIcon">🔄</span> تحديث الكاش
+      </button>
+    </div>
+    <div class="cache-progress" id="cacheProgress">
+      <div class="cache-progress-fill" id="cacheProgressFill"></div>
+    </div>
+    <div class="cache-status-note same" id="cacheStatusNote" style="display:none"></div>
+  </div>
+
   <!-- ══════════════ MTF CONFLUENCE WIDGET ══════════════ -->
   <div class="mtf-widget" id="mtf-widget">
     <div class="mtf-header">
@@ -1665,7 +1703,7 @@
         📊 MTF CONFLUENCE
         <span class="mtf-badge">MULTI-TIMEFRAME</span>
       </div>
-      <div class="mtf-sym-selector">
+      <div class="mtf-sym-selector" id="mtf-sym-selector" style="display:none;">
         <button class="mtf-sym-btn active" id="mtfbtn-eur" onclick="selectMTFSym('EUR')">EUR</button>
         <button class="mtf-sym-btn" id="mtfbtn-jpy" onclick="selectMTFSym('JPY')">JPY</button>
       </div>
@@ -1781,6 +1819,7 @@
       <div class="vol-bars" id="g-volBars"></div>
     </div>
     <button class="refresh-btn gold-btn" id="g-refreshBtn" onclick="runGold()"><span id="g-refreshIcon">🔄</span> تحديث الذهب</button>
+    <div class="tab-cache-note" id="g-cacheNote"></div>
   </div>
 
   <!-- ══════════════ EUR/USD PANEL ══════════════ -->
@@ -1856,6 +1895,7 @@
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="e-volVal">±—</div></div><div class="vol-bars" id="e-volBars"></div></div>
     <button class="refresh-btn eur-btn" id="e-refreshBtn" onclick="runEUR()"><span id="e-refreshIcon">🔄</span> تحديث EUR/USD</button>
+    <div class="tab-cache-note" id="e-cacheNote"></div>
   </div>
 
   <!-- ══════════════ USD/JPY PANEL ══════════════ -->
@@ -1932,6 +1972,7 @@
     <div class="section-title">تقلب GARCH اليومي</div>
     <div class="vol-card"><div class="vol-header"><div class="vol-title">النطاق المتوقع</div><div class="vol-val" id="j-volVal">±—</div></div><div class="vol-bars" id="j-volBars"></div></div>
     <button class="refresh-btn jpy-btn" id="j-refreshBtn" onclick="runJPY()"><span id="j-refreshIcon">🔄</span> تحديث USD/JPY</button>
+    <div class="tab-cache-note" id="j-cacheNote"></div>
   </div>
 
   <!-- ══════════════ PAIRS TRADING PANEL (جديد) ══════════════ -->
@@ -2029,6 +2070,7 @@
     </div>
 
     <button class="refresh-btn pairs-btn" id="p-refreshBtn" onclick="runPairs()"><span id="p-refreshIcon">🔄</span> تحديث Pairs Trading</button>
+    <div class="tab-cache-note" id="p-cacheNote"></div>
   </div>
 
 
@@ -2190,6 +2232,7 @@
       style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));">
       <span id="of-refreshIcon">🔄</span> تحديث Order Flow
     </button>
+    <div class="tab-cache-note" id="of-cacheNote"></div>
   </div>
 
   <!-- ══════════════ TIME SERIES PANEL ══════════════ -->
@@ -2272,6 +2315,7 @@
       style="background:linear-gradient(135deg,var(--cyan-dark),var(--cyan));">
       <span id="ts-refreshIcon">🔄</span> تحديث نماذج التنبؤ
     </button>
+    <div class="tab-cache-note" id="ts-cacheNote"></div>
   </div>
 
   <!-- ══════════════ SENTIMENT / NLP PANEL ══════════════ -->
@@ -2397,6 +2441,7 @@
       style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);">
       <span id="sent-refreshIcon">🔄</span> تحديث تحليل المشاعر
     </button>
+    <div class="tab-cache-note" id="sent-cacheNote"></div>
   </div>
 
   <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
@@ -2531,6 +2576,7 @@
       style="background:linear-gradient(135deg,#92400E,#D97706);">
       <span id="db-refreshIcon">🔄</span> تحديث التحيز اليومي
     </button>
+    <div class="tab-cache-note" id="db-cacheNote"></div>
   </div>
 
   <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
@@ -3136,10 +3182,37 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => { t.className='tab'; });
   document.getElementById('panel-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).className = 'tab active-'+tab;
-  // تأكد أننا في وضع Main
   document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
   document.getElementById('qbnav-brain').className = 'qb-nav-btn';
-  // شغّل Daily Bias تلقائياً عند فتح التاب إذا كان الكاش جاهزاً
+
+  // ── MTF: يظهر فقط في تابات الذهب/EUR/JPY ويتغير رمزه تلقائياً ──
+  const mtfWidget   = document.getElementById('mtf-widget');
+  const mtfSelector = document.getElementById('mtf-sym-selector');
+  if (mtfWidget) {
+    if (tab === 'gold') {
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'none'; // لا أزرار — XAU تلقائي
+      currentMTFSym = 'XAU';
+      runMTFConfluence();
+    } else if (tab === 'eur') {
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'flex';
+      document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('mtfbtn-eur')?.classList.add('active');
+      currentMTFSym = 'EUR';
+      runMTFConfluence();
+    } else if (tab === 'jpy') {
+      mtfWidget.style.display = 'block';
+      if (mtfSelector) mtfSelector.style.display = 'flex';
+      document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('mtfbtn-jpy')?.classList.add('active');
+      currentMTFSym = 'JPY';
+      runMTFConfluence();
+    } else {
+      mtfWidget.style.display = 'none';
+    }
+  }
+
   if (tab === 'dailybias' && Object.keys(_tdCache['1day']).length > 0) runDailyBias();
   if (tab === 'ms') setTimeout(loadMsData, 100);
 }
@@ -3255,10 +3328,62 @@ function _resample(candles1h, n) {
   return out.reverse();
 }
 
+let _fetchInProgress = false; // منع الطلبات المتزامنة
+let _lastCacheSnapshot = ''; // بصمة الكاش السابق للمقارنة
+
+// ── تحديث شريط الكاش في الواجهة ──
+function _updateCacheBar(state, progress) {
+  const timeEl   = document.getElementById('cacheBarTime');
+  const noteEl   = document.getElementById('cacheStatusNote');
+  const progBar  = document.getElementById('cacheProgress');
+  const progFill = document.getElementById('cacheProgressFill');
+  const btn      = document.getElementById('cacheRefreshBtn');
+  const icon     = document.getElementById('cacheRefreshIcon');
+  if (!timeEl) return;
+  if (state === 'fetching') {
+    const sym = ['XAU/USD','EUR/USD','USD/JPY','XAG/USD','GBP/USD'][progress-1] || '';
+    timeEl.textContent = `⏳ جاري جلب البيانات... (${progress}/5)`;
+    noteEl.className = 'cache-status-note fetching';
+    noteEl.textContent = `📡 جاري تحميل ${sym}`;
+    noteEl.style.display = 'block';
+    progBar.style.display = 'block';
+    progFill.style.width = (progress / 5 * 100) + '%';
+    if (btn) { btn.disabled = true; icon.textContent = '⏳'; }
+  } else if (state === 'done-new') {
+    const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+    timeEl.textContent = `آخر تحديث: ${t} · ${Object.keys(_tdCache['1h']).length} رموز`;
+    noteEl.className = 'cache-status-note new';
+    noteEl.textContent = '✅ بيانات جديدة · تم التحديث بنجاح';
+    noteEl.style.display = 'block';
+    progFill.style.width = '100%';
+    setTimeout(() => { progBar.style.display = 'none'; progFill.style.width = '0%'; }, 1800);
+    if (btn) { btn.disabled = false; icon.textContent = '🔄'; }
+  } else if (state === 'done-same') {
+    const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+    timeEl.textContent = `آخر تحديث: ${t} · ${Object.keys(_tdCache['1h']).length} رموز`;
+    noteEl.className = 'cache-status-note same';
+    noteEl.textContent = '↩ نفس البيانات السابقة · لا يوجد تغيير';
+    noteEl.style.display = 'block';
+    progBar.style.display = 'none';
+    if (btn) { btn.disabled = false; icon.textContent = '🔄'; }
+  }
+}
+
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
   if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) return;
   if (!TD_KEY) return;
+  if (_fetchInProgress) return;
+  _fetchInProgress = true;
+
+  // بصمة الكاش قبل التحديث
+  const snapshotBefore = JSON.stringify(
+    Object.keys(_tdCache['1h']).reduce((acc, s) => {
+      const v = _tdCache['1h'][s]; acc[s] = v?.[0]?.close ?? null; return acc;
+    }, {})
+  );
+
+  function _delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function _fetchSym(sym) {
     try {
@@ -3267,16 +3392,17 @@ async function fetchTDBatchAll(force = false) {
     } catch(e) { console.warn(`TD failed [${sym}]:`, e.message); return null; }
   }
 
-  // 5 طلبات فقط بالتوازي
-  const [xau, eur, jpy, xag, gbp] = await Promise.all([
-    _fetchSym('XAU/USD'), _fetchSym('EUR/USD'), _fetchSym('USD/JPY'),
-    _fetchSym('XAG/USD'), _fetchSym('GBP/USD'),
-  ]);
+  const symbols = ['XAU/USD', 'EUR/USD', 'USD/JPY', 'XAG/USD', 'GBP/USD'];
+  const map = {};
 
-  const map = {'XAU/USD':xau,'EUR/USD':eur,'USD/JPY':jpy,'XAG/USD':xag,'GBP/USD':gbp};
+  for (let i = 0; i < symbols.length; i++) {
+    _updateCacheBar('fetching', i + 1);
+    map[symbols[i]] = await _fetchSym(symbols[i]);
+    if (i < symbols.length - 1) await _delay(1200);
+  }
+
   Object.entries(map).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
 
-  // بناء 4h و 1day من 1h — صفر credits إضافية
   ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 8) {
@@ -3285,7 +3411,6 @@ async function fetchTDBatchAll(force = false) {
     }
   });
 
-  // Quote cache
   Object.keys(map).forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 2)
@@ -3293,20 +3418,47 @@ async function fetchTDBatchAll(force = false) {
   });
 
   _tdCacheTime = Date.now();
-  console.log('✅ TD Cache (5 req):', Object.keys(_tdCache['1h']));
+  _fetchInProgress = false;
+
+  // مقارنة بالبيانات القديمة
+  const snapshotAfter = JSON.stringify(
+    Object.keys(_tdCache['1h']).reduce((acc, s) => {
+      const v = _tdCache['1h'][s]; acc[s] = v?.[0]?.close ?? null; return acc;
+    }, {})
+  );
+  const isNew = (_lastCacheSnapshot === '') || (snapshotBefore !== snapshotAfter);
+  _lastCacheSnapshot = snapshotAfter;
+  _updateCacheBar(isNew ? 'done-new' : 'done-same');
+
+  console.log('✅ TD Cache (5 req sequential):', Object.keys(_tdCache['1h']), isNew ? '[جديد]' : '[نفس البيانات]');
 }
 
 // helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
 async function getTDValues(symbol, interval, outputsize = 40) {
   const cached = _tdCache[interval]?.[symbol];
   if (cached && cached.length > 0) return cached;
-  // إذا لم يكن في الكاش — حاول تحميل الكاش أولاً
+
+  // إذا كان هناك طلب جارٍ بالفعل — انتظر حتى ينتهي (polling)
+  if (_fetchInProgress) {
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      const retried = _tdCache[interval]?.[symbol];
+      if (retried && retried.length > 0) return retried;
+      if (!_fetchInProgress) break;
+    }
+    const retried2 = _tdCache[interval]?.[symbol];
+    if (retried2 && retried2.length > 0) return retried2;
+    throw new Error('انتهى وقت الانتظار — تحقق من مفتاح API');
+  }
+
+  // إذا لم يكن في الكاش ولا يوجد طلب جارٍ — ابدأ التحميل
   if (Object.keys(_tdCache['1h']).length === 0) {
     await fetchTDBatchAll(true);
     const retried = _tdCache[interval]?.[symbol];
     if (retried && retried.length > 0) return retried;
   }
-  throw new Error(`بيانات ${symbol} غير متوفرة في الكاش · يرجى الانتظار للتحديث التلقائي`);
+
+  throw new Error(`بيانات ${symbol} غير متوفرة · تحقق من مفتاح API أو انتظر التحديث التلقائي`);
 }
 
 // ══════════════════════════════════════════
@@ -3331,7 +3483,7 @@ function calcMTFSignal(values) {
 async function runMTFConfluence() {
   // لا تحديث إذا الكاش فارغ
   const tdSym = currentMTFSym === 'EUR' ? 'EUR/USD' :
-                currentMTFSym === 'XAU' ? 'XAU/USD' : 'USD/JPY';
+                currentMTFSym === 'JPY' ? 'USD/JPY' : 'XAU/USD';
 
   // حسب الكاش المتاح
   const v1d = _tdCache['1day']?.[tdSym];
@@ -3473,11 +3625,14 @@ function buildFakeSeries(currentPrice, count=30, volatilityPct=0.003) {
   const values = [];
   let price = currentPrice;
   for (let i = count; i >= 0; i--) {
-    const chg = price * volatilityPct * (Math.random() - 0.48);
+    // حتمي: نستخدم sin/cos بدلاً من random
+    const seed1 = Math.sin(i * 2.399) * 0.5; // pseudo-deterministic
+    const seed2 = Math.cos(i * 1.618) * 0.5;
+    const chg = price * volatilityPct * (seed1 - 0.48);
     const open = price;
     price = Math.max(price * 0.98, price + chg);
-    const high = Math.max(open, price) * (1 + Math.random() * 0.001);
-    const low  = Math.min(open, price) * (1 - Math.random() * 0.001);
+    const high = Math.max(open, price) * (1 + Math.abs(seed2) * 0.001);
+    const low  = Math.min(open, price) * (1 - Math.abs(seed1) * 0.001);
     values.push({
       open: open.toFixed(2),
       close: price.toFixed(2),
@@ -3785,7 +3940,7 @@ function setFactor(p,n,val,sig,live,src){ document.getElementById(`${p}-f${n}Val
 function setSignal(p,res){ const card=document.getElementById(`${p}-signalCard`); card.className='signal-card '+res.signal; const st=document.getElementById(`${p}-signalText`); st.textContent=res.signal; st.className='signal-text '+res.signal; document.getElementById(`${p}-signalAr`).textContent=AR[res.signal]; document.getElementById(`${p}-confFill`).className='conf-fill '+res.signal; document.getElementById(`${p}-confFill`).style.width=res.confidence+'%'; document.getElementById(`${p}-confVal`).textContent=res.confidence+'%'; document.getElementById(`${p}-confVal`).className='conf-val '+res.signal; }
 function setPrice(p,price,change,pct,label,prefix='$'){ const up=change>=0; document.getElementById(`${p}-priceMain`).textContent=prefix+price.toFixed(prefix==='¥'?2:4); const pc=document.getElementById(`${p}-priceChange`); pc.textContent=(up?'+':'')+change.toFixed(prefix==='¥'?2:4)+' ('+(up?'+':'')+pct.toFixed(2)+'%)'; pc.className='price-change '+(up?'up':'down'); document.getElementById(`${p}-priceTime`).textContent=new Date().toLocaleTimeString('ar-SA'); document.getElementById(`${p}-dataSource`).textContent=label; }
 function buildCandles(p,vals,prefix='$',dp=2){ const bar=document.getElementById(`${p}-candlesBar`); bar.innerHTML=''; const sl=vals.slice(0,12).reverse(); const H=sl.map(v=>parseFloat(v.high)),L=sl.map(v=>parseFloat(v.low)); const mx=Math.max(...H),mn=Math.min(...L),rng=mx-mn||1; sl.forEach(v=>{ const c=document.createElement('div'); c.className='candle '+(parseFloat(v.close)>=parseFloat(v.open)?'up':'down'); c.style.height=Math.max(6,((parseFloat(v.high)-parseFloat(v.low))/rng)*100)+'%'; bar.appendChild(c); }); document.getElementById(`${p}-candleTitle`).textContent=`${sl.length} شمعة ساعية · آخر ${prefix}${parseFloat(vals[0].close).toFixed(dp)}`; }
-function buildVol(p,vol,price,cls,prefix='$',dp=4){ const c=document.getElementById(`${p}-volBars`); c.innerHTML=''; for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className=`vol-bar ${cls}`+(i===11?' active':''); b.style.height=(20+Math.random()*60)+'%'; c.appendChild(b); } document.getElementById(`${p}-volVal`).textContent=`±${prefix}${(vol*price/100).toFixed(dp)}`; }
+function buildVol(p,vol,price,cls,prefix='$',dp=4,ohlcv=null){ const c=document.getElementById(`${p}-volBars`); c.innerHTML=''; if(ohlcv && ohlcv.length>=12){ // ارتفاعات حقيقية: نطاق كل شمعة (High-Low) مُعيَّر const candles=ohlcv.slice(0,12).reverse(); const ranges=candles.map(v=>parseFloat(v.high)-parseFloat(v.low)); const maxR=Math.max(...ranges)||1; for(let i=0;i<candles.length;i++){ const b=document.createElement('div'); b.className=`vol-bar ${cls}`+(i===candles.length-1?' active':''); const h=Math.max(8,(ranges[i]/maxR)*90); b.style.height=h+'%'; c.appendChild(b); } } else { // fallback بدون OHLCV for(let i=0;i<12;i++){ const b=document.createElement('div'); b.className=`vol-bar ${cls}`+(i===11?' active':''); b.style.height=(25 + Math.abs(Math.sin(i*0.8))*55)+'%'; c.appendChild(b); } } document.getElementById(`${p}-volVal`).textContent=`±${prefix}${(vol*price/100).toFixed(dp)}`; }
 function showErr(m){ const e=document.getElementById('errorBanner'); let msg=m; if(m.includes('Failed to fetch')||m.includes('NetworkError'))msg='فشل الاتصال بالإنترنت · تحقق من اتصالك'; else if(m.includes('تعذّر جلب سعر الذهب'))msg=m; else if(m.includes('HTTP 4'))msg='مفتاح API غير صحيح · يرجى التحقق من المفتاح'; else if(m.includes('HTTP 5'))msg='خطأ في خادم API · حاول مرة أخرى بعد قليل'; else if(m.includes('Twelve Data'))msg='Twelve Data: '+m.split('Twelve Data: ')[1]; e.textContent='⚠️ '+msg; e.classList.add('show'); }
 function hideErr(){ document.getElementById('errorBanner').classList.remove('show'); }
 function setBtnLoading(p,on){ const btn=document.getElementById(`${p}-refreshBtn`); const icon=document.getElementById(`${p}-refreshIcon`); if(on){btn.classList.add('loading');icon.innerHTML='<span class="spin">⟳</span>';}else{btn.classList.remove('loading');icon.textContent='🔄';} }
@@ -3857,7 +4012,7 @@ async function runGold(){
     setFactor('g',3,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[2],fredData?.vixLive,'td');
     setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],fredData?.breakeven!=null);
     buildCandles('g',values1h,'$',1);
-    buildVol('g',vol,price,'gold-bar','$',0);
+    buildVol('g',vol,price,'gold-bar','$',0,values1h);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
   }catch(err){showErr(err.message);console.error(err);}
   setBtnLoading('g',false);
@@ -3909,7 +4064,7 @@ async function runEUR(){
     setFactor('e',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
     setFactor('e',3,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[2],fredData?.breakeven!=null);
     buildCandles('e',values1h,'',5);
-    buildVol('e',vol,price,'eur-bar','',5);
+    buildVol('e',vol,price,'eur-bar','',5,values1h);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
     // تحديث MTF mini badges
     updateMTFMini('e', 'EUR');
@@ -3963,7 +4118,7 @@ async function runJPY(){
     setFactor('j',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
     setFactor('j',3,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[2],live&&fredData?.realYield!=null);
     buildCandles('j',values1h,'¥',2);
-    buildVol('j',vol,price,'jpy-bar','¥',2);
+    buildVol('j',vol,price,'jpy-bar','¥',2,values1h);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
     // تحديث MTF mini badges
     updateMTFMini('j', 'JPY');
@@ -4890,7 +5045,10 @@ async function runSentiment() {
     const bullPct  = Math.round(analyzed.filter(n => n.sent === 'BULLISH').length / analyzed.length * 100);
     const bearPct  = Math.round(analyzed.filter(n => n.sent === 'BEARISH').length / analyzed.length * 100);
     const neutPct  = 100 - bullPct - bearPct;
-    const buzzScore= Math.round(60 + Math.random() * 30);
+    // buzzScore مشتق من عدد الأخبار + قوة المشاعر
+    const buzzScore = Math.min(95, Math.max(30, Math.round(
+      40 + (newsItems.length / 8) * 30 + Math.abs(finalScore) * 25
+    )));
     const momentum = finalScore > 0.2 ? '↑ تصاعدي' : finalScore < -0.2 ? '↓ تنازلي' : '→ ثابت';
     const smartMoney = macroSignal > 0.1 ? 'BUY' : macroSignal < -0.1 ? 'SELL' : 'NEUTRAL';
     const smartColor = smartMoney === 'BUY' ? 'var(--buy)' : smartMoney === 'SELL' ? 'var(--sell)' : 'var(--neutral)';
@@ -4947,12 +5105,13 @@ async function runSentiment() {
     document.getElementById('sent-bkMacroPct').textContent = macroSentPct + '%';
     document.getElementById('sent-bkFearPct').textContent  = fearPct + '%';
 
-    // Buzz Chart
+    // Buzz Chart — متناقص حتمي من الأقدم للأحدث بدلاً من عشوائي
     const buzzEl = document.getElementById('sent-buzzBars');
     buzzEl.innerHTML = '';
-    const buzzVals = Array.from({length:12}, (_,i) =>
-      Math.max(15, Math.min(95, buzzScore + (Math.random()-0.5)*30))
-    );
+    const buzzVals = Array.from({length:12}, (_,i) => {
+      const decay = (i / 11) * 0.6 + 0.4; // تصاعد تدريجي نحو الأحدث
+      return Math.max(15, Math.min(95, buzzScore * decay + Math.sin(i * 1.3) * 8));
+    });
     const maxBuzz = Math.max(...buzzVals);
     buzzVals.forEach((v, i) => {
       const b = document.createElement('div');
@@ -5531,9 +5690,9 @@ function calcLiquidityLevels(ohlcv, currentPrice) {
   const lows   = ohlcv.map(c => parseFloat(c.low   || c.close));
   const closes = ohlcv.map(c => parseFloat(c.close));
   const volumes = ohlcv.map((c,i) => {
-    // حجم محاكَى من نطاق الشمعة (بدون بيانات حجم حقيقية)
+    // حجم محاكَى من نطاق الشمعة — حتمي بالكامل بدون عشوائية
     const range = Math.abs(parseFloat(c.high||c.close) - parseFloat(c.low||c.close));
-    return range * (1 + Math.sin(i * 1.618) * 0.3 + Math.random() * 0.2);
+    return range * (1 + Math.sin(i * 1.618) * 0.3 + Math.cos(i * 0.5) * 0.15);
   });
 
   const priceRange = Math.max(...highs) - Math.min(...lows);
@@ -6196,7 +6355,13 @@ async function checkRSSFeeds() {
   if (rssDot)   { rssDot.classList.remove('idle'); rssDot.classList.add('live'); }
 
   // اختر 3 feeds عشوائية لتقليل التحميل
-  const feedsToCheck = RSS_FEEDS.sort(() => Math.random() - 0.5).slice(0, 3);
+  // اختيار 3 مصادر بالتناوب بدلاً من العشوائي
+  const rssIdx = Math.floor(Date.now() / (3*60*1000)) % RSS_FEEDS.length;
+  const feedsToCheck = [
+    RSS_FEEDS[rssIdx % RSS_FEEDS.length],
+    RSS_FEEDS[(rssIdx + 1) % RSS_FEEDS.length],
+    RSS_FEEDS[(rssIdx + 2) % RSS_FEEDS.length],
+  ];
   const allItems = [];
 
   await Promise.allSettled(
@@ -6615,23 +6780,37 @@ async function runDailyBias() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب TD و FRED بالتوازي — ننتظر كليهما قبل المتابعة
+  // 1. جلب TD (يتم يدوياً فقط عبر زر الكاش) + FRED تلقائي
   await Promise.all([
     fetchTDBatchAll(),
     fetchAllFRED().then(d => { fredData = d; }),
   ]);
 
-  // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
+  // 2. تشغيل التحليلات من الكاش
+  await _runAnalysisFromCache();
+}
+
+// تشغيل التحليلات من الكاش بدون إعادة جلب TD
+async function _runAnalysisFromCache() {
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
-
-  // 3. تحديث بطاقة MTF Confluence
-  runMTFConfluence();
-
-  // 4. Quant Brain إذا كان مفتوحاً
+  if (['gold','eur','jpy'].includes(currentTab)) {
+    if (currentTab === 'gold') currentMTFSym = 'XAU';
+    else if (currentTab === 'eur') currentMTFSym = 'EUR';
+    else if (currentTab === 'jpy') currentMTFSym = 'JPY';
+    runMTFConfluence();
+  }
   if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
-
-  // 5. Daily Bias إذا كان مفتوحاً
   if (document.getElementById('panel-dailybias')?.classList.contains('active')) runDailyBias();
+}
+
+// ── زر تحديث الكاش يدوياً ──
+async function manualCacheRefresh() {
+  if (_fetchInProgress) return;
+  // إعادة جلب TD بالقوة
+  _tdCacheTime = 0; // إبطال الكاش لإجبار إعادة الجلب
+  await fetchTDBatchAll(true);
+  // بعد تحديث الكاش — أعد تشغيل التحليلات تلقائياً
+  await _runAnalysisFromCache();
 }
 
 // ══════════════════════════════════════════
@@ -6661,20 +6840,29 @@ window.addEventListener('load',()=>{
   document.getElementById('resetRow').style.display='block';
   const steps=['⏳ الاتصال بـ Twelve Data...','📊 جلب XAU/USD...','🇪🇺 جلب EUR/USD...','🇯🇵 جلب USD/JPY...','⚡ جلب بيانات Pairs...','🏛 استعلام FRED...','🧠 تشغيل Regime Detection...','🤖 تشغيل النماذج...','✅ جاهز!'];
   let i=0; const el=document.getElementById('loadStep');
-  const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },350);
-  setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); runAll(); },3200);
+  const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },800);
+  runAll().then(()=>{
+    clearInterval(iv);
+    if(el) el.textContent='✅ جاهز!';
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }).catch(()=>{
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  });
   // ── بدء مراقب RSS للأخبار العاجلة ──
-  setTimeout(startRSSMonitor, 4000);
+  setTimeout(startRSSMonitor, 9000);
 });
 
-setInterval(()=>{
-  const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`).classList.contains('loading'));
-  if(!anyLoading) runAll();
-},15*60*1000); // كل 15 دقيقة
+// التحديث التلقائي: FRED + التحليلات فقط — بدون إعادة جلب TD
+setInterval(async () => {
+  const anyLoading=['g','e','j','p'].some(p=>document.getElementById(`${p}-refreshBtn`)?.classList.contains('loading'));
+  if (anyLoading) return;
+  // تحديث FRED فقط
+  fetchAllFRED().then(d => { if(d) { fredData = d; _runAnalysisFromCache(); } });
+}, 15 * 60 * 1000); // كل 15 دقيقة
 
-// عداد تنازلي للتحديث التلقائي
+// عداد تنازلي — يشير الآن لتحديث FRED وليس TD
 (function startCountdown(){
-  const INTERVAL = 15 * 60; // ثانية
+  const INTERVAL = 15 * 60;
   let remaining = INTERVAL;
   const el = document.getElementById('countdownTimer');
   if (!el) return;
@@ -6683,7 +6871,7 @@ setInterval(()=>{
     if (remaining <= 0) remaining = INTERVAL;
     const m = String(Math.floor(remaining/60)).padStart(2,'0');
     const s = String(remaining % 60).padStart(2,'0');
-    el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
+    el.textContent = `🔄 تحديث FRED بعد ${m}:${s}`;
   }, 1000);
 })();
 
@@ -7046,49 +7234,115 @@ async function loadMsData() {
     const cfg = _msSymCfg[sym];
     let price = null, candles = [];
 
-    // محاولة جلب بيانات حقيقية من Twelve Data (إذا كان API_KEY محدداً)
-    if (typeof API_KEY !== 'undefined' && API_KEY && API_KEY !== 'YOUR_KEY') {
+    // الرمز بصيغة Twelve Data (مع شرطة مائلة)
+    const tdSymMap = { XAUUSD:'XAU/USD', EURUSD:'EUR/USD', USDJPY:'USD/JPY', GBPUSD:'GBP/USD' };
+    const tdSym = tdSymMap[sym];
+
+    // أولاً: محاولة جلب من الكاش المركزي (يُحدَّث عند الضغط على "تحديث الكاش")
+    const cached1h = _tdCache['1h']?.[tdSym];
+    if (cached1h && cached1h.length >= 10) {
+      price = parseFloat(cached1h[0].close);
+      candles = cached1h.slice(0, 50).map(c => ({
+        o: parseFloat(c.open),
+        h: parseFloat(c.high),
+        l: parseFloat(c.low),
+        c: parseFloat(c.close),
+        v: parseFloat(c.volume) || 1000
+      })).reverse();
+    }
+
+    // ثانياً: إذا الكاش فارغ — جلب مباشر من TD
+    if ((!price || candles.length === 0) && TD_KEY) {
       try {
         const [qRes, oRes] = await Promise.all([
-          fetch(`https://api.twelvedata.com/price?symbol=${sym}&apikey=${API_KEY}`),
-          fetch(`https://api.twelvedata.com/time_series?symbol=${sym}&interval=1min&outputsize=50&apikey=${API_KEY}`)
+          fetch(`https://api.twelvedata.com/price?symbol=${tdSym}&apikey=${TD_KEY}`),
+          fetch(`https://api.twelvedata.com/time_series?symbol=${tdSym}&interval=1h&outputsize=50&apikey=${TD_KEY}`)
         ]);
         const qd = await qRes.json();
         const od = await oRes.json();
         if (qd.price) price = parseFloat(qd.price);
         if (od.values) {
           candles = od.values.map(c => ({
-            o:parseFloat(c.open), h:parseFloat(c.high),
-            l:parseFloat(c.low), c:parseFloat(c.close),
-            v:parseFloat(c.volume)||Math.random()*1000+500
+            o: parseFloat(c.open), h: parseFloat(c.high),
+            l: parseFloat(c.low),  c: parseFloat(c.close),
+            v: parseFloat(c.volume) || 1000
           })).reverse();
         }
-      } catch(e) {}
+      } catch(e) { console.warn('MS direct fetch failed:', e.message); }
     }
 
-    // Fallback ذكي: محاكاة واقعية بناءً على آخر سعر معروف
+    // لا توجد بيانات — عرض رسالة واضحة بدون أرقام وهمية
     if (!price || candles.length === 0) {
-      const bases = { XAUUSD:3240, EURUSD:1.0850, USDJPY:149.50, GBPUSD:1.2650 };
-      price = bases[sym] * (1 + (Math.random()-0.5)*0.003);
-      candles = _msGenCandles(price, 50, cfg.pip);
+      _msShowNoData();
+      return;
     }
 
     _msCompute(price, candles, sym, cfg);
   } catch(e) {
     console.error('MS Error:', e);
+    _msShowNoData();
   } finally {
     btn.classList.remove('loading');
     btn.innerHTML = '<span>🔄</span> تحديث هيكل السوق';
   }
 }
 
+function _msShowNoData() {
+  const dash = '—';
+  const noMsg = 'لا توجد بيانات حالياً · حدّث الكاش أولاً';
+
+  const card = document.getElementById('ms-master-card');
+  if (card) card.className = 'ms-master-card NEUTRAL';
+  const score = document.getElementById('ms-master-score');
+  if (score) { score.textContent = dash; score.className = 'ms-master-score NEUTRAL'; }
+  const verdict = document.getElementById('ms-master-verdict');
+  if (verdict) { verdict.textContent = noMsg; verdict.className = 'ms-master-verdict NEUTRAL'; }
+  const sub = document.getElementById('ms-master-sub');
+  if (sub) sub.textContent = 'اضغط "تحديث الكاش" في الأعلى ثم اضغط "تحديث هيكل السوق"';
+  const cf = document.getElementById('ms-conf-fill');
+  if (cf) { cf.style.width = '0%'; cf.className = 'ms-conf-fill NEUTRAL'; }
+  const cv = document.getElementById('ms-conf-val');
+  if (cv) { cv.textContent = dash; cv.className = 'ms-conf-val NEUTRAL'; }
+
+  ['ob-supply','ob-demand','ob-vwap','ob-poc',
+   'ob-supply-meta','ob-demand-meta','ob-vwap-meta','ob-poc-meta',
+   'ba-bid-pct','ba-ask-pct','ba-spread','ba-depth','ba-liquidity',
+   'eq-speed-val','eq-slip-val','eq-quality-val','eq-impact-val',
+   'eq-cost','eq-response','eq-fill',
+   'mf-vwap','mf-vwap-dist','mf-spread-avg','mf-liq-trend','vwap-pos-label',
+   'zr-buy-val','zr-sell-val','zr-neut-val',
+   'ms-delta-cum','ms-delta-cur','ms-delta-cvd'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = dash; el.style.color = 'var(--muted)'; }
+  });
+
+  const sl = document.getElementById('ms-sweep-list');
+  if (sl) sl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">${noMsg}</div>`;
+
+  const ins = document.getElementById('ms-insight-text');
+  if (ins) ins.textContent = 'اضغط "تحديث الكاش" في الأعلى ثم أعد فتح هذا التاب.';
+
+  const canvas = document.getElementById('ob-canvas');
+  if (canvas) {
+    const W = canvas.parentElement?.clientWidth || 400, H = 220;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(107,114,128,0.5)';
+    ctx.font = '14px Tajawal'; ctx.textAlign = 'center';
+    ctx.fillText('لا توجد بيانات حالياً', W/2, H/2 - 8);
+    ctx.font = '11px Tajawal'; ctx.fillStyle = 'rgba(107,114,128,0.6)';
+    ctx.fillText('حدّث الكاش أولاً', W/2, H/2 + 14);
+  }
+}
+
 function _msGenCandles(base, n, pip) {
   let p = base;
   return Array.from({length:n}, (_, i) => {
-    const mv = (Math.random()-0.48)*pip*15;
+    const mv = (Math.sin(i * 2.399) * 0.5 - 0.02) * pip * 15;
     p += mv;
-    const rng = pip*(5+Math.random()*10);
-    return { o:p-mv, h:p+rng*0.6, l:p-rng*0.4, c:p, v:500+Math.random()*1500 };
+    const rng = pip * (5 + Math.abs(Math.cos(i * 1.618)) * 10);
+    return { o:p-mv, h:p+rng*0.6, l:p-rng*0.4, c:p, v:500+Math.abs(Math.sin(i*3.7))*1500 };
   });
 }
 
@@ -7114,26 +7368,59 @@ function _msCompute(price, candles, sym, cfg) {
   const supply = (candles.map(c=>c.h).sort((a,b)=>b-a).slice(0,3).reduce((a,b)=>a+b,0))/3;
   const demand = (candles.map(c=>c.l).sort((a,b)=>a-b).slice(0,3).reduce((a,b)=>a+b,0))/3;
 
-  // Bid/Ask
+  // Bid/Ask — مشتق من نسبة الشمعات الصاعدة (Close > Open)
   const bullC = candles.slice(-10).filter(c=>c.c>c.o).length;
-  const bidPct = Math.min(80,Math.max(20, Math.round(45+bullC*1.2+(Math.random()*6-3))));
+  const bidPct = Math.min(80,Math.max(20, Math.round(40 + bullC * 4)));
   const askPct = 100-bidPct;
 
-  // Scores
-  const spreadPips = (0.5+Math.random()*1.5).toFixed(1);
-  const depth = Math.round(10+Math.random()*15);
+  // ── Tick Data Approximation: Bid/Ask Spread = متوسط (High-Low) آخر 10 شمعات ──
+  const recentCandles = candles.slice(-10);
+  const avgHL = recentCandles.reduce((s,c) => s + (c.h - c.l), 0) / recentCandles.length;
+  const pipSz = candles[0].c > 100 ? 0.01 : 0.0001; // ذهب vs فوركس
+  const spreadPips = Math.max(0.1, (avgHL / 2 / pipSz)).toFixed(1); // نصف النطاق = تقدير spread
+  const depth = Math.round(Math.min(25, Math.max(5, bullC * 1.5 + (100-bidPct)*0.1)));
   const liqLabel = bidPct>58?'مرتفعة':bidPct<45?'منخفضة':'متوسطة';
-  const speedSc=Math.round(70+Math.random()*28), slipSc=Math.round(15+Math.random()*40);
-  const qualSc=Math.round(60+Math.random()*35), impSc=Math.round(10+Math.random()*50);
+
+  // ── Execution Quality من OHLCV الحقيقي ──
+  // Fill Rate: نسبة الشمعات الكاملة (Close قريب من High أو Low)
+  const fullCandles = recentCandles.filter(c => {
+    const range = c.h - c.l || 0.0001;
+    const closePct = (c.c - c.l) / range;
+    return closePct > 0.75 || closePct < 0.25; // أغلق بالقرب من طرف النطاق
+  }).length;
+  const fillRate = Math.round((fullCandles / recentCandles.length) * 100);
+
+  // Slippage Estimate: كلما كان High-Low أكبر كلما زاد الانزلاق
+  const volPct = Math.min(100, Math.round((avgHL / candles[0].c) * 10000)); // bps
+  const slipSc  = Math.min(80, Math.max(5, volPct));
+
+  // Execution Speed: عكس التقلب (سوق هادئ = تنفيذ أسرع)
+  const speedSc = Math.min(98, Math.max(50, 100 - slipSc));
+
+  // Quality Score: مزيج من Fill Rate + Spread
+  const qualSc = Math.min(98, Math.round((fillRate * 0.6) + (speedSc * 0.4)));
+
+  // Market Impact: حجم النطاق مقارنة بالمتوسط
+  const allRanges = candles.map(c => c.h - c.l);
+  const meanRange = allRanges.reduce((a,b) => a+b, 0) / allRanges.length || 1;
+  const lastRange = allRanges[allRanges.length - 1];
+  const impSc = Math.min(90, Math.max(5, Math.round((lastRange / meanRange) * 30)));
 
   // Delta
   const deltaHist = candles.map(c=>Math.round(((c.c-c.o)/(c.h-c.l||1))*c.v*0.5));
   const deltaCum = deltaHist.reduce((a,b)=>a+b,0);
   const deltaCur = deltaHist[deltaHist.length-1];
 
-  // ZR
-  const zrBuy=Math.round(30+Math.random()*50), zrSell=Math.round(20+Math.random()*40);
-  const zrNeut=Math.max(5,100-zrBuy-zrSell);
+  // ── ZR (Zero Reflections) من نسب VWAP و POC الحقيقية ──
+  // zrBuy: نسبة الشمعات التي ارتدت صعوداً عند/تحت VWAP
+  // zrSell: نسبة الشمعات التي ارتدت هبوطاً عند/فوق VWAP أو POC
+  const aboveVwapC = candles.filter(c => c.l <= vwap && c.c > vwap).length; // لمست VWAP وارتدت صعوداً
+  const belowVwapC = candles.filter(c => c.h >= vwap && c.c < vwap).length; // لمست VWAP وارتدت هبوطاً
+  const pocBounces = candles.filter(c => Math.abs(c.c - poc) < (maxP - minP) * 0.005).length;
+  const total = candles.length || 1;
+  const zrBuy  = Math.min(85, Math.max(10, Math.round((aboveVwapC / total) * 100 + pocBounces * 3)));
+  const zrSell = Math.min(85, Math.max(10, Math.round((belowVwapC / total) * 100 + pocBounces * 2)));
+  const zrNeut = Math.max(5, 100 - zrBuy - zrSell);
 
   // Master Score
   const sc = Math.round((aboveVwap?25:0)+(bidPct>55?20:bidPct<45?0:10)+(deltaCum>0?20:0)+zrBuy*0.2+10);
@@ -7144,7 +7431,7 @@ function _msCompute(price, candles, sym, cfg) {
   _msRenderOB(price, vwap, poc, supply, demand, candles, fmt);
   _msRenderBidAsk(bidPct, askPct, spreadPips, depth, liqLabel);
   _msRenderExec(speedSc, slipSc, qualSc, impSc);
-  _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt);
+  _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt, candles);
   _msRenderDelta(deltaHist, deltaCum, deltaCur);
   _msRenderSweeps(price, supply, demand, candles, fmt);
   _msRenderInsight(dir, aboveVwap, bidPct, deltaCum, vwapDist, price, vwap, poc, supply, demand, sym, fmt);
@@ -7167,19 +7454,35 @@ function _msRenderMaster(sc, dir) {
 
 function _msRenderOB(price, vwap, poc, supply, demand, candles, fmt) {
   document.getElementById('ob-current-price').textContent = fmt(price);
+
+  // قوة Supply: نسبة الشمعات التي وصلت لمنطقة Supply وارتدت هبوطاً
+  const supplyTouches = candles.filter(c => c.h >= supply * 0.9995 && c.c < c.h).length;
+  const supplyStr = Math.min(95, Math.max(30, Math.round((supplyTouches / candles.length) * 200 + 40)));
   document.getElementById('ob-supply').textContent=fmt(supply);
-  document.getElementById('ob-supply-meta').textContent='قوة '+Math.round(65+Math.random()*30)+'%';
+  document.getElementById('ob-supply-meta').textContent='قوة '+supplyStr+'%';
   document.getElementById('ob-demand').textContent=fmt(demand);
-  document.getElementById('ob-demand-meta').textContent='قوة '+Math.round(65+Math.random()*30)+'%';
+
+  // قوة Demand: نسبة الشمعات التي وصلت لمنطقة Demand وارتدت صعوداً
+  const demandTouches = candles.filter(c => c.l <= demand * 1.0005 && c.c > c.l).length;
+  const demandStr = Math.min(95, Math.max(30, Math.round((demandTouches / candles.length) * 200 + 40)));
+  document.getElementById('ob-demand-meta').textContent='قوة '+demandStr+'%';
   document.getElementById('ob-vwap').textContent=fmt(vwap);
   document.getElementById('ob-vwap-meta').textContent=price>vwap?'▲ فوق VWAP':'▼ تحت VWAP';
   document.getElementById('ob-poc').textContent=fmt(poc);
   document.getElementById('ob-poc-meta').textContent='أعلى تركيز حجم';
+
+  // قوة POC: كثافة الحجم عند POC مقارنة بالمتوسط
+  const bins=20, binSz=(Math.max(...candles.map(c=>c.h))-Math.min(...candles.map(c=>c.l)))/bins;
+  const pocBin = Math.round((poc - Math.min(...candles.map(c=>c.l))) / (binSz||1));
+  const totalVol = candles.reduce((s,c)=>s+c.v,0)||1;
+  const pocAreaVol = candles.filter(c => Math.abs(c.c - poc) < binSz * 2).reduce((s,c)=>s+c.v,0);
+  const pocStr = Math.min(95, Math.max(35, Math.round((pocAreaVol / totalVol) * 300 + 35)));
+
   setTimeout(()=>{
-    document.getElementById('ob-supply-str').style.width=Math.round(55+Math.random()*40)+'%';
-    document.getElementById('ob-demand-str').style.width=Math.round(55+Math.random()*40)+'%';
+    document.getElementById('ob-supply-str').style.width=supplyStr+'%';
+    document.getElementById('ob-demand-str').style.width=demandStr+'%';
     document.getElementById('ob-vwap-str').style.width='80%';
-    document.getElementById('ob-poc-str').style.width=Math.round(45+Math.random()*45)+'%';
+    document.getElementById('ob-poc-str').style.width=pocStr+'%';
   },200);
   _msDrawCanvas(price, vwap, poc, supply, demand, candles, fmt);
 }
@@ -7310,19 +7613,30 @@ function _msRenderExec(speed, slip, qual, imp) {
     document.getElementById('eq-quality-fill').style.width=qual+'%';
     document.getElementById('eq-impact-fill').style.width=imp+'%';
   },100);
-  const cost=(0.3+Math.random()*0.8).toFixed(2);
+  // eq-cost: مشتق من slippage (bps → pip تقريبي)
+  const cost = (slip * 0.01).toFixed(2);
   document.getElementById('eq-cost').textContent=cost+' pip';
-  document.getElementById('eq-cost').style.color=cost<0.7?'var(--buy)':'var(--sell)';
-  document.getElementById('eq-response').textContent=Math.round(50+Math.random()*150)+'ms';
-  document.getElementById('eq-fill').textContent=Math.round(90+Math.random()*9)+'%';
+  document.getElementById('eq-cost').style.color=parseFloat(cost)<0.5?'var(--buy)':'var(--sell)';
+  // eq-response: عكسي للـ slippage — سوق هادئ = استجابة أسرع
+  document.getElementById('eq-response').textContent=Math.round(200 - speed)+'ms';
+  // eq-fill: مرتبط بـ qual score
+  document.getElementById('eq-fill').textContent=Math.min(99, Math.max(85, qual))+'%';
 }
 
-function _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt) {
+function _msRenderMF(price, vwap, vwapDist, aboveVwap, zrBuy, zrSell, zrNeut, fmt, candles) {
   document.getElementById('mf-vwap').textContent=fmt(vwap);
   const dEl=document.getElementById('mf-vwap-dist');
   dEl.textContent=(aboveVwap?'+':'-')+Math.abs(vwapDist);
   dEl.style.color=aboveVwap?'var(--buy)':'var(--sell)';
-  document.getElementById('mf-spread-avg').textContent=(0.5+Math.random()*1.2).toFixed(1);
+  // متوسط Spread الحقيقي من High-Low آخر 10 شمعات
+  if(candles && candles.length >= 5){
+    const recent = candles.slice(-10);
+    const pipSz = candles[0].c > 100 ? 0.01 : 0.0001;
+    const avgSpread = recent.reduce((s,c)=>s+(c.h-c.l),0)/recent.length/pipSz;
+    document.getElementById('mf-spread-avg').textContent=Math.max(0.1, avgSpread*0.5).toFixed(1);
+  } else {
+    document.getElementById('mf-spread-avg').textContent='—';
+  }
   const lt=document.getElementById('mf-liq-trend');
   lt.textContent=aboveVwap?'↑ شرائي':'↓ بيعي';
   lt.style.color=aboveVwap?'var(--buy)':'var(--sell)';
@@ -7412,6 +7726,65 @@ const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
 // ══════════════════════════════════════════════════════════
 // END MARKET STRUCTURE ENGINE
 // ══════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// ██████ TAB CACHE NOTE SYSTEM ██████
+// ══════════════════════════════════════════
+// يخزن آخر بصمة بيانات لكل تاب للمقارنة
+const _tabSnapshots = {};
+
+// يُستدعى من كل دالة runXxx بعد الانتهاء
+function _updateTabCacheNote(noteId, symbolKey) {
+  const noteEl = document.getElementById(noteId);
+  if (!noteEl) return;
+
+  if (!_tdCacheTime) {
+    noteEl.textContent = '';
+    noteEl.className = 'tab-cache-note';
+    return;
+  }
+
+  // بناء بصمة من آخر سعر إغلاق للرمز المحدد
+  const v = _tdCache['1h']?.[symbolKey];
+  const snap = v?.[0]?.close ?? null;
+  const key  = noteId;
+  const prev = _tabSnapshots[key];
+  const isNew = (prev === undefined) || (String(prev) !== String(snap));
+  _tabSnapshots[key] = snap;
+
+  const t = new Date(_tdCacheTime).toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+
+  if (isNew) {
+    noteEl.className = 'tab-cache-note new';
+    noteEl.textContent = `✅ بيانات جديدة من الكاش · ${t}`;
+  } else {
+    noteEl.className = 'tab-cache-note same';
+    noteEl.textContent = `↩ نفس البيانات السابقة · آخر تحديث ${t}`;
+  }
+}
+
+// ربط ملاحظة الكاش بكل دالة تحليل — نعيد تعريف wrapper خفيف
+(function _wrapRunners() {
+  const _pairs = [
+    { run: 'runGold',       note: 'g-cacheNote',    sym: 'XAU/USD' },
+    { run: 'runEUR',        note: 'e-cacheNote',    sym: 'EUR/USD' },
+    { run: 'runJPY',        note: 'j-cacheNote',    sym: 'USD/JPY' },
+    { run: 'runPairs',      note: 'p-cacheNote',    sym: 'XAU/USD' },
+    { run: 'runOrderFlow',  note: 'of-cacheNote',   sym: 'XAU/USD' },
+    { run: 'runTimeSeries', note: 'ts-cacheNote',   sym: 'EUR/USD' },
+    { run: 'runSentiment',  note: 'sent-cacheNote', sym: null      },
+    { run: 'runDailyBias',  note: 'db-cacheNote',   sym: 'XAU/USD' },
+  ];
+  _pairs.forEach(({ run, note, sym }) => {
+    const orig = window[run];
+    if (typeof orig !== 'function') return;
+    window[run] = async function(...args) {
+      const result = await orig.apply(this, args);
+      _updateTabCacheNote(note, sym);
+      return result;
+    };
+  });
+})();
 
 </script>
 </body>
