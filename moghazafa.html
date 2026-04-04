@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v6 MTF</title>
+<title>Quant Signal Pro · Live v8 MTF</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -2281,6 +2281,9 @@ const _tdCache = {
 let _tdCacheTime = 0;          // آخر تحديث للكاش
 const TD_CACHE_TTL = 14 * 60 * 1000; // 14 دقيقة صلاحية الكاش
 
+// كاش أسعار Quote — يُستخرج من آخر شمعة (بدون طلبات quote منفصلة)
+const _tdQuoteCache = {};  // { 'EUR/USD': { price, prev }, ... }
+
 let currentMTFSym = 'EUR';     // الرمز النشط في بطاقة MTF
 let currentTSTF   = '1h';      // الإطار الزمني النشط في تاب TS
 
@@ -2374,8 +2377,8 @@ async function fetchTD(path) {
 // ══════════════════════════════════════════
 // ██████ BATCH FETCH & CACHE ENGINE ██████
 // ══════════════════════════════════════════
-// يجلب رموزاً متعددة في طلب واحد لكل إطار زمني
-// ويخزّن النتيجة في _tdCache لمشاركتها بين التابات
+// طلب واحد لكل إطار زمني يجلب جميع الرموز دفعةً واحدة
+// الخطة المجانية: 8 credits/دقيقة — نستخدم 3 فقط
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
   if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) {
@@ -2384,26 +2387,24 @@ async function fetchTDBatchAll(force = false) {
 
   if (!TD_KEY) return;
 
-  // الرموز المطلوبة لكل إطار
-  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD,XAU/USD';
-  const SYMS_4H   = 'EUR/USD,USD/JPY,XAU/USD';
-  const SYMS_1DAY = 'EUR/USD,USD/JPY,XAU/USD';
+  // ── جميع الرموز المطلوبة في طلب واحد لكل إطار ──
+  // هذا يستهلك 1 credit لكل طلب (batch) بدلاً من credit لكل رمز
+  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD,XAU/USD,XAG/USD';
+  const SYMS_4H   = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
+  const SYMS_1DAY = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
 
   try {
-    // 3 طلبات متوازية — batch بالرموز وليس بالإطارات
+    // 3 طلبات فقط — كل طلب يجلب جميع الرموز لإطار واحد
     const [res1h, res4h, res1d] = await Promise.all([
       fetchTD(`time_series?symbol=${SYMS_1H}&interval=1h&outputsize=60`),
       fetchTD(`time_series?symbol=${SYMS_4H}&interval=4h&outputsize=40`),
       fetchTD(`time_series?symbol=${SYMS_1DAY}&interval=1day&outputsize=30`),
     ]);
 
-    // تحليل الردود — عندما رموز متعددة يعيد TD كائناً مفهرساً بالرمز
     function parseBatchRes(res, symsStr) {
       const syms = symsStr.split(',');
       const out = {};
-      // إذا كان رمز واحد فقط يعيد مباشرةً وإلا يعيد object
       if (res.values) {
-        // رمز واحد
         out[syms[0]] = res.values;
       } else {
         syms.forEach(s => {
@@ -2416,25 +2417,41 @@ async function fetchTDBatchAll(force = false) {
     _tdCache['1h']   = parseBatchRes(res1h,   SYMS_1H);
     _tdCache['4h']   = parseBatchRes(res4h,   SYMS_4H);
     _tdCache['1day'] = parseBatchRes(res1d,   SYMS_1DAY);
+
+    // ── استخراج أسعار Quote من آخر شمعة في الكاش (بدون طلبات quote منفصلة) ──
+    ['EUR/USD','USD/JPY','XAU/USD','XAG/USD','GBP/USD'].forEach(sym => {
+      const vals = _tdCache['1h'][sym];
+      if (vals && vals.length >= 2) {
+        _tdQuoteCache[sym] = {
+          price: parseFloat(vals[0].close),
+          prev:  parseFloat(vals[1].close),
+        };
+      }
+    });
+
     _tdCacheTime = Date.now();
 
-    console.log('✅ TD Batch Cache refreshed:', {
+    console.log('✅ TD Batch Cache refreshed (3 requests):', {
       '1h':   Object.keys(_tdCache['1h']),
       '4h':   Object.keys(_tdCache['4h']),
       '1day': Object.keys(_tdCache['1day']),
     });
   } catch(e) {
-    console.warn('⚠️ TD Batch fetch failed, will use single fetches as fallback:', e.message);
+    console.warn('⚠️ TD Batch fetch failed:', e.message);
   }
 }
 
-// helper: يعيد قيم من الكاش أو يجلب مباشرةً كـ fallback
+// helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
 async function getTDValues(symbol, interval, outputsize = 40) {
   const cached = _tdCache[interval]?.[symbol];
   if (cached && cached.length > 0) return cached;
-  // fallback للجلب المباشر إذا لم يكن في الكاش
-  const res = await fetchTD(`time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}`);
-  return res.values;
+  // إذا لم يكن في الكاش — حاول تحميل الكاش أولاً
+  if (Object.keys(_tdCache['1h']).length === 0) {
+    await fetchTDBatchAll(true);
+    const retried = _tdCache[interval]?.[symbol];
+    if (retried && retried.length > 0) return retried;
+  }
+  throw new Error(`بيانات ${symbol} غير متوفرة في الكاش · يرجى الانتظار للتحديث التلقائي`);
 }
 
 // ══════════════════════════════════════════
@@ -2996,12 +3013,12 @@ async function runGold(){
 async function runEUR(){
   setBtnLoading('e',true); hideErr();
   try{
-    // استخدام الكاش أولاً ثم الجلب المباشر كـ fallback
     const values1h = await getTDValues('EUR/USD', '1h', 30);
-    const [quote] = await Promise.all([fetchTD('quote?symbol=EUR/USD')]);
     if(!fredData) fredData=await fetchAllFRED();
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
+
+    // السعر من الكاش — آخر شمعتين (بدون طلب quote منفصل)
+    const qt = _tdQuoteCache['EUR/USD'] || { price: parseFloat(values1h[0].close), prev: parseFloat(values1h[1]?.close || values1h[0].close) };
+    const price = qt.price, prev = qt.prev;
     const change=price-prev, pct=(change/prev)*100;
     const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
@@ -3050,10 +3067,11 @@ async function runJPY(){
   setBtnLoading('j',true); hideErr();
   try{
     const values1h = await getTDValues('USD/JPY', '1h', 30);
-    const [quote] = await Promise.all([fetchTD('quote?symbol=USD/JPY')]);
     if(!fredData) fredData=await fetchAllFRED();
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
+
+    // السعر من الكاش — بدون طلب quote منفصل
+    const qt = _tdQuoteCache['USD/JPY'] || { price: parseFloat(values1h[0].close), prev: parseFloat(values1h[1]?.close || values1h[0].close) };
+    const price = qt.price, prev = qt.prev;
     const change=price-prev, pct=(change/prev)*100;
     const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
@@ -3110,23 +3128,19 @@ async function runPairs(){
     let closesA, closesB, priceA, priceB;
 
     if (isXAUXAG) {
-      // جلب بيانات تسلسل زمني حقيقية لكل من الذهب والفضة
-      const [seriesA, seriesB] = await Promise.all([
-        fetchTD(`time_series?symbol=XAU/USD&interval=1h&outputsize=30`),
-        fetchTD(`time_series?symbol=XAG/USD&interval=1h&outputsize=30`),
-      ]);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+      // جلب من الكاش — XAU/USD و XAG/USD محفوظان من الـ batch
+      const valsA = await getTDValues('XAU/USD', '1h', 30);
+      const valsB = await getTDValues('XAG/USD', '1h', 30);
+      closesA = valsA.slice().reverse().map(v=>parseFloat(v.close));
+      closesB = valsB.slice().reverse().map(v=>parseFloat(v.close));
       priceA = closesA[closesA.length - 1];
       priceB = closesB[closesB.length - 1];
     } else {
-      // EUR/USD و GBP/USD من Twelve Data (متاحة في الخطة المجانية)
-      const [seriesA, seriesB] = await Promise.all([
-        fetchTD(`time_series?symbol=EUR/USD&interval=1h&outputsize=30`),
-        fetchTD(`time_series?symbol=GBP/USD&interval=1h&outputsize=30`),
-      ]);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+      // EUR/USD و GBP/USD من الكاش
+      const valsA = await getTDValues('EUR/USD', '1h', 30);
+      const valsB = await getTDValues('GBP/USD', '1h', 30);
+      closesA = valsA.slice().reverse().map(v=>parseFloat(v.close));
+      closesB = valsB.slice().reverse().map(v=>parseFloat(v.close));
       priceA  = closesA[closesA.length-1];
       priceB  = closesB[closesB.length-1];
     }
@@ -3318,13 +3332,11 @@ async function runOrderFlow() {
     const sym = currentOFSymbol;
 
     if (sym === 'XAU') {
-      // جلب بيانات حقيقية من Twelve Data
-      const values = await getTDValues('XAU/USD', '1h', 30);
-      ohlcv = values;
+      // جلب بيانات حقيقية من الكاش
+      ohlcv = await getTDValues('XAU/USD', '1h', 30);
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
-      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=30`);
-      ohlcv = series.values;
+      ohlcv = await getTDValues(tdSym, '1h', 30);
     }
 
     const of = calcOrderFlow(ohlcv.slice().reverse());
@@ -3962,15 +3974,9 @@ async function runSentiment() {
     // 2. جلب بيانات السعر للتحليل
     let closes = [];
     try {
-      if (sym === 'XAU') {
-        const metals = await fetchMetals();
-        const series = buildFakeSeries(parseFloat(metals.gold), 20, 0.004);
-        closes = series.values.map(v => parseFloat(v.close)).reverse();
-      } else {
-        const tdSym = sym === 'EUR' ? 'EUR/USD' : sym === 'JPY' ? 'USD/JPY' : 'DXY';
-        const series = await fetchTD(`time_series?symbol=${sym==='USD'?'EUR/USD':tdSym}&interval=1h&outputsize=20`);
-        closes = series.values.map(v => parseFloat(v.close)).reverse();
-      }
+      const tdSym = sym === 'XAU' ? 'XAU/USD' : sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+      const vals = _tdCache['1h']?.[tdSym];
+      if (vals && vals.length > 0) closes = vals.slice().reverse().map(v => parseFloat(v.close));
     } catch(e) { /* نكمل بدون closes */ }
 
     // 3. تحليل NLP لكل خبر
@@ -4594,13 +4600,12 @@ async function runQuantBrain() {
     const sym = _qbSymbol;
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      const series = buildFakeSeries(parseFloat(metals.gold), 40, 0.004);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      const vals = await getTDValues('XAU/USD', '1h', 40);
+      closes = vals.slice().reverse().map(v => parseFloat(v.close));
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
-      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=40`);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      const vals = await getTDValues(tdSym, '1h', 40);
+      closes = vals.slice().reverse().map(v => parseFloat(v.close));
     }
 
     // تأكد أن fredData موجود
@@ -5458,16 +5463,16 @@ function startRSSMonitor() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب FRED و Batch TD في وقت واحد
+  // 1. جلب FRED والـ Batch TD أولاً — 3 credits فقط لـ TD
   [fredData] = await Promise.all([
     fetchAllFRED(),
-    fetchTDBatchAll(),   // يملأ _tdCache بكل الأطر الزمنية
+    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز والأطر
   ]);
 
-  // 2. تشغيل كل التحليلات (تستخدم الكاش)
+  // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
 
-  // 3. تحديث بطاقة MTF Confluence بعد اكتمال الكاش
+  // 3. تحديث بطاقة MTF Confluence
   runMTFConfluence();
 
   // 4. Quant Brain إذا كان مفتوحاً
