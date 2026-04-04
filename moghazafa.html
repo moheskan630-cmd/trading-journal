@@ -20,7 +20,7 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
   body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(212,168,83,0.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
-  .container{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:16px;}
+  .container{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:16px;padding-bottom:80px;}
 
   /* HEADER */
   .header{display:flex;align-items:center;justify-content:space-between;padding:12px 0 18px;border-bottom:1px solid var(--border);margin-bottom:16px;}
@@ -638,6 +638,387 @@
     padding: 3px 8px; border-radius: 6px; cursor: pointer;
     font-family: 'Tajawal', sans-serif;
   }
+
+  /* ══════════════ LIQUIDITY HEATMAP ══════════════ */
+  .lhm-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .lhm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .lhm-title {
+    font-size: 12px; font-weight: 700; color: var(--rose-light);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .lhm-badge {
+    font-size: 9px; font-weight: 700; padding: 2px 7px;
+    border-radius: 5px; background: rgba(244,63,94,0.15);
+    color: var(--rose-light); letter-spacing: 0.5px;
+  }
+  .lhm-mode-tabs {
+    display: flex; gap: 4px; margin-bottom: 10px;
+    background: rgba(255,255,255,0.02); border-radius: 10px; padding: 3px;
+  }
+  .lhm-mode-btn {
+    flex: 1; padding: 5px 4px; border: none; border-radius: 7px;
+    font-family: 'Tajawal', sans-serif; font-size: 10px; font-weight: 700;
+    cursor: pointer; color: var(--muted); background: transparent;
+    transition: all 0.2s;
+  }
+  .lhm-mode-btn.active {
+    background: rgba(244,63,94,0.15); color: var(--rose-light);
+    border: 1px solid rgba(244,63,94,0.3);
+  }
+  /* Canvas الرئيسي */
+  .lhm-canvas-wrap {
+    position: relative; border-radius: 12px; overflow: hidden;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
+  }
+  #lhm-canvas {
+    display: block; width: 100%; cursor: crosshair;
+  }
+  /* شريط التوضيح */
+  .lhm-legend {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 10px; flex-wrap: wrap;
+  }
+  .lhm-legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; color: var(--muted);
+  }
+  .lhm-legend-dot {
+    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+  }
+  /* بطاقات المستويات */
+  .lhm-levels-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 12px;
+  }
+  .lhm-level-card {
+    border-radius: 12px; padding: 10px 12px;
+    border: 1px solid; position: relative; overflow: hidden;
+  }
+  .lhm-level-card.supply {
+    background: rgba(239,68,68,0.06);
+    border-color: rgba(239,68,68,0.25);
+  }
+  .lhm-level-card.demand {
+    background: rgba(34,197,94,0.06);
+    border-color: rgba(34,197,94,0.25);
+  }
+  .lhm-level-card.zero-ref {
+    background: rgba(212,168,83,0.06);
+    border-color: rgba(212,168,83,0.25);
+  }
+  .lhm-level-type {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .lhm-level-type.supply { color: var(--sell); }
+  .lhm-level-type.demand { color: var(--buy); }
+  .lhm-level-type.zero-ref { color: var(--gold); }
+  .lhm-level-price {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px; font-weight: 700; line-height: 1;
+  }
+  .lhm-level-price.supply { color: var(--rose-light); }
+  .lhm-level-price.demand { color: var(--buy); }
+  .lhm-level-price.zero-ref { color: var(--gold-light); }
+  .lhm-level-meta {
+    font-size: 10px; color: var(--muted); margin-top: 3px;
+  }
+  .lhm-level-strength {
+    position: absolute; left: 0; bottom: 0; height: 3px;
+    border-radius: 0 0 0 12px; transition: width 1s ease;
+  }
+  .lhm-level-strength.supply { background: var(--sell); }
+  .lhm-level-strength.demand { background: var(--buy); }
+  .lhm-level-strength.zero-ref { background: var(--gold); }
+
+  /* Tooltip */
+  .lhm-tooltip {
+    position: absolute; background: rgba(20,25,38,0.95);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+    padding: 8px 12px; font-size: 11px; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s; z-index: 10;
+    white-space: nowrap; min-width: 140px;
+  }
+  .lhm-tooltip.show { opacity: 1; }
+  .lhm-tooltip-price {
+    font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+  }
+  .lhm-tooltip-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .lhm-tooltip-strength { font-size: 10px; margin-top: 2px; }
+
+  /* إحصائيات المستويات */
+  .lhm-stats-row {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  .lhm-stat {
+    flex: 1; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px; text-align: center;
+  }
+  .lhm-stat-label { font-size: 9px; color: var(--muted); margin-bottom: 3px; }
+  .lhm-stat-val {
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+  }
+
+  /* تفسير نصي */
+  .lhm-insight {
+    background: rgba(244,63,94,0.05); border: 1px solid rgba(244,63,94,0.15);
+    border-radius: 12px; padding: 12px; margin-top: 12px;
+  }
+  .lhm-insight-title {
+    font-size: 11px; font-weight: 700; color: var(--rose-light); margin-bottom: 6px;
+  }
+  .lhm-insight-text {
+    font-size: 11px; color: var(--text); line-height: 1.7;
+  }
+
+  /* ══════════════ QUANT BRAIN — BOTTOM TAB NAV ══════════════ */
+  .qb-bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 500px;
+    background: rgba(10,12,16,0.97);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    z-index: 500; padding: 8px 16px 12px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .qb-nav-btn {
+    flex: 1; padding: 9px 6px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    color: var(--muted); font-size: 11px; font-weight: 700;
+    transition: all 0.3s; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; text-align: center;
+  }
+  .qb-nav-btn .qb-nav-icon { font-size: 18px; }
+  .qb-nav-btn .qb-nav-label { font-size: 9px; font-weight: 500; }
+  .qb-nav-btn.active-main {
+    background: rgba(212,168,83,0.12);
+    border-color: rgba(212,168,83,0.35);
+    color: var(--gold);
+  }
+  .qb-nav-btn.active-brain {
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15));
+    border-color: rgba(139,92,246,0.45);
+    color: #A78BFA;
+    box-shadow: 0 0 16px rgba(139,92,246,0.2);
+  }
+  .qb-brain-pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #A78BFA; margin: 0 auto;
+    animation: pulse 1.5s infinite;
+  }
+
+  /* ══ QUANT BRAIN PANEL ══ */
+  #panel-quantbrain {
+    display: none; padding-bottom: 80px;
+  }
+  #panel-quantbrain.active { display: block; }
+
+  /* هيدر Quant Brain */
+  .qb-hero {
+    border-radius: 20px; padding: 20px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08), rgba(168,85,247,0.06));
+    border: 1px solid rgba(139,92,246,0.3);
+    margin-bottom: 16px; text-align: center; position: relative; overflow: hidden;
+  }
+  .qb-hero::before {
+    content: '🧠'; position: absolute; font-size: 120px; opacity: 0.04;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+  }
+  .qb-hero-label { font-size: 10px; color: #A78BFA; letter-spacing: 2px; margin-bottom: 4px; }
+  .qb-hero-title {
+    font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700;
+    color: #fff; letter-spacing: 1px;
+  }
+  .qb-hero-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* اختيار الأصل */
+  .qb-sym-selector { display: flex; gap: 6px; margin-bottom: 16px; }
+  .qb-sym-btn {
+    flex: 1; padding: 8px 4px; border: 1px solid var(--border);
+    border-radius: 12px; background: var(--card); color: var(--muted);
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; text-align: center;
+  }
+  .qb-sym-btn.active {
+    background: rgba(139,92,246,0.15); color: #A78BFA;
+    border-color: rgba(139,92,246,0.4);
+  }
+
+  /* ── Probability Gauge ── */
+  .qb-gauge-card {
+    border-radius: 22px; padding: 22px 20px; margin-bottom: 14px;
+    position: relative; overflow: hidden;
+    border: 2px solid; transition: all 0.6s ease;
+  }
+  .qb-gauge-card.STRONG_BUY  { background: linear-gradient(135deg,rgba(34,197,94,0.14),rgba(34,197,94,0.04)); border-color: rgba(34,197,94,0.5); box-shadow: 0 0 40px rgba(34,197,94,0.12); }
+  .qb-gauge-card.BUY         { background: linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.02)); border-color: rgba(34,197,94,0.35); }
+  .qb-gauge-card.NEUTRAL     { background: rgba(255,255,255,0.02); border-color: rgba(245,158,11,0.25); }
+  .qb-gauge-card.SELL        { background: linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.02)); border-color: rgba(239,68,68,0.35); }
+  .qb-gauge-card.STRONG_SELL { background: linear-gradient(135deg,rgba(239,68,68,0.14),rgba(239,68,68,0.04)); border-color: rgba(239,68,68,0.5); box-shadow: 0 0 40px rgba(239,68,68,0.12); }
+  .qb-gauge-card.LOADING     { background: rgba(255,255,255,0.02); border-color: var(--border); }
+
+  .qb-gauge-label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 8px; }
+
+  /* شريط الاحتمالية */
+  .qb-prob-bar-wrap {
+    height: 14px; border-radius: 7px;
+    background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 10px;
+    position: relative;
+  }
+  .qb-prob-bar-fill {
+    height: 100%; border-radius: 7px;
+    transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+  .qb-prob-bar-fill::after {
+    content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
+    background: rgba(255,255,255,0.6); border-radius: 0 7px 7px 0;
+  }
+  .qb-prob-bar-fill.STRONG_BUY  { background: linear-gradient(90deg, #166534, #22C55E, #86EFAC); }
+  .qb-prob-bar-fill.BUY         { background: linear-gradient(90deg, #15803D, #22C55E); }
+  .qb-prob-bar-fill.NEUTRAL     { background: linear-gradient(90deg, #92400E, #F59E0B); }
+  .qb-prob-bar-fill.SELL        { background: linear-gradient(90deg, #EF4444, #B91C1C); }
+  .qb-prob-bar-fill.STRONG_SELL { background: linear-gradient(90deg, #FCA5A5, #EF4444, #7F1D1D); }
+  .qb-prob-bar-fill.LOADING     { background: var(--border); }
+
+  /* الاحتمالية الرقمية */
+  .qb-prob-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 6px; }
+  .qb-prob-num {
+    font-family: 'Rajdhani', sans-serif; font-size: 62px; font-weight: 700; line-height: 1;
+  }
+  .qb-prob-num.STRONG_BUY  { color: var(--buy); }
+  .qb-prob-num.BUY         { color: #86EFAC; }
+  .qb-prob-num.NEUTRAL     { color: var(--neutral); }
+  .qb-prob-num.SELL        { color: #FCA5A5; }
+  .qb-prob-num.STRONG_SELL { color: var(--sell); }
+  .qb-prob-num.LOADING     { color: var(--muted); }
+
+  .qb-signal-badge {
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 6px 14px; border-radius: 10px; margin-bottom: 8px; text-align: center;
+  }
+  .qb-signal-badge.STRONG_BUY  { background: rgba(34,197,94,0.2);  color: var(--buy); border: 1px solid rgba(34,197,94,0.4); }
+  .qb-signal-badge.BUY         { background: rgba(34,197,94,0.1);  color: #86EFAC;    border: 1px solid rgba(34,197,94,0.25); }
+  .qb-signal-badge.NEUTRAL     { background: rgba(245,158,11,0.1); color: var(--neutral); border: 1px solid rgba(245,158,11,0.3); }
+  .qb-signal-badge.SELL        { background: rgba(239,68,68,0.1);  color: #FCA5A5;    border: 1px solid rgba(239,68,68,0.25); }
+  .qb-signal-badge.STRONG_SELL { background: rgba(239,68,68,0.2);  color: var(--sell); border: 1px solid rgba(239,68,68,0.4); }
+  .qb-signal-badge.LOADING     { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+
+  .qb-posterior-note { font-size: 10px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+  /* ── شريط البُل/بير ── */
+  .qb-bull-bear-bar {
+    display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 5px;
+  }
+  .qb-bull-side { background: linear-gradient(90deg,#166534,var(--buy)); transition: width 1s ease; }
+  .qb-bear-side { background: linear-gradient(90deg,var(--sell),#7F1D1D); transition: width 1s ease; }
+  .qb-bb-labels { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 14px; }
+
+  /* ── Factor Cards ── */
+  .qb-factors-title {
+    font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .qb-factors-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .qb-factor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .qb-factor-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 11px 12px; position: relative; overflow: hidden;
+  }
+  .qb-factor-card.bull-factor { border-color: rgba(34,197,94,0.25); }
+  .qb-factor-card.bear-factor { border-color: rgba(239,68,68,0.25); }
+  .qb-factor-card.neut-factor { border-color: rgba(245,158,11,0.15); }
+
+  .qb-factor-name  { font-size: 10px; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+  .qb-factor-val   { font-family: 'Rajdhani', sans-serif; font-size: 19px; font-weight: 700; }
+  .qb-factor-val.bull { color: var(--buy); }
+  .qb-factor-val.bear { color: var(--sell); }
+  .qb-factor-val.neut { color: var(--neutral); }
+  .qb-factor-sub   { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .qb-factor-weight {
+    position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 0 0 14px;
+    transition: width 0.8s ease;
+  }
+  .qb-factor-weight.bull { background: var(--buy); }
+  .qb-factor-weight.bear { background: var(--sell); }
+  .qb-factor-weight.neut { background: var(--neutral); }
+
+  /* ── Bayesian Update Trail ── */
+  .qb-bayes-card {
+    background: var(--card); border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 16px; padding: 14px; margin-bottom: 14px;
+  }
+  .qb-bayes-title { font-size: 12px; font-weight: 700; color: #A78BFA; margin-bottom: 12px; }
+  .qb-bayes-step {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .qb-bayes-step:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .qb-bayes-num {
+    width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(139,92,246,0.4);
+    font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; color: #A78BFA;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .qb-bayes-desc { flex: 1; font-size: 11px; color: var(--text); line-height: 1.4; }
+  .qb-bayes-prob {
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    flex-shrink: 0; width: 42px; text-align: left;
+  }
+  .qb-bayes-prob.up   { color: var(--buy); }
+  .qb-bayes-prob.down { color: var(--sell); }
+  .qb-bayes-prob.flat { color: var(--neutral); }
+
+  /* ── Radar Chart ── */
+  .qb-radar-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px; margin-bottom: 14px;
+  }
+  .qb-radar-title { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 10px; }
+  #qb-radar { display: block; margin: 0 auto; }
+
+  /* ── Evidence Trail ── */
+  .qb-evidence {
+    background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 14px; padding: 14px; margin-bottom: 14px;
+  }
+  .qb-evidence-title { font-size: 12px; font-weight: 700; color: #818CF8; margin-bottom: 10px; }
+  .qb-evidence-text  { font-size: 11px; color: var(--text); line-height: 1.8; white-space: pre-line; }
+
+  /* ── History Sparkline ── */
+  .qb-history-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px; margin-bottom: 14px;
+  }
+  .qb-history-title { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 10px; }
+  #qb-history-canvas { display: block; width: 100%; }
+
+  /* زر التحديث */
+  .qb-refresh-btn {
+    width: 100%; padding: 16px; border: none; border-radius: 16px;
+    background: linear-gradient(135deg, #4338CA, #7C3AED, #9333EA);
+    color: #fff; font-family: 'Tajawal', sans-serif;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    margin-bottom: 14px; display: flex; align-items: center;
+    justify-content: center; gap: 8px; transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+  }
+  .qb-refresh-btn:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -1164,6 +1545,83 @@
       <div id="of-levelsContainer"></div>
     </div>
 
+    <!-- ══ LIQUIDITY HEATMAP ══ -->
+    <div class="section-title">🔥 Liquidity Heatmap · خريطة السيولة</div>
+    <div class="lhm-container">
+      <div class="lhm-header">
+        <div class="lhm-title">
+          🗺️ خريطة الأوامر المعلقة
+          <span class="lhm-badge">LIVE SIM</span>
+        </div>
+      </div>
+
+      <!-- تبويبات العرض -->
+      <div class="lhm-mode-tabs">
+        <button class="lhm-mode-btn active" id="lhm-btn-heatmap" onclick="setLHMMode('heatmap')">🌡️ Heatmap</button>
+        <button class="lhm-mode-btn" id="lhm-btn-profile" onclick="setLHMMode('profile')">📊 Volume Profile</button>
+        <button class="lhm-mode-btn" id="lhm-btn-orderbook" onclick="setLHMMode('orderbook')">📖 Order Book</button>
+      </div>
+
+      <!-- Canvas الرئيسي -->
+      <div class="lhm-canvas-wrap">
+        <canvas id="lhm-canvas" height="280"></canvas>
+        <div class="lhm-tooltip" id="lhm-tooltip">
+          <div class="lhm-tooltip-price" id="lhm-tip-price">—</div>
+          <div class="lhm-tooltip-label" id="lhm-tip-label">—</div>
+          <div class="lhm-tooltip-strength" id="lhm-tip-strength">—</div>
+        </div>
+      </div>
+
+      <!-- مفتاح الألوان -->
+      <div class="lhm-legend">
+        <div class="lhm-legend-item">
+          <div class="lhm-legend-dot" style="background:rgba(34,197,94,0.8)"></div>
+          <span>Demand Zone · شراء</span>
+        </div>
+        <div class="lhm-legend-item">
+          <div class="lhm-legend-dot" style="background:rgba(239,68,68,0.8)"></div>
+          <span>Supply Zone · بيع</span>
+        </div>
+        <div class="lhm-legend-item">
+          <div class="lhm-legend-dot" style="background:rgba(212,168,83,0.9)"></div>
+          <span>Zero Reflection · ارتداد صفري</span>
+        </div>
+        <div class="lhm-legend-item">
+          <div class="lhm-legend-dot" style="background:rgba(255,255,255,0.6)"></div>
+          <span>السعر الحالي</span>
+        </div>
+      </div>
+
+      <!-- بطاقات المستويات الرئيسية -->
+      <div class="lhm-levels-grid" id="lhm-levelsGrid"></div>
+
+      <!-- إحصائيات -->
+      <div class="lhm-stats-row">
+        <div class="lhm-stat">
+          <div class="lhm-stat-label">مناطق Supply</div>
+          <div class="lhm-stat-val" id="lhm-supplyCount" style="color:var(--sell)">—</div>
+        </div>
+        <div class="lhm-stat">
+          <div class="lhm-stat-label">مناطق Demand</div>
+          <div class="lhm-stat-val" id="lhm-demandCount" style="color:var(--buy)">—</div>
+        </div>
+        <div class="lhm-stat">
+          <div class="lhm-stat-label">Zero Reflections</div>
+          <div class="lhm-stat-val" id="lhm-zeroCount" style="color:var(--gold)">—</div>
+        </div>
+        <div class="lhm-stat">
+          <div class="lhm-stat-label">ضغط السيولة</div>
+          <div class="lhm-stat-val" id="lhm-liqBias">—</div>
+        </div>
+      </div>
+
+      <!-- تفسير نصي -->
+      <div class="lhm-insight">
+        <div class="lhm-insight-title">🧠 تفسير خريطة السيولة</div>
+        <div class="lhm-insight-text" id="lhm-insightText">جاري حساب مستويات السيولة...</div>
+      </div>
+    </div>
+
     <!-- تفسير الإشارة -->
     <div class="of-insight">
       <div class="of-insight-title">🧠 تفسير Order Flow</div>
@@ -1376,11 +1834,111 @@
     </button>
   </div>
 
+  <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
+  <div class="panel" id="panel-quantbrain">
+
+    <!-- Hero Header -->
+    <div class="qb-hero">
+      <div class="qb-hero-label">⚡ QUANTITATIVE ENGINE v4</div>
+      <div class="qb-hero-title">🧠 QUANT BRAIN</div>
+      <div class="qb-hero-sub">Factor Model × Bayesian Updater × احتمالية ديناميكية</div>
+    </div>
+
+    <!-- اختيار الأصل -->
+    <div class="qb-sym-selector">
+      <button class="qb-sym-btn active" id="qbbtn-xau" onclick="selectQBSymbol('XAU')">🥇 XAU</button>
+      <button class="qb-sym-btn" id="qbbtn-eur" onclick="selectQBSymbol('EUR')">🇪🇺 EUR</button>
+      <button class="qb-sym-btn" id="qbbtn-jpy" onclick="selectQBSymbol('JPY')">🇯🇵 JPY</button>
+    </div>
+
+    <!-- Probability Gauge الرئيسي -->
+    <div class="qb-gauge-card LOADING" id="qb-gaugeCard">
+      <div class="qb-gauge-label">🎯 POSTERIOR PROBABILITY · احتمالية الصعود</div>
+      <div class="qb-prob-row">
+        <div>
+          <div class="qb-prob-num LOADING" id="qb-probNum">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">% احتمال صعود</div>
+        </div>
+        <div style="text-align:left;">
+          <div class="qb-signal-badge LOADING" id="qb-signalBadge">جاري التحليل...</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="qb-updateCount">Bayesian Updates: —</div>
+        </div>
+      </div>
+      <div class="qb-prob-bar-wrap">
+        <div class="qb-prob-bar-fill LOADING" id="qb-probBar" style="width:50%"></div>
+      </div>
+      <!-- شريط Bull/Bear -->
+      <div class="qb-bull-bear-bar">
+        <div class="qb-bull-side" id="qb-bullSide" style="width:50%"></div>
+        <div class="qb-bear-side" id="qb-bearSide" style="width:50%"></div>
+      </div>
+      <div class="qb-bb-labels">
+        <span style="color:var(--buy);">Bull: <span id="qb-bullPct">—</span></span>
+        <span style="color:var(--sell);">Bear: <span id="qb-bearPct">—</span></span>
+      </div>
+      <div class="qb-posterior-note" id="qb-posteriorNote">Prior = 50% → Bayesian Updates → Posterior</div>
+    </div>
+
+    <!-- Radar Chart: توزيع العوامل -->
+    <div class="section-title">🕸️ Radar · قوة العوامل</div>
+    <div class="qb-radar-wrap">
+      <div class="qb-radar-title">📡 توزيع الأوزان على 8 عوامل كمية</div>
+      <canvas id="qb-radar" width="260" height="200"></canvas>
+    </div>
+
+    <!-- Factor Cards -->
+    <div class="section-title">⚙️ Factor Engine · العوامل الثمانية</div>
+    <div class="qb-factor-grid" id="qb-factorGrid">
+      <!-- تُملأ برمجياً -->
+    </div>
+
+    <!-- Bayesian Update Trail -->
+    <div class="section-title">🔄 Bayesian Trail · مسار التحديث</div>
+    <div class="qb-bayes-card">
+      <div class="qb-bayes-title">📐 كيف تطورت الاحتمالية خطوة بخطوة</div>
+      <div id="qb-bayesSteps">
+        <!-- تُملأ برمجياً -->
+      </div>
+    </div>
+
+    <!-- Probability History Sparkline -->
+    <div class="section-title">📈 سجل الاحتمالية · آخر 20 تحديث</div>
+    <div class="qb-history-wrap">
+      <div class="qb-history-title">تطور Posterior Probability عبر الوقت</div>
+      <canvas id="qb-history-canvas" height="70"></canvas>
+    </div>
+
+    <!-- Evidence Trail النصي -->
+    <div class="section-title">🔍 Evidence Trail · لماذا هذه النتيجة؟</div>
+    <div class="qb-evidence">
+      <div class="qb-evidence-title">🧠 تفسير النموذج عامل بعامل</div>
+      <div class="qb-evidence-text" id="qb-evidenceText">جاري تشغيل المحرك الاحتمالي...</div>
+    </div>
+
+    <button class="qb-refresh-btn" id="qb-refreshBtn" onclick="runQuantBrain()">
+      <span id="qb-refreshIcon">🧠</span> تشغيل Quant Brain
+    </button>
+
+  </div><!-- /panel-quantbrain -->
+
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
     metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
     <span id="countdownTimer" style="color:var(--gold);font-size:10px;">🔄 تحديث تلقائي كل 15 دقيقة</span>
   </div>
+</div>
+
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<div class="qb-bottom-nav">
+  <button class="qb-nav-btn active-main" id="qbnav-main" onclick="switchBottomNav('main')">
+    <span class="qb-nav-icon">📊</span>
+    <span class="qb-nav-label">لوحة التحليل</span>
+  </button>
+  <button class="qb-nav-btn" id="qbnav-brain" onclick="switchBottomNav('brain')">
+    <span class="qb-nav-icon">🧠</span>
+    <div class="qb-brain-pulse"></div>
+    <span class="qb-nav-label">Quant Brain</span>
+  </button>
 </div>
 
 <script>
@@ -1446,6 +2004,28 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => { t.className='tab'; });
   document.getElementById('panel-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).className = 'tab active-'+tab;
+  // تأكد أننا في وضع Main
+  document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
+  document.getElementById('qbnav-brain').className = 'qb-nav-btn';
+}
+
+function switchBottomNav(mode) {
+  if (mode === 'brain') {
+    // إخفاء كل البانلات الأخرى
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => { t.className = 'tab'; });
+    document.getElementById('panel-quantbrain').classList.add('active');
+    document.getElementById('qbnav-brain').className = 'qb-nav-btn active-brain';
+    document.getElementById('qbnav-main').className  = 'qb-nav-btn';
+    // شغّل Quant Brain تلقائياً إذا لم يُشغَّل بعد
+    if (!_qbData) runQuantBrain();
+  } else {
+    // الرجوع للوضع الرئيسي — فعّل آخر تاب
+    document.getElementById('panel-quantbrain').classList.remove('active');
+    document.getElementById('qbnav-main').className  = 'qb-nav-btn active-main';
+    document.getElementById('qbnav-brain').className = 'qb-nav-btn';
+    switchTab(currentTab || 'gold');
+  }
 }
 
 function selectPair(pair) {
@@ -2356,6 +2936,9 @@ async function runOrderFlow() {
     }
     document.getElementById('of-insightText').textContent = insight;
 
+    // ── تشغيل Liquidity Heatmap ──
+    runLiquidityHeatmap(ohlcv.slice().reverse(), of.currentPrice);
+
   } catch(err) { showErr(err.message); console.error(err); }
 
   btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
@@ -3071,6 +3654,1044 @@ async function runSentiment() {
 }
 
 // ══════════════════════════════════════════
+// ██████ QUANT BRAIN ENGINE ██████
+// ██ Factor Model × Bayesian Updater ██████
+// ══════════════════════════════════════════
+
+let _qbData         = null;   // آخر نتائج
+let _qbHistory      = [];     // تاريخ Posterior
+let _qbSymbol       = 'XAU';  // الأصل الحالي
+let _qbUpdateCount  = 0;
+
+function selectQBSymbol(sym) {
+  _qbSymbol = sym;
+  document.querySelectorAll('.qb-sym-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('qbbtn-' + sym.toLowerCase()).classList.add('active');
+  runQuantBrain();
+}
+
+// ────────────────────────────────────────
+// 1. FACTOR ENGINE — 8 عوامل كمية
+// ────────────────────────────────────────
+function computeFactors(closes, fredData, sym) {
+  const n = closes.length;
+  if (n < 10) return null;
+
+  // ── دوال مساعدة ──
+  const mean  = arr => arr.reduce((a,b) => a+b,0) / arr.length;
+  const std   = arr => { const m=mean(arr); return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/arr.length); };
+  const last  = closes[n-1];
+  const rets  = closes.slice(1).map((v,i) => (v - closes[i]) / closes[i] * 100);
+
+  // ── F1: Momentum (20-period Rate of Change) ──
+  const roc20 = n >= 20 ? (last - closes[n-20]) / closes[n-20] * 100 : 0;
+  const f1_raw = Math.max(-3, Math.min(3, roc20 / 2));
+  const f1_signal = f1_raw > 0.4 ? 'bull' : f1_raw < -0.4 ? 'bear' : 'neut';
+  const f1_prob = 0.5 + Math.tanh(f1_raw * 0.8) * 0.38;
+
+  // ── F2: Volatility (GARCH proxy — VIX inverse for gold) ──
+  const vol = std(rets.slice(-10));
+  const volNorm = Math.max(0, Math.min(1, vol / 0.8));
+  // تقلب عالٍ = عدم يقين → يقلل الثقة لكن قد يعني ارتفاع الذهب
+  const f2_raw = sym === 'XAU' ? (volNorm - 0.5) * 0.5 : -(volNorm - 0.5);
+  const f2_signal = volNorm > 0.6 ? (sym==='XAU'?'bull':'bear') : volNorm < 0.35 ? 'neut' : 'neut';
+  const f2_prob = sym === 'XAU' ? 0.5 + volNorm * 0.2 : 0.5 - volNorm * 0.15;
+
+  // ── F3: Mean Reversion (Z-Score) ──
+  const ma20 = mean(closes.slice(-20));
+  const sd20 = std(closes.slice(-20));
+  const zScore = sd20 > 0 ? (last - ma20) / sd20 : 0;
+  const f3_raw = -zScore;  // Mean Reversion: مرتفع جداً = توقع هبوط
+  const f3_signal = zScore > 1.5 ? 'bear' : zScore < -1.5 ? 'bull' : 'neut';
+  const f3_prob = 0.5 + Math.tanh(f3_raw * 0.6) * 0.25;
+
+  // ── F4: Trend Strength (ADX proxy) ──
+  let upMoves=0, downMoves=0;
+  for (let i=1; i<Math.min(15,n); i++) {
+    if (closes[i] > closes[i-1]) upMoves++;
+    else downMoves++;
+  }
+  const trendPct = (upMoves - downMoves) / (upMoves + downMoves || 1);
+  const f4_raw = trendPct;
+  const f4_signal = trendPct > 0.3 ? 'bull' : trendPct < -0.3 ? 'bear' : 'neut';
+  const f4_prob = 0.5 + trendPct * 0.3;
+
+  // ── F5: Carry (فارق الفائدة) ──
+  const fed = fredData?.fedRate ?? 5.25;
+  const ecb = fredData?.ecbRate ?? 4.0;
+  const boj = fredData?.bojRate ?? 0.1;
+  let carryRaw = 0;
+  if (sym === 'XAU') carryRaw = -(fed - 2.5) / 3;       // فائدة مرتفعة = ضرر للذهب
+  if (sym === 'EUR') carryRaw = (ecb - fed) / 2;
+  if (sym === 'JPY') carryRaw = (fed - boj) / 5;
+  const f5_signal = carryRaw > 0.1 ? 'bull' : carryRaw < -0.1 ? 'bear' : 'neut';
+  const f5_prob = 0.5 + Math.tanh(carryRaw) * 0.3;
+
+  // ── F6: Macro (Real Yield + DXY) ──
+  const realYield = fredData?.realYield ?? 1.5;
+  const dxy = fredData?.dxy ?? 104;
+  let macroRaw = 0;
+  if (sym === 'XAU') macroRaw = -(realYield / 3) - (dxy - 100) / 50;
+  if (sym === 'EUR') macroRaw = -(dxy - 100) / 60;
+  if (sym === 'JPY') macroRaw =  (dxy - 100) / 60;
+  const f6_signal = macroRaw > 0.1 ? 'bull' : macroRaw < -0.1 ? 'bear' : 'neut';
+  const f6_prob = 0.5 + Math.tanh(macroRaw * 0.8) * 0.28;
+
+  // ── F7: Regime Fit (مدى انسجام النظام الحالي مع الأصل) ──
+  const recentTrend = (last - mean(closes.slice(-5))) / last * 100;
+  const regimeRaw = Math.max(-1, Math.min(1, recentTrend / 0.5));
+  const f7_signal = regimeRaw > 0.3 ? 'bull' : regimeRaw < -0.3 ? 'bear' : 'neut';
+  const f7_prob = 0.5 + regimeRaw * 0.22;
+
+  // ── F8: Price Momentum Divergence (RSI proxy) ──
+  let gains=0, losses=0, gcnt=0, lcnt=0;
+  rets.slice(-14).forEach(r => { if(r>0){gains+=r;gcnt++;}else{losses+=Math.abs(r);lcnt++;} });
+  const avgGain = gcnt > 0 ? gains/gcnt : 0;
+  const avgLoss = lcnt > 0 ? losses/lcnt : 0.001;
+  const rsi = 100 - (100 / (1 + avgGain/avgLoss));
+  const f8_raw = (rsi - 50) / 50;
+  const f8_signal = rsi > 65 ? 'bear' : rsi < 35 ? 'bull' : 'neut';  // RSI: overbought = توقع تصحيح
+  const f8_prob = 0.5 - f8_raw * 0.2;
+
+  return [
+    { id:'momentum',   name:'Momentum · ROC20',       val: roc20.toFixed(2)+'%',    raw: f1_raw, signal: f1_signal, prob: f1_prob,  weight: 0.18, sub: `اتجاه آخر 20 فترة`,        icon:'🚀' },
+    { id:'volatility', name:'Volatility · GARCH',     val: vol.toFixed(3)+'%',      raw: f2_raw, signal: f2_signal, prob: f2_prob,  weight: 0.12, sub: `انحراف العوائد ×10`,       icon:'⚡' },
+    { id:'meanrev',    name:'Mean Reversion · Z',     val: 'Z='+zScore.toFixed(2),  raw: f3_raw, signal: f3_signal, prob: f3_prob,  weight: 0.14, sub: `${zScore>0?'فوق':'تحت'} المتوسط 20`, icon:'🔁' },
+    { id:'trend',      name:'Trend Strength · ADX',   val: (trendPct*100).toFixed(1)+'%', raw: f4_raw, signal: f4_signal, prob: f4_prob, weight: 0.13, sub: `${upMoves}↑ vs ${downMoves}↓ (15 فترة)`, icon:'📈' },
+    { id:'carry',      name:'Carry · Rate Diff',      val: (carryRaw*100).toFixed(1)+'bp', raw: carryRaw, signal: f5_signal, prob: f5_prob, weight: 0.14, sub: `Fed ${fed}% · فارق الفائدة`,  icon:'💹' },
+    { id:'macro',      name:'Macro · Yield + DXY',    val: `DXY${dxy?.toFixed?dxy.toFixed(1):dxy}`, raw: macroRaw, signal: f6_signal, prob: f6_prob, weight: 0.12, sub: `عائد حقيقي ${realYield?.toFixed?realYield.toFixed(2):realYield}%`, icon:'🏦' },
+    { id:'regime',     name:'Regime Fit · Trend',     val: (regimeRaw*100).toFixed(1)+'%', raw: regimeRaw, signal: f7_signal, prob: f7_prob, weight: 0.09, sub: `انسجام النظام الحالي`,      icon:'🔮' },
+    { id:'rsi',        name:'RSI Divergence · 14',    val: rsi.toFixed(1),          raw: f8_raw, signal: f8_signal, prob: f8_prob,  weight: 0.08, sub: `${rsi>65?'تشبع شراء':rsi<35?'تشبع بيع':'نطاق محايد'}`, icon:'📊' },
+  ];
+}
+
+// ────────────────────────────────────────
+// 2. BAYESIAN ENGINE
+//    Prior × Likelihood → Posterior
+// ────────────────────────────────────────
+function bayesianUpdate(factors) {
+  const steps = [];
+  let posterior = 0.50; // Prior: 50/50
+  steps.push({
+    num: 0, desc: 'Prior الأولي: بداية بدون معلومات (50/50)',
+    prob: posterior, delta: 0,
+  });
+
+  // رتّب العوامل حسب الوزن تنازلياً
+  const sorted = [...factors].sort((a,b) => b.weight - a.weight);
+
+  sorted.forEach((f, i) => {
+    const prev = posterior;
+    // Likelihood Ratio: كيف يؤثر هذا العامل؟
+    // LR > 1 → يدعم الصعود ، LR < 1 → يدعم الهبوط
+    const likelihoodIfBull = f.prob;
+    const likelihoodIfBear = 1 - f.prob;
+
+    // Bayes: P(Bull|Factor) = P(Factor|Bull)*P(Bull) / P(Factor)
+    const pFactor = likelihoodIfBull * posterior + likelihoodIfBear * (1 - posterior);
+    const newPosterior = pFactor > 0
+      ? (likelihoodIfBull * posterior) / pFactor
+      : posterior;
+
+    // تطبيق وزن العامل (تخفيف التأثير حسب الأهمية النسبية)
+    posterior = posterior + (newPosterior - posterior) * (f.weight * 5);
+    posterior = Math.max(0.05, Math.min(0.95, posterior));
+
+    const delta = posterior - prev;
+    const dir = delta > 0.005 ? 'up' : delta < -0.005 ? 'down' : 'flat';
+
+    steps.push({
+      num: i+1,
+      desc: `${f.icon} ${f.name}: ${f.val} → ${f.signal === 'bull' ? 'دعم صعودي' : f.signal === 'bear' ? 'دعم هبوطي' : 'محايد'}`,
+      prob: posterior, delta, dir,
+    });
+
+    _qbUpdateCount++;
+  });
+
+  return { posterior, steps };
+}
+
+// ────────────────────────────────────────
+// 3. CLASSIFIER + SIGNAL
+// ────────────────────────────────────────
+function classifyPosterior(p) {
+  if (p >= 0.85) return { cls: 'STRONG_BUY',  arLabel: '⚡ دخول قوي',   color: 'var(--buy)',     emoji: '⚡🟢' };
+  if (p >= 0.75) return { cls: 'BUY',          arLabel: '🟢 شراء جيد',   color: '#86EFAC',        emoji: '🟢' };
+  if (p >= 0.60) return { cls: 'BUY',          arLabel: '🔵 ميل صعودي',  color: '#93C5FD',        emoji: '🔵' };
+  if (p >= 0.40) return { cls: 'NEUTRAL',      arLabel: '🟡 منطقة رمادية — انتظر', color: 'var(--neutral)', emoji: '🟡' };
+  if (p >= 0.25) return { cls: 'SELL',         arLabel: '🔴 ميل هبوطي',  color: '#FCA5A5',        emoji: '🔴' };
+  if (p >= 0.15) return { cls: 'SELL',         arLabel: '🔴 بيع جيد',    color: 'var(--sell)',    emoji: '🔴' };
+  return            { cls: 'STRONG_SELL',      arLabel: '⚡ بيع قوي',    color: 'var(--sell)',    emoji: '⚡🔴' };
+}
+
+// ────────────────────────────────────────
+// 4. RADAR CHART (Canvas)
+// ────────────────────────────────────────
+function drawQBRadar(factors) {
+  const canvas = document.getElementById('qb-radar');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W, H) * 0.38;
+  const N = factors.length;
+  ctx.clearRect(0,0,W,H);
+
+  // شبكة دائرية
+  [0.25,0.5,0.75,1].forEach(r => {
+    ctx.beginPath();
+    for (let i=0; i<N; i++) {
+      const angle = (i/N)*Math.PI*2 - Math.PI/2;
+      const x = cx + Math.cos(angle)*R*r;
+      const y = cy + Math.sin(angle)*R*r;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = r===1 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = r===1 ? 1.5 : 0.8;
+    ctx.stroke();
+  });
+
+  // محاور
+  factors.forEach((f,i) => {
+    const angle = (i/N)*Math.PI*2 - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle)*R, cy + Math.sin(angle)*R);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // تسميات
+    const lx = cx + Math.cos(angle)*(R+18);
+    const ly = cy + Math.sin(angle)*(R+18);
+    ctx.fillStyle = f.signal==='bull'?'rgba(34,197,94,0.85)':f.signal==='bear'?'rgba(239,68,68,0.85)':'rgba(245,158,11,0.7)';
+    ctx.font = '700 8.5px Rajdhani';
+    ctx.textAlign = 'center';
+    ctx.fillText(f.icon, lx, ly);
+  });
+
+  // قيم العوامل (0→1 بناءً على prob)
+  const gradBull = ctx.createLinearGradient(0,0,W,H);
+  gradBull.addColorStop(0,'rgba(34,197,94,0.35)');
+  gradBull.addColorStop(1,'rgba(99,102,241,0.25)');
+
+  ctx.beginPath();
+  factors.forEach((f,i) => {
+    const angle = (i/N)*Math.PI*2 - Math.PI/2;
+    const r = Math.max(0.05, Math.min(1, f.prob));
+    const x = cx + Math.cos(angle)*R*r;
+    const y = cy + Math.sin(angle)*R*r;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = gradBull;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(139,92,246,0.7)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // نقاط
+  factors.forEach((f,i) => {
+    const angle = (i/N)*Math.PI*2 - Math.PI/2;
+    const r = Math.max(0.05, Math.min(1, f.prob));
+    const x = cx + Math.cos(angle)*R*r;
+    const y = cy + Math.sin(angle)*R*r;
+    ctx.beginPath();
+    ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle = f.signal==='bull'?'rgba(34,197,94,0.9)':f.signal==='bear'?'rgba(239,68,68,0.9)':'rgba(245,158,11,0.8)';
+    ctx.fill();
+  });
+
+  ctx.textAlign = 'left'; // reset
+}
+
+// ────────────────────────────────────────
+// 5. HISTORY SPARKLINE
+// ────────────────────────────────────────
+function drawQBHistory(history) {
+  const canvas = document.getElementById('qb-history-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 300;
+  canvas.width = W;
+  const H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  if (history.length < 2) {
+    ctx.fillStyle = 'rgba(107,114,128,0.4)';
+    ctx.font = '11px Tajawal';
+    ctx.fillText('سيظهر السجل بعد عدة تحديثات', 20, H/2);
+    return;
+  }
+
+  const minV = 0.05, maxV = 0.95;
+  const toY = v => H - ((v - minV) / (maxV - minV)) * (H - 8) - 4;
+  const toX = (i, len) => (i / (len-1)) * (W-2) + 1;
+
+  // منطقة ملونة
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(139,92,246,0.3)');
+  grad.addColorStop(1,'rgba(139,92,246,0.02)');
+
+  ctx.beginPath();
+  history.forEach((v,i) => {
+    const x=toX(i,history.length), y=toY(v);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.lineTo(toX(history.length-1,history.length), H);
+  ctx.lineTo(1, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // خط Sparkline
+  ctx.beginPath();
+  history.forEach((v,i) => {
+    const x=toX(i,history.length), y=toY(v);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = '#A78BFA';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // خط 50%
+  const y50 = toY(0.5);
+  ctx.strokeStyle = 'rgba(245,158,11,0.4)';
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(0,y50); ctx.lineTo(W,y50); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // خطوط 85% و15%
+  [[0.85,'rgba(34,197,94,0.35)'],[0.15,'rgba(239,68,68,0.35)']].forEach(([v,c]) => {
+    const y = toY(v);
+    ctx.strokeStyle = c; ctx.lineWidth = 0.8;
+    ctx.setLineDash([2,6]);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // نقطة أخيرة
+  const lx = toX(history.length-1, history.length);
+  const ly = toY(history[history.length-1]);
+  const lv = history[history.length-1];
+  ctx.beginPath();
+  ctx.arc(lx, ly, 4, 0, Math.PI*2);
+  ctx.fillStyle = lv>=0.75?'var(--buy)':lv<=0.25?'var(--sell)':'#A78BFA';
+  ctx.fill();
+}
+
+// ────────────────────────────────────────
+// 6. UI UPDATE
+// ────────────────────────────────────────
+function updateQBUI(factors, bayesResult) {
+  const { posterior, steps } = bayesResult;
+  const cls  = classifyPosterior(posterior);
+  const pct  = Math.round(posterior * 100);
+  const bull = pct;
+  const bear = 100 - pct;
+
+  // Gauge Card
+  const card = document.getElementById('qb-gaugeCard');
+  if (card) card.className = 'qb-gauge-card ' + cls.cls;
+
+  const probNum = document.getElementById('qb-probNum');
+  if (probNum) { probNum.textContent = pct + '%'; probNum.className = 'qb-prob-num ' + cls.cls; }
+
+  const badge = document.getElementById('qb-signalBadge');
+  if (badge) { badge.textContent = cls.arLabel; badge.className = 'qb-signal-badge ' + cls.cls; }
+
+  const bar = document.getElementById('qb-probBar');
+  if (bar) { bar.style.width = pct + '%'; bar.className = 'qb-prob-bar-fill ' + cls.cls; }
+
+  const bullEl = document.getElementById('qb-bullSide');
+  const bearEl = document.getElementById('qb-bearSide');
+  if (bullEl) bullEl.style.width = bull + '%';
+  if (bearEl) bearEl.style.width = bear + '%';
+  const bpct = document.getElementById('qb-bullPct');
+  const bpct2 = document.getElementById('qb-bearPct');
+  if (bpct) bpct.textContent = bull + '%';
+  if (bpct2) bpct2.textContent = bear + '%';
+
+  const uc = document.getElementById('qb-updateCount');
+  if (uc) uc.textContent = `Bayesian Updates: ${_qbUpdateCount}`;
+
+  const pn = document.getElementById('qb-posteriorNote');
+  if (pn) pn.textContent = `Prior 50% → ${steps.length-1} تحديثات Bayesian → Posterior ${pct}%`;
+
+  // Factor Grid
+  const grid = document.getElementById('qb-factorGrid');
+  if (grid) {
+    grid.innerHTML = factors.map(f => `
+      <div class="qb-factor-card ${f.signal}-factor">
+        <div class="qb-factor-name">${f.icon} ${f.name}</div>
+        <div class="qb-factor-val ${f.signal}">${f.val}</div>
+        <div class="qb-factor-sub">${f.sub}</div>
+        <div class="qb-factor-weight ${f.signal}" style="width:${f.weight*500}%"></div>
+      </div>`).join('');
+  }
+
+  // Bayesian Steps
+  const stepsEl = document.getElementById('qb-bayesSteps');
+  if (stepsEl) {
+    stepsEl.innerHTML = steps.map(s => `
+      <div class="qb-bayes-step">
+        <div class="qb-bayes-num">${s.num}</div>
+        <div class="qb-bayes-desc">${s.desc}</div>
+        <div class="qb-bayes-prob ${s.dir||'flat'}">
+          ${(s.prob*100).toFixed(1)}%
+          ${s.delta!=null && Math.abs(s.delta)>0.003 ? `<span style="font-size:9px;">${s.delta>0?'↑':'↓'}</span>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  // Evidence Trail
+  const evEl = document.getElementById('qb-evidenceText');
+  if (evEl) {
+    const symNames = { XAU:'الذهب XAU/USD', EUR:'اليورو EUR/USD', JPY:'الدولار/ين USD/JPY' };
+    const symName = symNames[_qbSymbol] || _qbSymbol;
+
+    let ev = `🧠 تحليل Quant Brain لـ ${symName}:\n\n`;
+    ev += `📊 الاحتمالية النهائية (Posterior): ${pct}%\n`;
+    ev += `🎯 الإشارة: ${cls.arLabel}\n\n`;
+
+    ev += `⚙️ أبرز العوامل المؤثرة:\n`;
+    const sorted = [...factors].sort((a,b) => Math.abs(b.prob-0.5) - Math.abs(a.prob-0.5));
+    sorted.slice(0,4).forEach(f => {
+      const impact = Math.abs(f.prob - 0.5);
+      const dir = f.prob > 0.52 ? 'صعودي 🟢' : f.prob < 0.48 ? 'هبوطي 🔴' : 'محايد 🟡';
+      ev += `• ${f.icon} ${f.name}: ${f.val} → ${dir} (تأثير: ${(impact*100).toFixed(0)}%)\n`;
+    });
+
+    ev += `\n🔄 مسار Bayesian:\n`;
+    ev += `ابدأنا من Prior = 50% ثم حدّثنا الاحتمالية ${steps.length-1} مرة بناءً على كل عامل:\n`;
+    const bigMoves = steps.slice(1).filter(s => Math.abs(s.delta) > 0.01)
+      .sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0,3);
+    bigMoves.forEach(s => {
+      ev += `• ${s.delta>0?'↑ رفع':'↓ خفض'} الاحتمالية ${(Math.abs(s.delta)*100).toFixed(1)}%: ${s.desc.split(':')[0]}\n`;
+    });
+
+    ev += `\n💡 الخلاصة:\n`;
+    if (pct >= 85) ev += `إشارة دخول قوية نادرة — ${cls.arLabel}. الأغلبية العظمى من العوامل تدعم الصعود.`;
+    else if (pct >= 75) ev += `إشارة شراء جيدة — أغلب العوامل إيجابية مع حذر معقول.`;
+    else if (pct >= 60) ev += `ميل صعودي — انتظر تأكيداً إضافياً قبل الدخول.`;
+    else if (pct >= 40) ev += `منطقة رمادية — العوامل متضاربة. الأفضل الانتظار لوضوح الاتجاه.`;
+    else if (pct >= 25) ev += `ميل هبوطي — أغلب العوامل سلبية. حذر من الشراء.`;
+    else ev += `إشارة بيع قوية — العوامل الكمية تشير للضغط الهبوطي بوضوح.`;
+
+    evEl.textContent = ev;
+  }
+
+  // Radar Chart
+  drawQBRadar(factors);
+
+  // History Chart
+  drawQBHistory(_qbHistory);
+}
+
+// ────────────────────────────────────────
+// 7. MAIN RUN FUNCTION
+// ────────────────────────────────────────
+async function runQuantBrain() {
+  const btn  = document.getElementById('qb-refreshBtn');
+  const icon = document.getElementById('qb-refreshIcon');
+  if (btn)  { btn.style.opacity='0.7'; btn.style.pointerEvents='none'; }
+  if (icon) icon.innerHTML = '<span class="spin">⟳</span>';
+
+  try {
+    // 1. جلب البيانات
+    let closes = [];
+    const sym = _qbSymbol;
+
+    if (sym === 'XAU') {
+      const metals = await fetchMetals();
+      const series = buildFakeSeries(parseFloat(metals.gold), 40, 0.004);
+      closes = series.values.map(v => parseFloat(v.close)).reverse();
+    } else {
+      const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=40`);
+      closes = series.values.map(v => parseFloat(v.close)).reverse();
+    }
+
+    // تأكد أن fredData موجود
+    if (!fredData) fredData = await fetchAllFRED();
+
+    // 2. Factor Engine
+    const factors = computeFactors(closes, fredData, sym);
+    if (!factors) throw new Error('بيانات غير كافية');
+
+    // 3. Bayesian Engine
+    const bayesResult = bayesianUpdate(factors);
+
+    // 4. حفظ في التاريخ
+    _qbHistory.push(bayesResult.posterior);
+    if (_qbHistory.length > 20) _qbHistory.shift();
+
+    // 5. تحديث UI
+    _qbData = { factors, bayesResult };
+    updateQBUI(factors, bayesResult);
+
+  } catch(err) {
+    console.error('Quant Brain error:', err);
+    const evEl = document.getElementById('qb-evidenceText');
+    if (evEl) evEl.textContent = '⚠️ خطأ: ' + err.message;
+  }
+
+  if (btn)  { btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
+  if (icon) icon.textContent = '🧠';
+}
+
+// ══════════════════════════════════════════
+// ██████ LIQUIDITY HEATMAP ENGINE ██████
+// ══════════════════════════════════════════
+
+let _lhmData = null;      // بيانات الهيتماب الحالية
+let _lhmMode = 'heatmap'; // وضع العرض الحالي
+let _lhmAnimFrame = null; // رقم فريم الأنيميشن
+
+function setLHMMode(mode) {
+  _lhmMode = mode;
+  ['heatmap','profile','orderbook'].forEach(m => {
+    const btn = document.getElementById('lhm-btn-' + m);
+    if (btn) btn.className = 'lhm-mode-btn' + (m === mode ? ' active' : '');
+  });
+  if (_lhmData) drawLHMCanvas(_lhmData);
+}
+
+// ── حساب مستويات السيولة من OHLCV ──
+function calcLiquidityLevels(ohlcv, currentPrice) {
+  const n = ohlcv.length;
+  if (n < 5) return null;
+
+  const highs  = ohlcv.map(c => parseFloat(c.high  || c.close));
+  const lows   = ohlcv.map(c => parseFloat(c.low   || c.close));
+  const closes = ohlcv.map(c => parseFloat(c.close));
+  const volumes = ohlcv.map((c,i) => {
+    // حجم محاكَى من نطاق الشمعة (بدون بيانات حجم حقيقية)
+    const range = Math.abs(parseFloat(c.high||c.close) - parseFloat(c.low||c.close));
+    return range * (1 + Math.sin(i * 1.618) * 0.3 + Math.random() * 0.2);
+  });
+
+  const priceRange = Math.max(...highs) - Math.min(...lows);
+
+  // 1. خوارزمية تجميع الأسعار (Price Clustering Algorithm)
+  const CLUSTERS = 60;
+  const minP = Math.min(...lows) * 0.9995;
+  const maxP = Math.max(...highs) * 1.0005;
+  const step  = (maxP - minP) / CLUSTERS;
+
+  const clusterVol  = new Float64Array(CLUSTERS).fill(0);
+  const clusterBuy  = new Float64Array(CLUSTERS).fill(0);
+  const clusterSell = new Float64Array(CLUSTERS).fill(0);
+
+  ohlcv.forEach((candle, i) => {
+    const o = parseFloat(candle.open  || candle.close);
+    const h = parseFloat(candle.high  || candle.close);
+    const l = parseFloat(candle.low   || candle.close);
+    const c = parseFloat(candle.close);
+    const v = volumes[i];
+    const isBull = c >= o;
+
+    // وزّع الحجم على النطاق من low إلى high
+    const loCluster = Math.max(0, Math.floor((l - minP) / step));
+    const hiCluster = Math.min(CLUSTERS - 1, Math.floor((h - minP) / step));
+
+    for (let cl = loCluster; cl <= hiCluster; cl++) {
+      const distrib = v / Math.max(1, hiCluster - loCluster + 1);
+      clusterVol[cl]  += distrib;
+      if (isBull) clusterBuy[cl]  += distrib * 0.6;
+      else        clusterSell[cl] += distrib * 0.6;
+    }
+  });
+
+  // 2. كشف مناطق الذروة (Peak Detection) = مناطق Limit Orders
+  const peaks = [];
+  const meanVol = clusterVol.reduce((a,b)=>a+b,0) / CLUSTERS;
+  const threshold = meanVol * 1.4; // 40% فوق المتوسط = cluster مهم
+
+  for (let i = 2; i < CLUSTERS - 2; i++) {
+    const v = clusterVol[i];
+    if (v < threshold) continue;
+    // تحقق أنه أعلى من جيرانه
+    if (v > clusterVol[i-1] && v > clusterVol[i-2] &&
+        v > clusterVol[i+1] && v > clusterVol[i+2]) {
+      const price = minP + (i + 0.5) * step;
+      const strength = Math.min(100, Math.round((v / (meanVol * 3)) * 100));
+      const buyRatio = clusterBuy[i] / Math.max(0.001, clusterVol[i]);
+      const type = buyRatio > 0.52 ? 'demand' : 'supply';
+      const distFromPrice = (price - currentPrice) / currentPrice * 100;
+      peaks.push({ price, strength, type, cluster: i, distFromPrice, buyRatio, vol: v });
+    }
+  }
+
+  // 3. كشف Zero Reflection (الارتداد الصفري)
+  // منطقة التصحيح التاريخية حيث تكررت الارتدادات
+  const zeroReflections = [];
+  for (let i = 1; i < ohlcv.length - 1; i++) {
+    const prev = closes[i-1], curr = closes[i], next = closes[i+1];
+    // قمة محلية
+    if (curr > prev * 1.0002 && curr > next * 1.0002) {
+      const pr = minP + Math.floor((curr - minP) / step) * step;
+      const existing = zeroReflections.find(z => Math.abs(z.price - curr) < step * 2);
+      if (existing) existing.hits++;
+      else zeroReflections.push({ price: curr, type: 'resistance', hits: 1 });
+    }
+    // قاع محلي
+    if (curr < prev * 0.9998 && curr < next * 0.9998) {
+      const existing = zeroReflections.find(z => Math.abs(z.price - curr) < step * 2);
+      if (existing) existing.hits++;
+      else zeroReflections.push({ price: curr, type: 'support', hits: 1 });
+    }
+  }
+  const strongZR = zeroReflections
+    .filter(z => z.hits >= 2)
+    .sort((a,b) => b.hits - a.hits)
+    .slice(0, 5);
+
+  // 4. مستويات Fibonacci المحسوبة من swing high/low
+  const swingHigh = Math.max(...highs.slice(-20));
+  const swingLow  = Math.min(...lows.slice(-20));
+  const swingRange = swingHigh - swingLow;
+  const fibLevels = [0.236, 0.382, 0.5, 0.618, 0.786].map(r => ({
+    price: swingLow + swingRange * (1 - r),
+    ratio: r,
+    label: `Fib ${(r*100).toFixed(1)}%`,
+  }));
+
+  // 5. VWAP محاكاة
+  let vwapNum = 0, vwapDen = 0;
+  ohlcv.slice(-20).forEach((c, i) => {
+    const tp = (parseFloat(c.high||c.close) + parseFloat(c.low||c.close) + parseFloat(c.close)) / 3;
+    const v  = volumes[volumes.length - 20 + i];
+    vwapNum += tp * v;
+    vwapDen += v;
+  });
+  const vwap = vwapDen > 0 ? vwapNum / vwapDen : currentPrice;
+
+  // إحصائيات
+  const supplyZones  = peaks.filter(p => p.type === 'supply' && p.price > currentPrice);
+  const demandZones  = peaks.filter(p => p.type === 'demand' && p.price < currentPrice);
+  const liqBias = supplyZones.length > demandZones.length ? 'بيعي' :
+                  demandZones.length > supplyZones.length ? 'شرائي' : 'محايد';
+
+  return {
+    clusters: { vol: clusterVol, buy: clusterBuy, sell: clusterSell, count: CLUSTERS },
+    minP, maxP, step, peaks,
+    zeroReflections: strongZR,
+    fibLevels,
+    vwap,
+    currentPrice,
+    supplyZones, demandZones,
+    liqBias,
+    priceRange,
+  };
+}
+
+// ── رسم Canvas الهيتماب ──
+function drawLHMCanvas(data) {
+  const canvas  = document.getElementById('lhm-canvas');
+  if (!canvas) return;
+  const ctx     = canvas.getContext('2d');
+  const W       = canvas.offsetWidth;
+  const H       = canvas.height;
+  canvas.width  = W;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const { clusters, minP, maxP, step, peaks, zeroReflections, fibLevels, vwap, currentPrice, CLUSTERS: CL } = data;
+  const N = clusters.count;
+
+  // دالة تحويل السعر → Y
+  const priceToY = p => H - ((p - minP) / (maxP - minP)) * (H - 20) - 10;
+
+  if (_lhmMode === 'heatmap') {
+    drawHeatmapMode(ctx, W, H, data, priceToY);
+  } else if (_lhmMode === 'profile') {
+    drawVolumeProfileMode(ctx, W, H, data, priceToY);
+  } else {
+    drawOrderBookMode(ctx, W, H, data, priceToY);
+  }
+
+  // ── رسم خطوط مشتركة ──
+  drawSharedOverlay(ctx, W, H, data, priceToY);
+}
+
+function drawHeatmapMode(ctx, W, H, data, priceToY) {
+  const { clusters, minP, step, peaks } = data;
+  const N = clusters.count;
+  const maxVol = Math.max(...clusters.vol);
+
+  // خلفية متدرجة
+  ctx.fillStyle = '#0A0C10';
+  ctx.fillRect(0, 0, W, H);
+
+  // رسم كل cluster كخلية حرارية
+  for (let i = 0; i < N; i++) {
+    const v = clusters.vol[i];
+    if (v < 0.001) continue;
+    const intensity = Math.min(1, v / (maxVol * 0.7));
+    const buyRatio  = clusters.buy[i] / Math.max(0.001, v);
+    const y     = priceToY(minP + (i + 1) * step);
+    const yNext = priceToY(minP + i * step);
+    const barH  = Math.max(1, Math.abs(yNext - y));
+
+    // لون بناءً على Bid/Ask
+    const r = Math.round(255 * (1 - buyRatio) * intensity);
+    const g = Math.round(255 * buyRatio * intensity);
+    const b = Math.round(40 * intensity);
+    const a = Math.min(0.9, intensity * 1.2 + 0.1);
+
+    ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+    ctx.fillRect(0, y, W * 0.72, barH);
+
+    // حجم بار على اليمين
+    const barW = (v / maxVol) * W * 0.22;
+    ctx.fillStyle = `rgba(${r},${g},${b},${Math.min(0.95, a + 0.2)})`;
+    ctx.fillRect(W * 0.75, y, barW, barH);
+  }
+}
+
+function drawVolumeProfileMode(ctx, W, H, data, priceToY) {
+  const { clusters, minP, step, currentPrice } = data;
+  const N = clusters.count;
+  const maxVol = Math.max(...clusters.vol);
+
+  ctx.fillStyle = '#0A0C10';
+  ctx.fillRect(0, 0, W, H);
+
+  // شبكة أفقية
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = (H / 5) * i;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  for (let i = 0; i < N; i++) {
+    const v = clusters.vol[i];
+    if (v < 0.001) continue;
+    const barW  = (v / maxVol) * W * 0.85;
+    const buyW  = barW * (clusters.buy[i]  / Math.max(0.001, v));
+    const sellW = barW * (clusters.sell[i] / Math.max(0.001, v));
+    const y     = priceToY(minP + (i + 1) * step);
+    const yNext = priceToY(minP + i * step);
+    const barH  = Math.max(1, Math.abs(yNext - y));
+
+    // جزء الشراء
+    ctx.fillStyle = `rgba(34,197,94,0.65)`;
+    ctx.fillRect(0, y, buyW, barH);
+    // جزء البيع
+    ctx.fillStyle = `rgba(239,68,68,0.65)`;
+    ctx.fillRect(buyW, y, sellW - buyW, barH);
+    // فراغ
+    ctx.fillStyle = `rgba(255,255,255,0.03)`;
+    ctx.fillRect(sellW, y, barW - sellW, barH);
+  }
+}
+
+function drawOrderBookMode(ctx, W, H, data, priceToY) {
+  const { clusters, minP, step, currentPrice } = data;
+  const N = clusters.count;
+  const maxVol = Math.max(...clusters.vol);
+  const midY   = priceToY(currentPrice);
+
+  ctx.fillStyle = '#0A0C10';
+  ctx.fillRect(0, 0, W, H);
+
+  // Order Book: فوق السعر = Asks (بيع) · تحت السعر = Bids (شراء)
+  for (let i = 0; i < N; i++) {
+    const price = minP + (i + 0.5) * step;
+    const v     = clusters.vol[i];
+    if (v < 0.001) continue;
+    const barW  = (v / maxVol) * W * 0.45;
+    const y     = priceToY(minP + (i + 1) * step);
+    const yNext = priceToY(minP + i * step);
+    const barH  = Math.max(1.5, Math.abs(yNext - y));
+    const isAsk = price > currentPrice;
+
+    if (isAsk) {
+      // Asks من المنتصف لليسار
+      ctx.fillStyle = `rgba(239,68,68,0.7)`;
+      ctx.fillRect(W/2, y, barW, barH);
+    } else {
+      // Bids من المنتصف لليمين
+      ctx.fillStyle = `rgba(34,197,94,0.7)`;
+      ctx.fillRect(W/2 - barW, y, barW, barH);
+    }
+  }
+
+  // خط المنتصف
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // تسميات
+  ctx.fillStyle = 'rgba(239,68,68,0.7)';
+  ctx.font = '700 10px Rajdhani';
+  ctx.fillText('ASKS ▲', W/2 + 8, 16);
+  ctx.fillStyle = 'rgba(34,197,94,0.7)';
+  ctx.fillText('BIDS ▼', W/2 - 60, 16);
+}
+
+function drawSharedOverlay(ctx, W, H, data, priceToY) {
+  const { peaks, zeroReflections, fibLevels, vwap, currentPrice, minP, maxP } = data;
+  const dp = currentPrice > 100 ? 1 : 4;
+
+  // ── فيبوناتشي خطوط خفيفة ──
+  fibLevels.forEach(fib => {
+    if (fib.price < minP || fib.price > maxP) return;
+    const y = priceToY(fib.price);
+    ctx.strokeStyle = 'rgba(212,168,83,0.18)';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([3, 6]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(212,168,83,0.5)';
+    ctx.font = '600 9px Rajdhani';
+    ctx.fillText(fib.label, W - 58, y - 2);
+  });
+
+  // ── VWAP ──
+  if (vwap > minP && vwap < maxP) {
+    const vy = priceToY(vwap);
+    ctx.strokeStyle = 'rgba(168,85,247,0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6, 3]);
+    ctx.beginPath(); ctx.moveTo(0, vy); ctx.lineTo(W, vy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(168,85,247,0.9)';
+    ctx.font = '700 9px Rajdhani';
+    ctx.fillText('VWAP', 4, vy - 3);
+  }
+
+  // ── خطوط Zero Reflection ──
+  zeroReflections.forEach(zr => {
+    if (zr.price < minP || zr.price > maxP) return;
+    const y = priceToY(zr.price);
+    const alpha = Math.min(0.9, 0.4 + zr.hits * 0.15);
+    ctx.strokeStyle = `rgba(212,168,83,${alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.setLineDash([]);
+    // تسمية
+    ctx.fillStyle = `rgba(212,168,83,${alpha + 0.1})`;
+    ctx.font = '700 9px Tajawal';
+    ctx.fillText(`⟳ ×${zr.hits}`, 4, y - 3);
+  });
+
+  // ── مناطق Supply / Demand (peaks) ──
+  peaks.forEach(pk => {
+    if (pk.price < minP || pk.price > maxP) return;
+    const y = priceToY(pk.price);
+    const color = pk.type === 'demand'
+      ? `rgba(34,197,94,${0.3 + pk.strength/200})`
+      : `rgba(239,68,68,${0.3 + pk.strength/200})`;
+
+    // ظل المنطقة
+    const zoneH = Math.max(3, (data.step / (maxP - minP)) * H * 2.5);
+    ctx.fillStyle = pk.type === 'demand'
+      ? `rgba(34,197,94,${0.04 + pk.strength/500})`
+      : `rgba(239,68,68,${0.04 + pk.strength/500})`;
+    ctx.fillRect(0, y - zoneH/2, W * 0.72, zoneH);
+
+    // خط رئيسي
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = pk.strength > 70 ? 2 : 1.2;
+    ctx.setLineDash(pk.strength > 70 ? [] : [5, 4]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W * 0.72, y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // نقطة دائرية
+    ctx.beginPath();
+    ctx.arc(W * 0.72, y, 3, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // تسمية
+    ctx.fillStyle = pk.type === 'demand' ? 'rgba(34,197,94,0.9)' : 'rgba(239,68,68,0.9)';
+    ctx.font = '600 9px Rajdhani';
+    const label = `${pk.type === 'demand' ? '▲D' : '▼S'} ${pk.price.toFixed(dp)}`;
+    ctx.fillText(label, W * 0.73, y + 3);
+  });
+
+  // ── خط السعر الحالي ──
+  const cy = priceToY(currentPrice);
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+
+  // تسمية السعر
+  ctx.fillStyle = '#0A0C10';
+  ctx.fillRect(W - 90, cy - 10, 90, 20);
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(W - 90, cy - 10, 90, 20);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '700 11px Rajdhani';
+  ctx.textAlign = 'center';
+  ctx.fillText(currentPrice.toFixed(dp), W - 45, cy + 4);
+  ctx.textAlign = 'left';
+
+  // مقياس الأسعار (Y-axis)
+  ctx.fillStyle = 'rgba(107,114,128,0.7)';
+  ctx.font = '9px Rajdhani';
+  [0.2, 0.4, 0.6, 0.8].forEach(pct => {
+    const price = minP + (maxP - minP) * pct;
+    const y = priceToY(price);
+    ctx.fillText(price.toFixed(dp), W * 0.735, y + 3);
+  });
+}
+
+// ── تحديث بطاقات المستويات + الإحصائيات ──
+function updateLHMCards(data) {
+  const { supplyZones, demandZones, zeroReflections, liqBias, currentPrice } = data;
+  const dp = currentPrice > 100 ? 1 : 4;
+  const prefix = currentPrice > 100 ? '$' : '';
+
+  // أقوى supply
+  const topSupply = [...supplyZones].sort((a,b) => b.strength - a.strength).slice(0, 2);
+  // أقوى demand
+  const topDemand = [...demandZones].sort((a,b) => b.strength - a.strength).slice(0, 2);
+  // أقوى zero reflection
+  const topZR = zeroReflections.slice(0, 2);
+
+  const grid = document.getElementById('lhm-levelsGrid');
+  if (!grid) return;
+
+  const cards = [
+    ...topSupply.map(z => ({
+      type: 'supply', typeLabel: '⬇️ Supply Zone',
+      price: z.price, strength: z.strength,
+      meta: `${(Math.abs(z.distFromPrice)).toFixed(2)}% فوق السعر · قوة: ${z.strength}%`,
+    })),
+    ...topDemand.map(z => ({
+      type: 'demand', typeLabel: '⬆️ Demand Zone',
+      price: z.price, strength: z.strength,
+      meta: `${(Math.abs(z.distFromPrice)).toFixed(2)}% تحت السعر · قوة: ${z.strength}%`,
+    })),
+    ...topZR.map(z => ({
+      type: 'zero-ref', typeLabel: '⟳ Zero Reflection',
+      price: z.price, strength: Math.min(100, z.hits * 25),
+      meta: `تكرر ${z.hits} مرات · ${z.type === 'resistance' ? 'مقاومة' : 'دعم'}`,
+    })),
+  ].slice(0, 6);
+
+  grid.innerHTML = cards.map(c => `
+    <div class="lhm-level-card ${c.type}">
+      <div class="lhm-level-type ${c.type}">${c.typeLabel}</div>
+      <div class="lhm-level-price ${c.type}">${prefix}${c.price.toFixed(dp)}</div>
+      <div class="lhm-level-meta">${c.meta}</div>
+      <div class="lhm-level-strength ${c.type}" style="width:${c.strength}%"></div>
+    </div>`).join('');
+
+  // إحصائيات
+  const el = id => document.getElementById(id);
+  if (el('lhm-supplyCount')) el('lhm-supplyCount').textContent = supplyZones.length;
+  if (el('lhm-demandCount')) el('lhm-demandCount').textContent = demandZones.length;
+  if (el('lhm-zeroCount'))   el('lhm-zeroCount').textContent   = zeroReflections.length;
+  if (el('lhm-liqBias')) {
+    el('lhm-liqBias').textContent = liqBias;
+    el('lhm-liqBias').style.color =
+      liqBias === 'شرائي' ? 'var(--buy)' :
+      liqBias === 'بيعي'  ? 'var(--sell)' : 'var(--neutral)';
+  }
+
+  // تفسير نصي
+  const nearestSupply = topSupply[0];
+  const nearestDemand = topDemand[0];
+  const nearestZR = topZR[0];
+  let insight = '';
+
+  if (nearestDemand && nearestSupply) {
+    insight += `📍 السعر الحالي ${prefix}${currentPrice.toFixed(dp)} محاط بـ:\n`;
+    insight += `• منطقة Demand عند ${prefix}${nearestDemand.price.toFixed(dp)} (قوة ${nearestDemand.strength}%) — يُتوقع ارتداد صعودي\n`;
+    insight += `• منطقة Supply عند ${prefix}${nearestSupply.price.toFixed(dp)} (قوة ${nearestSupply.strength}%) — مقاومة محتملة\n\n`;
+  }
+  if (nearestZR) {
+    insight += `🔄 أقوى Zero Reflection عند ${prefix}${nearestZR.price.toFixed(dp)} (تكرر ${nearestZR.hits} مرات)\n`;
+    insight += `السوق ارتد من هذا المستوى ${nearestZR.hits} مرات تاريخياً — احتمالية ارتداد مرتفعة.\n\n`;
+  }
+  insight += `⚖️ التحيّز العام للسيولة: ${liqBias} — `;
+  insight += liqBias === 'شرائي' ? 'أوامر الشراء أكثر كثافة تحت السعر.' :
+             liqBias === 'بيعي'  ? 'أوامر البيع أكثر كثافة فوق السعر.' :
+                                  'توازن بين الشراء والبيع.';
+
+  if (el('lhm-insightText')) el('lhm-insightText').textContent = insight;
+}
+
+// ── Tooltip تفاعلي ──
+function initLHMTooltip() {
+  const canvas  = document.getElementById('lhm-canvas');
+  const tooltip = document.getElementById('lhm-tooltip');
+  if (!canvas || !tooltip || !_lhmData) return;
+
+  canvas.addEventListener('mousemove', e => {
+    const rect   = canvas.getBoundingClientRect();
+    const mouseY = e.clientY - rect.top;
+    const H      = canvas.height;
+    const { minP, maxP, currentPrice, peaks } = _lhmData;
+    const price  = maxP - (mouseY / H) * (maxP - minP);
+    const dp     = currentPrice > 100 ? 1 : 4;
+    const prefix = currentPrice > 100 ? '$' : '';
+
+    // هل نحن قريبون من منطقة peak؟
+    const nearPeak = peaks.find(pk =>
+      Math.abs(pk.price - price) < (maxP - minP) * 0.015
+    );
+
+    document.getElementById('lhm-tip-price').textContent = prefix + price.toFixed(dp);
+    document.getElementById('lhm-tip-price').style.color =
+      nearPeak ? (nearPeak.type === 'demand' ? 'var(--buy)' : 'var(--sell)') : '#fff';
+    document.getElementById('lhm-tip-label').textContent  = nearPeak
+      ? (nearPeak.type === 'demand' ? '⬆️ Demand Zone — أوامر شراء' : '⬇️ Supply Zone — أوامر بيع')
+      : '── منطقة محايدة ──';
+    document.getElementById('lhm-tip-strength').textContent = nearPeak
+      ? `قوة المنطقة: ${nearPeak.strength}%`
+      : `بُعد عن السعر: ${((Math.abs(price - currentPrice)/currentPrice)*100).toFixed(3)}%`;
+
+    // ضبط موقع التولتيب
+    const tx = e.clientX - rect.left;
+    tooltip.style.right  = tx < rect.width / 2 ? '8px' : 'auto';
+    tooltip.style.left   = tx < rect.width / 2 ? 'auto' : '8px';
+    tooltip.style.top    = Math.max(5, mouseY - 55) + 'px';
+    tooltip.classList.add('show');
+  });
+
+  canvas.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+}
+
+// ── الدالة الرئيسية — تُستدعى من runOrderFlow ──
+function runLiquidityHeatmap(ohlcv, currentPrice) {
+  if (!ohlcv || ohlcv.length < 5) return;
+
+  _lhmData = calcLiquidityLevels(ohlcv, currentPrice);
+  if (!_lhmData) return;
+
+  // رسم Canvas
+  drawLHMCanvas(_lhmData);
+
+  // تحديث البطاقات والإحصائيات
+  updateLHMCards(_lhmData);
+
+  // تهيئة التولتيب
+  initLHMTooltip();
+
+  // إعادة الرسم عند تغيير الحجم
+  if (!window._lhmResizeAttached) {
+    window.addEventListener('resize', () => {
+      if (_lhmData) drawLHMCanvas(_lhmData);
+    });
+    window._lhmResizeAttached = true;
+  }
+}
+
+// ══════════════════════════════════════════
 // ██████ BREAKING NEWS RSS ALERT ENGINE ██████
 // ══════════════════════════════════════════
 
@@ -3351,6 +4972,8 @@ function startRSSMonitor() {
 async function runAll(){
   fredData=await fetchAllFRED();
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
+  // تحديث Quant Brain فقط إذا كان مفتوحاً
+  if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
 }
 
 // ══════════════════════════════════════════
