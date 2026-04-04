@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v2</title>
+<title>Quant Signal Pro · Live v6 MTF</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -71,6 +71,219 @@
 
   .tab.active-orderflow{background:rgba(244,63,94,0.15);color:var(--rose-light);border:1px solid rgba(244,63,94,0.3);}
   .tab.active-timeseries{background:rgba(6,182,212,0.15);color:var(--cyan-light);border:1px solid rgba(6,182,212,0.3);}
+
+  /* ══════════════ MTF CONFLUENCE WIDGET ══════════════ */
+  .mtf-widget {
+    background: linear-gradient(135deg, rgba(212,168,83,0.06), rgba(59,130,246,0.04));
+    border: 1px solid rgba(212,168,83,0.2);
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mtf-widget::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,168,83,0.05), transparent);
+    pointer-events: none;
+  }
+  .mtf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .mtf-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mtf-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: rgba(212,168,83,0.15);
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+  .mtf-sym-selector {
+    display: flex;
+    gap: 4px;
+  }
+  .mtf-sym-btn {
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .mtf-sym-btn.active {
+    background: rgba(212,168,83,0.15);
+    color: var(--gold);
+    border-color: rgba(212,168,83,0.4);
+  }
+  .mtf-frames {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .mtf-frame {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: all 0.4s ease;
+  }
+  .mtf-frame.BUY  { background: rgba(34,197,94,0.08);  border-color: rgba(34,197,94,0.3); }
+  .mtf-frame.SELL { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.3); }
+  .mtf-frame.NEUTRAL { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25); }
+  .mtf-frame-tf {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .mtf-frame-sig {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .mtf-frame-sig.BUY     { color: var(--buy); }
+  .mtf-frame-sig.SELL    { color: var(--sell); }
+  .mtf-frame-sig.NEUTRAL { color: var(--neutral); }
+  .mtf-frame-sig.LOADING { color: var(--muted); }
+  .mtf-frame-conf {
+    font-size: 9px;
+    color: var(--muted);
+  }
+  .mtf-frame-regime {
+    font-size: 8px;
+    margin-top: 3px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .mtf-frame-regime.TRENDING_UP   { background:rgba(34,197,94,0.15);  color:var(--buy); }
+  .mtf-frame-regime.TRENDING_DOWN { background:rgba(239,68,68,0.15);  color:var(--sell); }
+  .mtf-frame-regime.RANGING       { background:rgba(245,158,11,0.15); color:var(--neutral); }
+  .mtf-frame-regime.HIGH_VOL      { background:rgba(139,92,246,0.15); color:var(--purple-light); }
+  .mtf-confluence-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .mtf-confluence-label {
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 60px;
+  }
+  .mtf-confluence-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .mtf-confluence-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease, background 0.5s ease;
+  }
+  .mtf-confluence-fill.strong-buy  { background: linear-gradient(90deg,#15803D,#22C55E); }
+  .mtf-confluence-fill.buy         { background: linear-gradient(90deg,#22C55E,#86EFAC); }
+  .mtf-confluence-fill.neutral     { background: linear-gradient(90deg,#92400E,#F59E0B); }
+  .mtf-confluence-fill.sell        { background: linear-gradient(90deg,#EF4444,#FCA5A5); }
+  .mtf-confluence-fill.strong-sell { background: linear-gradient(90deg,#7F1D1D,#EF4444); }
+  .mtf-confluence-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 80px;
+    text-align: left;
+  }
+  .mtf-confluence-text.strong-buy  { color: var(--buy); }
+  .mtf-confluence-text.buy         { color: var(--buy); }
+  .mtf-confluence-text.neutral     { color: var(--neutral); }
+  .mtf-confluence-text.sell        { color: var(--sell); }
+  .mtf-confluence-text.strong-sell { color: var(--sell); }
+  .mtf-loading-pulse {
+    animation: pulse 1s infinite;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 6px 0;
+  }
+
+  /* ══ inline MTF mini-badge inside signal cards ══ */
+  .mtf-mini {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .mtf-mini-item {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .mtf-mini-item.BUY     { background:rgba(34,197,94,0.15);  color:var(--buy); }
+  .mtf-mini-item.SELL    { background:rgba(239,68,68,0.15);  color:var(--sell); }
+  .mtf-mini-item.NEUTRAL { background:rgba(245,158,11,0.1);  color:var(--neutral); }
+
+  /* ══ TIME SERIES MTF selector ══ */
+  .ts-tf-selector {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .ts-tf-btn {
+    flex: 1;
+    padding: 6px 4px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--muted);
+    background: transparent;
+    text-align: center;
+  }
+  .ts-tf-btn.active {
+    background: rgba(6,182,212,0.15);
+    color: var(--cyan-light);
+    border: 1px solid rgba(6,182,212,0.3);
+  }
 
   /* ══ ORDER FLOW ══ */
   .of-symbol-selector{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
@@ -1064,7 +1277,7 @@
 
 <div class="container">
   <div class="header">
-    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v2</span></div>
+    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v6</span></div>
     <div class="live-badge"><div class="live-dot"></div>مباشر</div>
   </div>
 
@@ -1151,6 +1364,49 @@
       <span class="tab-sym">🧠 NLP</span>
       <span class="tab-name">مشاعر</span>
     </button>
+  </div>
+
+  <!-- ══════════════ MTF CONFLUENCE WIDGET ══════════════ -->
+  <div class="mtf-widget" id="mtf-widget">
+    <div class="mtf-header">
+      <div class="mtf-title">
+        📊 MTF CONFLUENCE
+        <span class="mtf-badge">MULTI-TIMEFRAME</span>
+      </div>
+      <div class="mtf-sym-selector">
+        <button class="mtf-sym-btn active" id="mtfbtn-eur" onclick="selectMTFSym('EUR')">EUR</button>
+        <button class="mtf-sym-btn" id="mtfbtn-jpy" onclick="selectMTFSym('JPY')">JPY</button>
+      </div>
+    </div>
+
+    <div class="mtf-frames">
+      <div class="mtf-frame LOADING" id="mtf-1d">
+        <div class="mtf-frame-tf">1 DAY</div>
+        <div class="mtf-frame-sig LOADING" id="mtf-1d-sig">—</div>
+        <div class="mtf-frame-conf" id="mtf-1d-conf">ثقة: —</div>
+        <span class="mtf-frame-regime RANGING" id="mtf-1d-regime">—</span>
+      </div>
+      <div class="mtf-frame LOADING" id="mtf-4h">
+        <div class="mtf-frame-tf">4 HOUR</div>
+        <div class="mtf-frame-sig LOADING" id="mtf-4h-sig">—</div>
+        <div class="mtf-frame-conf" id="mtf-4h-conf">ثقة: —</div>
+        <span class="mtf-frame-regime RANGING" id="mtf-4h-regime">—</span>
+      </div>
+      <div class="mtf-frame LOADING" id="mtf-1h">
+        <div class="mtf-frame-tf">1 HOUR</div>
+        <div class="mtf-frame-sig LOADING" id="mtf-1h-sig">—</div>
+        <div class="mtf-frame-conf" id="mtf-1h-conf">ثقة: —</div>
+        <span class="mtf-frame-regime RANGING" id="mtf-1h-regime">—</span>
+      </div>
+    </div>
+
+    <div class="mtf-confluence-bar">
+      <div class="mtf-confluence-label">التوافق</div>
+      <div class="mtf-confluence-track">
+        <div class="mtf-confluence-fill neutral" id="mtf-conf-fill" style="width:50%"></div>
+      </div>
+      <div class="mtf-confluence-text neutral" id="mtf-conf-text">جاري التحليل...</div>
+    </div>
   </div>
 
   <!-- ══════════════ GOLD PANEL ══════════════ -->
@@ -1269,6 +1525,11 @@
         <div class="conf-val" id="e-confVal">—</div>
       </div>
       <div class="regime-note" id="e-regimeNote">🧠 يتم تعديل الإشارة بناءً على حالة السوق</div>
+      <div class="mtf-mini" id="e-mtfMini">
+        <span class="mtf-mini-item LOADING" id="e-mtf-1d">1D: —</span>
+        <span class="mtf-mini-item LOADING" id="e-mtf-4h">4H: —</span>
+        <span class="mtf-mini-item LOADING" id="e-mtf-1h">1H: —</span>
+      </div>
     </div>
 
     <div class="section-title">شمعات آخر ١٢ ساعة</div>
@@ -1339,6 +1600,11 @@
         <div class="conf-val" id="j-confVal">—</div>
       </div>
       <div class="regime-note" id="j-regimeNote">🧠 يتم تعديل الإشارة بناءً على حالة السوق</div>
+      <div class="mtf-mini" id="j-mtfMini">
+        <span class="mtf-mini-item LOADING" id="j-mtf-1d">1D: —</span>
+        <span class="mtf-mini-item LOADING" id="j-mtf-4h">4H: —</span>
+        <span class="mtf-mini-item LOADING" id="j-mtf-1h">1H: —</span>
+      </div>
     </div>
 
     <div class="section-title">شمعات آخر ١٢ ساعة</div>
@@ -1642,6 +1908,13 @@
       <button class="ts-sym-btn active" id="tsbtn-xau" onclick="selectTSSymbol('XAU')">🥇 XAU</button>
       <button class="ts-sym-btn" id="tsbtn-eur" onclick="selectTSSymbol('EUR')">🇪🇺 EUR</button>
       <button class="ts-sym-btn" id="tsbtn-jpy" onclick="selectTSSymbol('JPY')">🇯🇵 JPY</button>
+    </div>
+
+    <!-- اختيار الإطار الزمني -->
+    <div class="ts-tf-selector">
+      <button class="ts-tf-btn" id="ts-tf-1day" onclick="selectTSTF('1day')">📅 يومي</button>
+      <button class="ts-tf-btn" id="ts-tf-4h" onclick="selectTSTF('4h')">⏱ 4 ساعات</button>
+      <button class="ts-tf-btn active" id="ts-tf-1h" onclick="selectTSTF('1h')">🕐 ساعي</button>
     </div>
 
     <!-- بطاقة التنبؤ الرئيسية -->
@@ -1996,6 +2269,22 @@ let currentPair = 'XAUXAG';
 let fredData    = null;
 
 // ══════════════════════════════════════════
+// ██████ MTF BATCH CACHE SYSTEM ██████
+// ══════════════════════════════════════════
+// كاش مركزي لكل البيانات — يُملأ مرة واحدة ويُشارك بين التابات
+const _tdCache = {
+  // 1H: { 'EUR/USD': [...values], 'USD/JPY': [...values], 'GBP/USD': [...values] }
+  '1h':   {},
+  '4h':   {},
+  '1day': {},
+};
+let _tdCacheTime = 0;          // آخر تحديث للكاش
+const TD_CACHE_TTL = 14 * 60 * 1000; // 14 دقيقة صلاحية الكاش
+
+let currentMTFSym = 'EUR';     // الرمز النشط في بطاقة MTF
+let currentTSTF   = '1h';      // الإطار الزمني النشط في تاب TS
+
+// ══════════════════════════════════════════
 // TAB & PAIR SWITCHING
 // ══════════════════════════════════════════
 function switchTab(tab) {
@@ -2080,6 +2369,184 @@ async function fetchTD(path) {
   const d=await r.json();
   if (d.status==='error') throw new Error('Twelve Data: '+d.message);
   return d;
+}
+
+// ══════════════════════════════════════════
+// ██████ BATCH FETCH & CACHE ENGINE ██████
+// ══════════════════════════════════════════
+// يجلب رموزاً متعددة في طلب واحد لكل إطار زمني
+// ويخزّن النتيجة في _tdCache لمشاركتها بين التابات
+async function fetchTDBatchAll(force = false) {
+  const now = Date.now();
+  if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) {
+    return; // الكاش لا يزال صالحاً
+  }
+
+  if (!TD_KEY) return;
+
+  // الرموز المطلوبة لكل إطار
+  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD,XAU/USD';
+  const SYMS_4H   = 'EUR/USD,USD/JPY,XAU/USD';
+  const SYMS_1DAY = 'EUR/USD,USD/JPY,XAU/USD';
+
+  try {
+    // 3 طلبات متوازية — batch بالرموز وليس بالإطارات
+    const [res1h, res4h, res1d] = await Promise.all([
+      fetchTD(`time_series?symbol=${SYMS_1H}&interval=1h&outputsize=60`),
+      fetchTD(`time_series?symbol=${SYMS_4H}&interval=4h&outputsize=40`),
+      fetchTD(`time_series?symbol=${SYMS_1DAY}&interval=1day&outputsize=30`),
+    ]);
+
+    // تحليل الردود — عندما رموز متعددة يعيد TD كائناً مفهرساً بالرمز
+    function parseBatchRes(res, symsStr) {
+      const syms = symsStr.split(',');
+      const out = {};
+      // إذا كان رمز واحد فقط يعيد مباشرةً وإلا يعيد object
+      if (res.values) {
+        // رمز واحد
+        out[syms[0]] = res.values;
+      } else {
+        syms.forEach(s => {
+          if (res[s] && res[s].values) out[s] = res[s].values;
+        });
+      }
+      return out;
+    }
+
+    _tdCache['1h']   = parseBatchRes(res1h,   SYMS_1H);
+    _tdCache['4h']   = parseBatchRes(res4h,   SYMS_4H);
+    _tdCache['1day'] = parseBatchRes(res1d,   SYMS_1DAY);
+    _tdCacheTime = Date.now();
+
+    console.log('✅ TD Batch Cache refreshed:', {
+      '1h':   Object.keys(_tdCache['1h']),
+      '4h':   Object.keys(_tdCache['4h']),
+      '1day': Object.keys(_tdCache['1day']),
+    });
+  } catch(e) {
+    console.warn('⚠️ TD Batch fetch failed, will use single fetches as fallback:', e.message);
+  }
+}
+
+// helper: يعيد قيم من الكاش أو يجلب مباشرةً كـ fallback
+async function getTDValues(symbol, interval, outputsize = 40) {
+  const cached = _tdCache[interval]?.[symbol];
+  if (cached && cached.length > 0) return cached;
+  // fallback للجلب المباشر إذا لم يكن في الكاش
+  const res = await fetchTD(`time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}`);
+  return res.values;
+}
+
+// ══════════════════════════════════════════
+// ██████ MTF CONFLUENCE ENGINE ██████
+// ══════════════════════════════════════════
+function calcMTFSignal(values) {
+  if (!values || values.length < 15) return { signal: 'NEUTRAL', confidence: 50, regime: 'RANGING' };
+  const closes = values.slice().reverse().map(v => parseFloat(v.close));
+  const rsi = calcRSI(closes);
+  const z   = calcZ(closes);
+  const vol = calcVol(closes);
+  const m1  = sigGARCH(vol, rsi);
+  const m2  = sigMR(z);
+  const m3  = sigMom(rsi);
+  const m4  = sigBB(closes);
+  const res = ensemble([m1.sig, m2.sig, m3.sig, m4.sig], m3.sig);
+  const regimeData = detectRegime(closes, fredData?.vix);
+  const filtered   = applyRegimeFilter(res, regimeData.regime);
+  return { ...filtered, regime: regimeData.regime };
+}
+
+async function runMTFConfluence() {
+  // لا تحديث إذا الكاش فارغ
+  const tdSym = currentMTFSym === 'EUR' ? 'EUR/USD' :
+                currentMTFSym === 'XAU' ? 'XAU/USD' : 'USD/JPY';
+
+  // حسب الكاش المتاح
+  const v1d = _tdCache['1day']?.[tdSym];
+  const v4h = _tdCache['4h']?.[tdSym];
+  const v1h = _tdCache['1h']?.[tdSym];
+
+  const frames = [
+    { key: '1d', label: '1 DAY', values: v1d },
+    { key: '4h', label: '4 HOUR', values: v4h },
+    { key: '1h', label: '1 HOUR', values: v1h },
+  ];
+
+  const sigAr = { BUY:'شراء↑', SELL:'بيع↓', NEUTRAL:'انتظار' };
+  const regAr  = { TRENDING_UP:'صاعد', TRENDING_DOWN:'هابط', RANGING:'عرضي', HIGH_VOL:'متقلب' };
+  const results = [];
+
+  frames.forEach(({ key, values }) => {
+    const r = calcMTFSignal(values);
+    results.push(r);
+
+    const frameEl  = document.getElementById(`mtf-${key}`);
+    const sigEl    = document.getElementById(`mtf-${key}-sig`);
+    const confEl   = document.getElementById(`mtf-${key}-conf`);
+    const regimeEl = document.getElementById(`mtf-${key}-regime`);
+
+    if (!frameEl) return;
+
+    const sig = values ? r.signal : 'NEUTRAL';
+    frameEl.className  = `mtf-frame ${sig}`;
+    sigEl.textContent  = values ? sigAr[sig] : '—';
+    sigEl.className    = `mtf-frame-sig ${sig}`;
+    confEl.textContent = values ? `ثقة: ${r.confidence}%` : 'لا بيانات';
+    regimeEl.textContent  = values ? (regAr[r.regime] || r.regime) : '—';
+    regimeEl.className    = `mtf-frame-regime ${r.regime}`;
+  });
+
+  // حساب التوافق الكلي
+  const hasData = results.some((r, i) => frames[i].values);
+  if (!hasData) return;
+
+  const counts = { BUY: 0, SELL: 0, NEUTRAL: 0 };
+  results.forEach((r, i) => { if (frames[i].values) counts[r.signal]++; });
+
+  let confClass, confText, fillPct;
+  if (counts.BUY === 3)        { confClass = 'strong-buy';  confText = '🟢 توافق شراء قوي'; fillPct = 90; }
+  else if (counts.BUY === 2)   { confClass = 'buy';         confText = '↑ ميل للشراء';      fillPct = 68; }
+  else if (counts.SELL === 3)  { confClass = 'strong-sell'; confText = '🔴 توافق بيع قوي';  fillPct = 10; }
+  else if (counts.SELL === 2)  { confClass = 'sell';        confText = '↓ ميل للبيع';       fillPct = 32; }
+  else                         { confClass = 'neutral';     confText = '◈ لا توافق — انتظر'; fillPct = 50; }
+
+  const fill = document.getElementById('mtf-conf-fill');
+  const text = document.getElementById('mtf-conf-text');
+  fill.className = `mtf-confluence-fill ${confClass}`;
+  fill.style.width = fillPct + '%';
+  text.className = `mtf-confluence-text ${confClass}`;
+  text.textContent = confText;
+}
+
+function selectMTFSym(sym) {
+  currentMTFSym = sym;
+  document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mtfbtn-' + sym.toLowerCase()).classList.add('active');
+  runMTFConfluence();
+}
+
+// تحديث MTF mini-badges داخل تابات EUR/JPY
+function updateMTFMini(prefix, sym) {
+  const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+  const tfs = [
+    { id: `${prefix}-mtf-1d`, tf: '1day', label: '1D' },
+    { id: `${prefix}-mtf-4h`, tf: '4h',   label: '4H' },
+    { id: `${prefix}-mtf-1h`, tf: '1h',   label: '1H' },
+  ];
+  const sigShort = { BUY: '↑', SELL: '↓', NEUTRAL: '◈' };
+  tfs.forEach(({ id, tf, label }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const values = _tdCache[tf]?.[tdSym];
+    if (!values || values.length < 10) {
+      el.textContent = `${label}: —`;
+      el.className = 'mtf-mini-item NEUTRAL';
+      return;
+    }
+    const r = calcMTFSignal(values);
+    el.textContent = `${label}: ${sigShort[r.signal]}`;
+    el.className = `mtf-mini-item ${r.signal}`;
+  });
 }
 
 // ══════════════════════════════════════════
@@ -2476,21 +2943,22 @@ function setRegime(p, regimeData) {
 async function runGold(){
   setBtnLoading('g',true); hideErr();
   try{
-    // جلب الذهب من metals.live (مجاني)
-    const metals = await fetchMetals();
-    const price = parseFloat(metals.gold);
-    if (!price || isNaN(price)) throw new Error('تعذّر جلب سعر الذهب من metals.live');
+    // جلب بيانات حقيقية لـ XAU/USD من Twelve Data
+    const values1h = await getTDValues('XAU/USD', '1h', 30);
+    if (!values1h || values1h.length < 2) throw new Error('تعذّر جلب بيانات XAU/USD من Twelve Data');
+
+    // السعر الحالي والسابق من البيانات الحقيقية
+    const latestCandle = values1h[0];
+    const prevCandle   = values1h[1];
+    const price    = parseFloat(latestCandle.close);
+    const prevPrice = parseFloat(prevCandle.close);
+    const change   = price - prevPrice;
+    const pct      = (change / prevPrice) * 100;
 
     if(!fredData) fredData=await fetchAllFRED();
 
-    // نبني سعر الأمس تقريبياً من FRED أو نقدّره
-    const prevApprox = price * (1 - (Math.random() * 0.004 - 0.002));
-    const change = price - prevApprox;
-    const pct = (change / prevApprox) * 100;
-
-    // بناء سلسلة زمنية تقريبية للتحليل الكمي
-    const series = buildFakeSeries(price, 30, 0.004);
-    const closes = series.values.map(v=>parseFloat(v.close)).reverse();
+    // بناء سلسلة زمنية من البيانات الحقيقية (مرتبة من الأقدم للأحدث)
+    const closes = values1h.slice().reverse().map(v=>parseFloat(v.close));
 
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
 
@@ -2506,7 +2974,7 @@ async function runGold(){
     res = applyRegimeFilter(res, regimeData.regime);
 
     const live=!!fredData;
-    setPrice('g',price,change,pct,live?'📡 metals.live + FRED · بيانات حقيقية ✓':'📡 metals.live · ذهب حقيقي ✓','$');
+    setPrice('g',price,change,pct,live?'📡 Twelve Data + FRED · بيانات حقيقية ✓':'📡 Twelve Data · بيانات حقيقية ✓','$');
     setSignal('g',res);
     setModel('g','m1',m1.sig,m1.val); setModel('g','m2',m2.sig,m2.val);
     setModel('g','m3',m3.sig,m3.val); setModel('g','m4',m4.sig,m4.val);
@@ -2515,7 +2983,7 @@ async function runGold(){
     setFactor('g',2,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[1],fredData?.dxyLive,'td');
     setFactor('g',3,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[2],fredData?.vixLive,'td');
     setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],fredData?.breakeven!=null);
-    buildCandles('g',series.values,'$',1);
+    buildCandles('g',values1h,'$',1);
     buildVol('g',vol,price,'gold-bar','$',0);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
   }catch(err){showErr(err.message);console.error(err);}
@@ -2528,12 +2996,14 @@ async function runGold(){
 async function runEUR(){
   setBtnLoading('e',true); hideErr();
   try{
-    const [quote,series]=await Promise.all([fetchTD('quote?symbol=EUR/USD'),fetchTD('time_series?symbol=EUR/USD&interval=1h&outputsize=30')]);
+    // استخدام الكاش أولاً ثم الجلب المباشر كـ fallback
+    const values1h = await getTDValues('EUR/USD', '1h', 30);
+    const [quote] = await Promise.all([fetchTD('quote?symbol=EUR/USD')]);
     if(!fredData) fredData=await fetchAllFRED();
     const price=parseFloat(quote.close||quote.price);
     const prev=parseFloat(quote.previous_close);
     const change=price-prev, pct=(change/prev)*100;
-    const closes=series.values.map(v=>parseFloat(v.close)).reverse();
+    const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
 
     const regimeData = detectRegime(closes, fredData?.vix);
@@ -2564,9 +3034,11 @@ async function runEUR(){
     setFactor('e',1,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[0],fredData?.dxyLive,'td');
     setFactor('e',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
     setFactor('e',3,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[2],fredData?.breakeven!=null);
-    buildCandles('e',series.values,'',5);
+    buildCandles('e',values1h,'',5);
     buildVol('e',vol,price,'eur-bar','',5);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
+    // تحديث MTF mini badges
+    updateMTFMini('e', 'EUR');
   }catch(err){showErr(err.message);console.error(err);}
   setBtnLoading('e',false);
 }
@@ -2577,12 +3049,13 @@ async function runEUR(){
 async function runJPY(){
   setBtnLoading('j',true); hideErr();
   try{
-    const [quote,series]=await Promise.all([fetchTD('quote?symbol=USD/JPY'),fetchTD('time_series?symbol=USD/JPY&interval=1h&outputsize=30')]);
+    const values1h = await getTDValues('USD/JPY', '1h', 30);
+    const [quote] = await Promise.all([fetchTD('quote?symbol=USD/JPY')]);
     if(!fredData) fredData=await fetchAllFRED();
     const price=parseFloat(quote.close||quote.price);
     const prev=parseFloat(quote.previous_close);
     const change=price-prev, pct=(change/prev)*100;
-    const closes=series.values.map(v=>parseFloat(v.close)).reverse();
+    const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
 
     const regimeData = detectRegime(closes, fredData?.vix);
@@ -2613,9 +3086,11 @@ async function runJPY(){
     setFactor('j',1,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[0],fredData?.dxyLive,'td');
     setFactor('j',2,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[1],fredData?.vixLive,'td');
     setFactor('j',3,fredData?.realYield!=null?fv(fredData.realYield,2)+'%':'—',mac[2],live&&fredData?.realYield!=null);
-    buildCandles('j',series.values,'¥',2);
+    buildCandles('j',values1h,'¥',2);
     buildVol('j',vol,price,'jpy-bar','¥',2);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
+    // تحديث MTF mini badges
+    updateMTFMini('j', 'JPY');
   }catch(err){showErr(err.message);console.error(err);}
   setBtnLoading('j',false);
 }
@@ -2635,15 +3110,15 @@ async function runPairs(){
     let closesA, closesB, priceA, priceB;
 
     if (isXAUXAG) {
-      // استخدام metals.live للذهب والفضة (مجاني)
-      const metals = await fetchMetals();
-      priceA = parseFloat(metals.gold);
-      priceB = parseFloat(metals.silver);
-      if (!priceA || !priceB) throw new Error('تعذّر جلب أسعار المعادن من metals.live');
-      const seriesA = buildFakeSeries(priceA, 30, 0.004);
-      const seriesB = buildFakeSeries(priceB, 30, 0.005);
+      // جلب بيانات تسلسل زمني حقيقية لكل من الذهب والفضة
+      const [seriesA, seriesB] = await Promise.all([
+        fetchTD(`time_series?symbol=XAU/USD&interval=1h&outputsize=30`),
+        fetchTD(`time_series?symbol=XAG/USD&interval=1h&outputsize=30`),
+      ]);
       closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
       closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+      priceA = closesA[closesA.length - 1];
+      priceB = closesB[closesB.length - 1];
     } else {
       // EUR/USD و GBP/USD من Twelve Data (متاحة في الخطة المجانية)
       const [seriesA, seriesB] = await Promise.all([
@@ -2843,10 +3318,9 @@ async function runOrderFlow() {
     const sym = currentOFSymbol;
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      const price = parseFloat(metals.gold);
-      const series = buildFakeSeries(price, 30, 0.004);
-      ohlcv = series.values;
+      // جلب بيانات حقيقية من Twelve Data
+      const values = await getTDValues('XAU/USD', '1h', 30);
+      ohlcv = values;
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
       const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=30`);
@@ -3106,6 +3580,18 @@ function updateTSModelDetail() {
   document.getElementById('ts-p-aic').textContent = d.aic;
 }
 
+function selectTSTF(tf) {
+  currentTSTF = tf;
+  document.querySelectorAll('.ts-tf-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('ts-tf-' + tf).classList.add('active');
+  // تحديث عنوان التنبؤ
+  const tfLabels = { '1h': 'الشمعة القادمة (ساعية)', '4h': 'الشمعة القادمة (4 ساعات)', '1day': 'الشمعة القادمة (يومية)' };
+  const fc = document.getElementById('ts-forecastCard');
+  const titleEl = fc ? fc.querySelector('.forecast-title') : null;
+  if (titleEl) titleEl.textContent = `🔮 التنبؤ المُجمَّع · ${tfLabels[tf] || ''}`;
+  runTimeSeries();
+}
+
 async function runTimeSeries() {
   const btn = document.getElementById('ts-refreshBtn');
   const icon = document.getElementById('ts-refreshIcon');
@@ -3116,16 +3602,18 @@ async function runTimeSeries() {
   try {
     let closes, currentPrice;
     const sym = currentTSSymbol;
+    const tf  = currentTSTF || '1h';
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      currentPrice = parseFloat(metals.gold);
-      const series = buildFakeSeries(currentPrice, 40, 0.004);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      // جلب بيانات حقيقية من Twelve Data للذهب
+      const values = await getTDValues('XAU/USD', tf, 50);
+      closes = values.slice().reverse().map(v => parseFloat(v.close));
+      currentPrice = closes[closes.length - 1];
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
-      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=40`);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      // استخدام الكاش إذا متاح، وإلا جلب مباشر
+      const values = await getTDValues(tdSym, tf, 50);
+      closes = values.slice().reverse().map(v => parseFloat(v.close));
       currentPrice = closes[closes.length - 1];
     }
 
@@ -4970,9 +5458,19 @@ function startRSSMonitor() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  fredData=await fetchAllFRED();
+  // 1. جلب FRED و Batch TD في وقت واحد
+  [fredData] = await Promise.all([
+    fetchAllFRED(),
+    fetchTDBatchAll(),   // يملأ _tdCache بكل الأطر الزمنية
+  ]);
+
+  // 2. تشغيل كل التحليلات (تستخدم الكاش)
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
-  // تحديث Quant Brain فقط إذا كان مفتوحاً
+
+  // 3. تحديث بطاقة MTF Confluence بعد اكتمال الكاش
+  runMTFConfluence();
+
+  // 4. Quant Brain إذا كان مفتوحاً
   if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
 }
 
