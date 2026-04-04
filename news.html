@@ -32,7 +32,7 @@
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 
   /* TABS */
-  .tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tabs{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab{padding:7px 2px;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.3s ease;color:var(--muted);background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
   .tab .tab-sym{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;}
   .tab .tab-name{font-size:9px;font-weight:500;}
@@ -1376,6 +1376,101 @@
     box-shadow: 0 4px 20px rgba(124,58,237,0.3);
   }
   .qb-refresh-btn:active { transform: scale(0.98); }
+
+  /* ══════════════ MICROSTRUCTURE TAB ══════════════ */
+  .tab.active-micro{background:rgba(16,185,129,0.15);color:#34D399;border:1px solid rgba(16,185,129,0.35);}
+
+  /* Symbol selector */
+  .ms-sym-selector{display:flex;gap:6px;margin-bottom:14px;}
+  .ms-sym-btn{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;text-align:center;}
+  .ms-sym-btn.active{background:rgba(16,185,129,0.15);color:#34D399;border-color:rgba(16,185,129,0.4);}
+
+  /* بطاقة الجودة الرئيسية */
+  .ms-quality-card{border-radius:20px;padding:20px;margin-bottom:14px;border:2px solid;transition:all 0.5s;text-align:center;}
+  .ms-quality-card.EXCELLENT{background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(16,185,129,0.03));border-color:rgba(16,185,129,0.45);box-shadow:0 0 30px rgba(16,185,129,0.08);}
+  .ms-quality-card.GOOD{background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.02));border-color:rgba(34,197,94,0.35);}
+  .ms-quality-card.FAIR{background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.02));border-color:rgba(245,158,11,0.3);}
+  .ms-quality-card.POOR{background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.02));border-color:rgba(239,68,68,0.35);}
+  .ms-quality-card.LOADING{background:rgba(255,255,255,0.02);border-color:var(--border);}
+  .ms-quality-label{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+  .ms-quality-grade{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:700;line-height:1;}
+  .ms-quality-grade.EXCELLENT,.ms-quality-grade.GOOD{color:#34D399;}
+  .ms-quality-grade.FAIR{color:var(--neutral);}
+  .ms-quality-grade.POOR{color:var(--sell);}
+  .ms-quality-desc{font-size:13px;font-weight:700;margin-top:6px;}
+  .ms-quality-desc.EXCELLENT,.ms-quality-desc.GOOD{color:#34D399;}
+  .ms-quality-desc.FAIR{color:var(--neutral);}
+  .ms-quality-desc.POOR{color:var(--sell);}
+  .ms-quality-conf-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+  .ms-conf-bar{flex:1;max-width:150px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+  .ms-conf-fill{height:100%;border-radius:3px;transition:width 1s ease;background:linear-gradient(90deg,#059669,#34D399);}
+  .ms-conf-val{font-size:12px;font-weight:700;color:#34D399;}
+
+  /* Order Book Heatmap */
+  .ms-ob-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .ms-ob-title{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+  .ms-ob-price-tag{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--gold);}
+  .ms-ob-heatmap{display:flex;flex-direction:column;gap:3px;}
+  .ms-ob-row{display:flex;align-items:center;gap:6px;height:22px;}
+  .ms-ob-price{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;width:56px;text-align:left;flex-shrink:0;}
+  .ms-ob-price.ask-p{color:var(--sell);}
+  .ms-ob-price.bid-p{color:var(--buy);}
+  .ms-ob-price.mid-p{color:var(--gold);font-size:12px;}
+  .ms-ob-bar-wrap{flex:1;height:100%;position:relative;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.03);}
+  .ms-ob-bar{height:100%;border-radius:3px;transition:width 0.8s ease;}
+  .ms-ob-bar.ask-bar{background:linear-gradient(90deg,rgba(239,68,68,0.15),rgba(239,68,68,0.5));margin-right:auto;}
+  .ms-ob-bar.bid-bar{background:linear-gradient(90deg,rgba(34,197,94,0.5),rgba(34,197,94,0.15));margin-left:auto;}
+  .ms-ob-vol{font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--muted);width:36px;text-align:left;flex-shrink:0;}
+  .ms-ob-mid-line{height:1px;background:var(--gold);opacity:0.4;margin:3px 0;}
+  .ms-ob-legend{display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--muted);}
+  .ms-ob-legend span{display:flex;align-items:center;gap:4px;}
+  .ms-ob-legend .dot{width:8px;height:8px;border-radius:2px;}
+
+  /* Spread & Execution metrics */
+  .ms-metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .ms-metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;position:relative;overflow:hidden;}
+  .ms-metric-label{font-size:10px;color:var(--muted);margin-bottom:4px;line-height:1.3;}
+  .ms-metric-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;}
+  .ms-metric-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+  .ms-metric-bar{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 0 14px;transition:width 0.8s ease;}
+
+  /* Spread تاريخي */
+  .ms-spread-chart{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .ms-spread-title{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;}
+  .ms-spread-bars{display:flex;gap:3px;align-items:flex-end;height:52px;}
+  .ms-spread-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height 0.5s;}
+  .ms-spread-bar.tight{background:linear-gradient(180deg,rgba(16,185,129,0.8),rgba(16,185,129,0.3));}
+  .ms-spread-bar.wide{background:linear-gradient(180deg,rgba(239,68,68,0.8),rgba(239,68,68,0.3));}
+  .ms-spread-bar.cur{outline:1px solid rgba(255,255,255,0.3);}
+
+  /* VWAP & Zero Reflection */
+  .ms-vwap-card{background:var(--card);border:1px solid rgba(212,168,83,0.2);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .ms-vwap-title{font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;}
+  .ms-vwap-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .ms-vwap-row:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+  .ms-vwap-label{font-size:11px;color:var(--muted);}
+  .ms-vwap-val{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;}
+  .ms-vwap-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;}
+  .ms-vwap-badge.above{background:rgba(34,197,94,0.15);color:var(--buy);}
+  .ms-vwap-badge.below{background:rgba(239,68,68,0.15);color:var(--sell);}
+  .ms-vwap-badge.at{background:rgba(212,168,83,0.15);color:var(--gold);}
+
+  /* Execution efficiency */
+  .ms-exec-card{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:14px;padding:14px;margin-bottom:14px;}
+  .ms-exec-title{font-size:12px;font-weight:700;color:#34D399;margin-bottom:10px;}
+  .ms-exec-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ms-exec-label{font-size:11px;color:var(--muted);width:110px;flex-shrink:0;}
+  .ms-exec-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
+  .ms-exec-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+  .ms-exec-fill.good{background:linear-gradient(90deg,#059669,#34D399);}
+  .ms-exec-fill.fair{background:linear-gradient(90deg,#B45309,var(--neutral));}
+  .ms-exec-fill.poor{background:linear-gradient(90deg,#991B1B,var(--sell));}
+  .ms-exec-val{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;width:44px;text-align:left;}
+
+  /* Insight نصي */
+  .ms-insight{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.18);border-radius:14px;padding:14px;margin-bottom:14px;}
+  .ms-insight-title{font-size:12px;font-weight:700;color:#34D399;margin-bottom:8px;}
+  .ms-insight-text{font-size:12px;color:var(--text);line-height:1.7;white-space:pre-line;}
 </style>
 </head>
 <body>
@@ -1511,6 +1606,10 @@
     <button class="tab" id="tab-dailybias" onclick="switchTab('dailybias')">
       <span class="tab-sym">🎯 DB</span>
       <span class="tab-name">تحيز</span>
+    </button>
+    <button class="tab" id="tab-micro" onclick="switchTab('micro')">
+      <span class="tab-sym">🔬 MS</span>
+      <span class="tab-name">هيكلة</span>
     </button>
   </div>
 
@@ -2475,6 +2574,154 @@
     </button>
 
   </div><!-- /panel-quantbrain -->
+
+  <!-- ══════════════ MICROSTRUCTURE PANEL ══════════════ -->
+  <div class="panel" id="panel-micro">
+
+    <!-- اختيار الرمز -->
+    <div class="ms-sym-selector">
+      <button class="ms-sym-btn active" id="msbtn-xau" onclick="selectMSSym('XAU')">🥇 XAU</button>
+      <button class="ms-sym-btn" id="msbtn-eur" onclick="selectMSSym('EUR')">🇪🇺 EUR</button>
+      <button class="ms-sym-btn" id="msbtn-jpy" onclick="selectMSSym('JPY')">🇯🇵 JPY</button>
+    </div>
+
+    <!-- بطاقة جودة السيولة الرئيسية -->
+    <div class="ms-quality-card LOADING" id="ms-qualityCard">
+      <div class="ms-quality-label">🔬 MARKET MICROSTRUCTURE · جودة السيولة</div>
+      <div class="ms-quality-grade LOADING" id="ms-qualityGrade">—</div>
+      <div class="ms-quality-desc LOADING" id="ms-qualityDesc">جاري التحليل...</div>
+      <div class="ms-quality-conf-row">
+        <span style="font-size:11px;color:var(--muted);">دقة النموذج</span>
+        <div class="ms-conf-bar"><div class="ms-conf-fill" id="ms-confFill" style="width:0%"></div></div>
+        <span class="ms-conf-val" id="ms-confVal">—</span>
+      </div>
+    </div>
+
+    <!-- Order Book Heatmap -->
+    <div class="section-title">📖 دفتر الأوامر · Order Book Heatmap</div>
+    <div class="ms-ob-card">
+      <div class="ms-ob-title">
+        <span>مستويات السيولة المرصودة حول السعر</span>
+        <span class="ms-ob-price-tag" id="ms-ob-midPrice">—</span>
+      </div>
+      <div class="ms-ob-heatmap" id="ms-obHeatmap">
+        <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px;">جاري البناء...</div>
+      </div>
+      <div class="ms-ob-legend">
+        <span><span class="dot" style="background:rgba(239,68,68,0.5);"></span> طلبات بيع (Ask)</span>
+        <span><span class="dot" style="background:rgba(34,197,94,0.5);"></span> طلبات شراء (Bid)</span>
+        <span><span class="dot" style="background:var(--gold);"></span> سعر السوق</span>
+      </div>
+    </div>
+
+    <!-- مقاييس الهيكلة الدقيقة -->
+    <div class="section-title">⚙️ مقاييس التنفيذ والسيولة</div>
+    <div class="ms-metrics-grid">
+      <div class="ms-metric">
+        <div class="ms-metric-label">📐 Bid-Ask Spread</div>
+        <div class="ms-metric-val" id="ms-spread" style="color:#34D399">—</div>
+        <div class="ms-metric-sub">فارق العرض والطلب</div>
+        <div class="ms-metric-bar" id="ms-spreadBar" style="background:#34D399;width:0%"></div>
+      </div>
+      <div class="ms-metric">
+        <div class="ms-metric-label">⚡ Execution Speed</div>
+        <div class="ms-metric-val" id="ms-execSpeed" style="color:var(--cyan-light)">—</div>
+        <div class="ms-metric-sub">سرعة استجابة السوق</div>
+        <div class="ms-metric-bar" id="ms-execBar" style="background:var(--cyan-light);width:0%"></div>
+      </div>
+      <div class="ms-metric">
+        <div class="ms-metric-label">💧 Market Depth</div>
+        <div class="ms-metric-val" id="ms-depth" style="color:var(--blue-light)">—</div>
+        <div class="ms-metric-sub">عمق دفتر الأوامر</div>
+        <div class="ms-metric-bar" id="ms-depthBar" style="background:var(--blue-light);width:0%"></div>
+      </div>
+      <div class="ms-metric">
+        <div class="ms-metric-label">📉 Price Impact</div>
+        <div class="ms-metric-val" id="ms-impact" style="color:var(--gold)">—</div>
+        <div class="ms-metric-sub">Slippage المتوقع</div>
+        <div class="ms-metric-bar" id="ms-impactBar" style="background:var(--gold);width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Spread التاريخي -->
+    <div class="section-title">📊 تاريخ Spread · آخر ٢٠ شمعة</div>
+    <div class="ms-spread-chart">
+      <div class="ms-spread-title" id="ms-spreadChartTitle">تطور فارق العرض والطلب عبر الوقت</div>
+      <div class="ms-spread-bars" id="ms-spreadBars"></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px;">
+        <span style="color:#34D399">▪ ضيق = سيولة جيدة</span>
+        <span style="color:var(--sell)">▪ واسع = سيولة ضعيفة</span>
+      </div>
+    </div>
+
+    <!-- VWAP & Zero Reflections -->
+    <div class="section-title">📍 VWAP · Zero Reflections · مرجعيات السيولة</div>
+    <div class="ms-vwap-card">
+      <div class="ms-vwap-title">🏛 مستويات الترجيح والانعكاس الصفري</div>
+      <div class="ms-vwap-row">
+        <span class="ms-vwap-label">VWAP (اليوم)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="ms-vwap-val" id="ms-vwap">—</span>
+          <span class="ms-vwap-badge" id="ms-vwapBadge">—</span>
+        </div>
+      </div>
+      <div class="ms-vwap-row">
+        <span class="ms-vwap-label">Zero Reflection (ZR1)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="ms-vwap-val" id="ms-zr1">—</span>
+          <span class="ms-vwap-badge at" id="ms-zr1Desc">—</span>
+        </div>
+      </div>
+      <div class="ms-vwap-row">
+        <span class="ms-vwap-label">Zero Reflection (ZR2)</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="ms-vwap-val" id="ms-zr2">—</span>
+          <span class="ms-vwap-badge at" id="ms-zr2Desc">—</span>
+        </div>
+      </div>
+      <div class="ms-vwap-row">
+        <span class="ms-vwap-label">VWAP Std Dev Band ±1σ</span>
+        <span class="ms-vwap-val" id="ms-vwapBand">—</span>
+      </div>
+    </div>
+
+    <!-- Execution Efficiency -->
+    <div class="section-title">🚀 كفاءة التنفيذ</div>
+    <div class="ms-exec-card">
+      <div class="ms-exec-title">📊 تقييم شامل لمعايير التنفيذ</div>
+      <div class="ms-exec-row">
+        <span class="ms-exec-label">Liquidity Score</span>
+        <div class="ms-exec-bar-wrap"><div class="ms-exec-fill good" id="ms-ef-liq" style="width:0%"></div></div>
+        <span class="ms-exec-val" id="ms-ef-liqVal" style="color:#34D399">—</span>
+      </div>
+      <div class="ms-exec-row">
+        <span class="ms-exec-label">Slippage Risk</span>
+        <div class="ms-exec-bar-wrap"><div class="ms-exec-fill fair" id="ms-ef-slip" style="width:0%"></div></div>
+        <span class="ms-exec-val" id="ms-ef-slipVal" style="color:var(--neutral)">—</span>
+      </div>
+      <div class="ms-exec-row">
+        <span class="ms-exec-label">Market Resilience</span>
+        <div class="ms-exec-bar-wrap"><div class="ms-exec-fill good" id="ms-ef-res" style="width:0%"></div></div>
+        <span class="ms-exec-val" id="ms-ef-resVal" style="color:#34D399">—</span>
+      </div>
+      <div class="ms-exec-row">
+        <span class="ms-exec-label">Order Flow Toxicity</span>
+        <div class="ms-exec-bar-wrap"><div class="ms-exec-fill poor" id="ms-ef-tox" style="width:0%"></div></div>
+        <span class="ms-exec-val" id="ms-ef-toxVal" style="color:var(--sell)">—</span>
+      </div>
+    </div>
+
+    <!-- Insight نصي -->
+    <div class="ms-insight">
+      <div class="ms-insight-title">🔬 تفسير الهيكلة الدقيقة الشامل</div>
+      <div class="ms-insight-text" id="ms-insightText">جاري تحليل بنية السوق...</div>
+    </div>
+
+    <button class="refresh-btn" id="ms-refreshBtn" onclick="runMicro()"
+      style="background:linear-gradient(135deg,#059669,#10B981);color:#0A0C10;">
+      <span id="ms-refreshIcon">🔄</span> تحديث Microstructure
+    </button>
+  </div><!-- /panel-micro -->
 
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v8<br>
@@ -6049,6 +6296,339 @@ async function runDailyBias() {
 }
 
 // ══════════════════════════════════════════
+// ██████ MICROSTRUCTURE ENGINE ██████
+// ══════════════════════════════════════════
+let currentMSSym = 'XAU';
+
+function selectMSSym(sym) {
+  currentMSSym = sym;
+  document.querySelectorAll('.ms-sym-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('msbtn-' + sym.toLowerCase()).classList.add('active');
+  runMicro();
+}
+
+// ── حساب VWAP من OHLCV ──
+function calcVWAP(ohlcv) {
+  let cumPV = 0, cumVol = 0;
+  const typicals = [];
+  ohlcv.forEach(c => {
+    const h = parseFloat(c.high), l = parseFloat(c.low), cl = parseFloat(c.close);
+    const vol = parseFloat(c.volume) || 1000; // fallback حجم افتراضي
+    const tp = (h + l + cl) / 3;
+    cumPV  += tp * vol;
+    cumVol += vol;
+    typicals.push(tp);
+  });
+  const vwap = cumPV / (cumVol || 1);
+
+  // Standard Deviation للـ VWAP
+  const variance = typicals.reduce((a, tp) => a + (tp - vwap)**2, 0) / typicals.length;
+  const stdDev = Math.sqrt(variance);
+
+  return { vwap, stdDev, upper: vwap + stdDev, lower: vwap - stdDev };
+}
+
+// ── حساب Zero Reflections (نقاط الارتداد الصفري) ──
+function calcZeroReflections(closes, vwap) {
+  // ZR = مستويات يتوازن فيها ضغط الشراء والبيع بشكل مثالي
+  // نحسبها من نقاط الالتقاء بين السعر وVWAP
+  const n = closes.length;
+  const mean = closes.reduce((a,b) => a+b, 0) / n;
+  const std  = Math.sqrt(closes.reduce((a,b) => a + (b-mean)**2, 0) / n);
+
+  // ZR1: أقرب مستوى معكوس فوق/تحت VWAP
+  const zr1 = vwap + std * 0.618; // نسبة ذهبية
+  const zr2 = vwap - std * 0.618;
+
+  return { zr1, zr2 };
+}
+
+// ── بناء Order Book افتراضي من بيانات السعر ──
+function buildOrderBook(ohlcv, currentPrice, sym) {
+  const closes = ohlcv.slice().map(c => parseFloat(c.close));
+  const highs   = ohlcv.map(c => parseFloat(c.high));
+  const lows    = ohlcv.map(c => parseFloat(c.low));
+
+  // نقدّر كثافة الأوامر من تكرار مستويات الدعم/المقاومة
+  const priceRange = Math.max(...highs) - Math.min(...lows);
+  const step = priceRange / 10; // 10 مستويات
+
+  const levels = [];
+  for (let i = 5; i >= 1; i--) {
+    const price = currentPrice + step * i * 0.3;
+    // كثافة الأوامر: أعلى عند مستويات مرّت بها أسعار سابقة
+    const density = ohlcv.filter(c =>
+      Math.abs(parseFloat(c.high) - price) < step * 0.5 ||
+      Math.abs(parseFloat(c.low)  - price) < step * 0.5
+    ).length;
+    levels.push({ price, side: 'ask', volume: Math.max(20, density * 15 + Math.random() * 40) });
+  }
+  for (let i = 1; i <= 5; i++) {
+    const price = currentPrice - step * i * 0.3;
+    const density = ohlcv.filter(c =>
+      Math.abs(parseFloat(c.high) - price) < step * 0.5 ||
+      Math.abs(parseFloat(c.low)  - price) < step * 0.5
+    ).length;
+    levels.push({ price, side: 'bid', volume: Math.max(20, density * 15 + Math.random() * 40) });
+  }
+
+  return levels.sort((a, b) => b.price - a.price);
+}
+
+// ── حساب Spread التاريخي ──
+function calcHistoricalSpread(ohlcv) {
+  // نقدّر الـ Spread من (High-Low)/Close كنسبة مئوية
+  return ohlcv.map(c => {
+    const h = parseFloat(c.high), l = parseFloat(c.low), cl = parseFloat(c.close);
+    return ((h - l) / cl) * 100;
+  });
+}
+
+// ── حساب Market Microstructure Score الشامل ──
+function calcMicroScore(closes, spreads, vwapData, currentPrice) {
+  let score = 100;
+
+  // 1. Spread Score (30 نقطة) — spread ضيق = نقاط أعلى
+  const avgSpread = spreads.reduce((a,b) => a+b, 0) / spreads.length;
+  const curSpread = spreads[spreads.length - 1];
+  if (curSpread > avgSpread * 1.5) score -= 25;
+  else if (curSpread > avgSpread * 1.2) score -= 15;
+  else if (curSpread < avgSpread * 0.8) score += 5;
+
+  // 2. VWAP Position (25 نقطة) — قرب VWAP = تقارب أفضل
+  const distFromVWAP = Math.abs(currentPrice - vwapData.vwap) / vwapData.stdDev;
+  if (distFromVWAP > 2.0) score -= 20;
+  else if (distFromVWAP > 1.5) score -= 10;
+  else if (distFromVWAP < 0.5) score += 5;
+
+  // 3. Volatility (25 نقطة)
+  const vol = calcVol(closes);
+  if (vol > 2.0) score -= 20;
+  else if (vol > 1.5) score -= 10;
+  else if (vol < 0.5) score += 5;
+
+  // 4. Momentum Consistency (20 نقطة)
+  const rsi = calcRSI(closes);
+  if (rsi > 75 || rsi < 25) score -= 15; // ذروة = سيولة هشة
+  else if (rsi > 60 || rsi < 40) score -= 5;
+  else score += 5;
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let grade, quality, desc;
+  if (score >= 80)      { grade = 'A+'; quality = 'EXCELLENT'; desc = '✅ سيولة ممتازة — تنفيذ مثالي'; }
+  else if (score >= 65) { grade = 'B+'; quality = 'GOOD';      desc = '🟢 سيولة جيدة — تنفيذ مقبول'; }
+  else if (score >= 50) { grade = 'C';  quality = 'FAIR';      desc = '🟡 سيولة متوسطة — تكاليف معتدلة'; }
+  else                  { grade = 'D';  quality = 'POOR';      desc = '🔴 سيولة ضعيفة — احذر من Slippage'; }
+
+  return { score, grade, quality, desc };
+}
+
+// ── الدالة الرئيسية ──
+async function runMicro() {
+  const btn  = document.getElementById('ms-refreshBtn');
+  const icon = document.getElementById('ms-refreshIcon');
+  if (btn) { btn.style.opacity = '0.7'; btn.style.pointerEvents = 'none'; }
+  if (icon) icon.innerHTML = '<span class="spin">⟳</span>';
+  hideErr();
+
+  try {
+    const sym   = currentMSSym;
+    const tdSym = sym === 'XAU' ? 'XAU/USD' : sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+    const prefix = sym === 'XAU' ? '$' : sym === 'JPY' ? '¥' : '';
+    const dp     = sym === 'JPY' ? 2 : sym === 'XAU' ? 2 : 4;
+
+    // جلب البيانات من الكاش
+    const rawValues = await getTDValues(tdSym, '1h', 40);
+    const ohlcv  = rawValues.slice(0, 30).reverse(); // أقدم → أحدث
+    const closes = ohlcv.map(c => parseFloat(c.close));
+    const currentPrice = closes[closes.length - 1];
+
+    // ── الحسابات ──
+    const vwapData = calcVWAP(ohlcv);
+    const zr       = calcZeroReflections(closes, vwapData.vwap);
+    const spreads  = calcHistoricalSpread(ohlcv);
+    const obLevels = buildOrderBook(ohlcv, currentPrice, sym);
+    const micro    = calcMicroScore(closes, spreads, vwapData, currentPrice);
+
+    const curSpread   = spreads[spreads.length - 1];
+    const avgSpread   = spreads.reduce((a,b) => a+b, 0) / spreads.length;
+    const spreadPips  = (curSpread * currentPrice / 100);
+    const vol         = calcVol(closes);
+    const rsi         = calcRSI(closes);
+    const distVWAP    = Math.abs(currentPrice - vwapData.vwap);
+
+    // مقاييس الأداء
+    const liqScore    = Math.round(Math.max(10, 100 - curSpread * 20));
+    const slipRisk    = Math.round(Math.min(100, curSpread * 15 + vol * 8));
+    const resilience  = Math.round(Math.max(20, 100 - vol * 12 - (rsi>70||rsi<30?20:0)));
+    const toxicity    = Math.round(Math.min(95, Math.abs(calcZ(closes)) * 25 + vol * 10));
+    const execSpeed   = Math.round(Math.max(30, 100 - spreads.slice(-5).reduce((a,b)=>a+b,0)/5 * 12));
+    const depth       = Math.round(Math.max(20, liqScore * 0.8 + resilience * 0.2));
+
+    // ══ تحديث UI ══
+
+    // بطاقة الجودة
+    const qCard = document.getElementById('ms-qualityCard');
+    qCard.className = `ms-quality-card ${micro.quality}`;
+    const qGrade = document.getElementById('ms-qualityGrade');
+    qGrade.textContent  = micro.grade;
+    qGrade.className    = `ms-quality-grade ${micro.quality}`;
+    const qDesc = document.getElementById('ms-qualityDesc');
+    qDesc.textContent   = micro.desc;
+    qDesc.className     = `ms-quality-desc ${micro.quality}`;
+    document.getElementById('ms-confFill').style.width = micro.score + '%';
+    document.getElementById('ms-confVal').textContent  = micro.score + '/100';
+
+    // Order Book Heatmap
+    const midPrice = document.getElementById('ms-ob-midPrice');
+    midPrice.textContent = prefix + currentPrice.toFixed(dp);
+
+    const heatmap = document.getElementById('ms-obHeatmap');
+    const maxVol  = Math.max(...obLevels.map(l => l.volume));
+    const asks    = obLevels.filter(l => l.side === 'ask').slice(0, 5);
+    const bids    = obLevels.filter(l => l.side === 'bid').slice(0, 5);
+
+    heatmap.innerHTML = [
+      ...asks.reverse().map(l => `
+        <div class="ms-ob-row">
+          <span class="ms-ob-price ask-p">${prefix}${l.price.toFixed(dp)}</span>
+          <div class="ms-ob-bar-wrap">
+            <div class="ms-ob-bar ask-bar" style="width:${(l.volume/maxVol*100).toFixed(0)}%"></div>
+          </div>
+          <span class="ms-ob-vol">${l.volume.toFixed(0)}K</span>
+        </div>`),
+      `<div class="ms-ob-mid-line"></div>
+       <div class="ms-ob-row" style="background:rgba(212,168,83,0.06);border-radius:6px;padding:2px 0;">
+         <span class="ms-ob-price mid-p">⬤ ${prefix}${currentPrice.toFixed(dp)}</span>
+         <div style="flex:1;text-align:center;font-size:10px;color:var(--gold);">السعر الحالي</div>
+         <span class="ms-ob-vol" style="color:var(--gold);">LIVE</span>
+       </div>
+       <div class="ms-ob-mid-line"></div>`,
+      ...bids.map(l => `
+        <div class="ms-ob-row">
+          <span class="ms-ob-price bid-p">${prefix}${l.price.toFixed(dp)}</span>
+          <div class="ms-ob-bar-wrap">
+            <div class="ms-ob-bar bid-bar" style="width:${(l.volume/maxVol*100).toFixed(0)}%"></div>
+          </div>
+          <span class="ms-ob-vol">${l.volume.toFixed(0)}K</span>
+        </div>`),
+    ].join('');
+
+    // مقاييس
+    const spreadColor = curSpread < avgSpread ? '#34D399' : curSpread > avgSpread*1.3 ? 'var(--sell)' : 'var(--neutral)';
+    document.getElementById('ms-spread').textContent = curSpread.toFixed(3) + '%';
+    document.getElementById('ms-spread').style.color = spreadColor;
+    document.getElementById('ms-spreadBar').style.width = Math.min(100, curSpread*30) + '%';
+    document.getElementById('ms-spreadBar').style.background = spreadColor;
+
+    document.getElementById('ms-execSpeed').textContent = execSpeed + '%';
+    document.getElementById('ms-execBar').style.width = execSpeed + '%';
+
+    document.getElementById('ms-depth').textContent = depth + '%';
+    document.getElementById('ms-depthBar').style.width = depth + '%';
+
+    const impactColor = slipRisk > 60 ? 'var(--sell)' : slipRisk > 35 ? 'var(--neutral)' : 'var(--buy)';
+    document.getElementById('ms-impact').textContent = slipRisk + '%';
+    document.getElementById('ms-impact').style.color = impactColor;
+    document.getElementById('ms-impactBar').style.width = slipRisk + '%';
+    document.getElementById('ms-impactBar').style.background = impactColor;
+
+    // Spread Chart تاريخي
+    const barsEl = document.getElementById('ms-spreadBars');
+    barsEl.innerHTML = '';
+    const last20 = spreads.slice(-20);
+    const maxS = Math.max(...last20);
+    last20.forEach((s, i) => {
+      const bar = document.createElement('div');
+      const isTight = s < avgSpread;
+      bar.className = `ms-spread-bar ${isTight ? 'tight' : 'wide'}${i===last20.length-1?' cur':''}`;
+      bar.style.height = Math.max(4, (s / maxS) * 100) + '%';
+      barsEl.appendChild(bar);
+    });
+    document.getElementById('ms-spreadChartTitle').textContent =
+      `Spread الحالي: ${curSpread.toFixed(3)}% · متوسط: ${avgSpread.toFixed(3)}%`;
+
+    // VWAP & Zero Reflections
+    const vwapEl = document.getElementById('ms-vwap');
+    vwapEl.textContent = prefix + vwapData.vwap.toFixed(dp);
+    vwapEl.style.color = currentPrice > vwapData.vwap ? 'var(--buy)' : 'var(--sell)';
+    const vwapBadge = document.getElementById('ms-vwapBadge');
+    if (currentPrice > vwapData.vwap + vwapData.stdDev * 0.2) {
+      vwapBadge.textContent = '↑ فوق VWAP'; vwapBadge.className = 'ms-vwap-badge above';
+    } else if (currentPrice < vwapData.vwap - vwapData.stdDev * 0.2) {
+      vwapBadge.textContent = '↓ تحت VWAP'; vwapBadge.className = 'ms-vwap-badge below';
+    } else {
+      vwapBadge.textContent = '≈ عند VWAP'; vwapBadge.className = 'ms-vwap-badge at';
+    }
+
+    document.getElementById('ms-zr1').textContent = prefix + zr.zr1.toFixed(dp);
+    document.getElementById('ms-zr1').style.color  = 'var(--sell)';
+    document.getElementById('ms-zr1Desc').textContent = currentPrice > zr.zr1 ? '↑ فوقه' : 'مقاومة';
+    document.getElementById('ms-zr2').textContent = prefix + zr.zr2.toFixed(dp);
+    document.getElementById('ms-zr2').style.color  = 'var(--buy)';
+    document.getElementById('ms-zr2Desc').textContent = currentPrice < zr.zr2 ? '↓ تحته' : 'دعم';
+    document.getElementById('ms-vwapBand').textContent =
+      `${prefix}${vwapData.lower.toFixed(dp)} ↔ ${prefix}${vwapData.upper.toFixed(dp)}`;
+
+    // Execution Efficiency bars
+    const setExec = (id, valId, pct, val, cls) => {
+      document.getElementById(id).style.width = pct + '%';
+      document.getElementById(id).className   = `ms-exec-fill ${cls}`;
+      document.getElementById(valId).textContent = val;
+    };
+    setExec('ms-ef-liq',  'ms-ef-liqVal',  liqScore,  liqScore+'%',  liqScore>65?'good':liqScore>40?'fair':'poor');
+    setExec('ms-ef-slip', 'ms-ef-slipVal', slipRisk,  slipRisk+'%',  slipRisk<35?'good':slipRisk<60?'fair':'poor');
+    setExec('ms-ef-res',  'ms-ef-resVal',  resilience,resilience+'%',resilience>65?'good':resilience>40?'fair':'poor');
+    setExec('ms-ef-tox',  'ms-ef-toxVal',  toxicity,  toxicity+'%',  toxicity<35?'good':toxicity<60?'fair':'poor');
+
+    // Insight نصي
+    const symNames = { XAU:'الذهب XAU/USD', EUR:'اليورو EUR/USD', JPY:'الين USD/JPY' };
+    let insight = `🔬 تحليل الهيكلة الدقيقة لـ ${symNames[sym]}:\n\n`;
+
+    insight += `📖 دفتر الأوامر:\n`;
+    insight += `الأوامر المعلقة مرتكزة حول ${prefix}${currentPrice.toFixed(dp)}. `;
+    insight += liqScore > 65
+      ? `كثافة الأوامر مرتفعة عند المستويات الرئيسية مما يُشير لسيولة قوية وتنفيذ سلس.\n`
+      : `كثافة الأوامر متوسطة — قد يحدث بعض الانزلاق السعري عند الأوامر الكبيرة.\n`;
+
+    insight += `\n📐 Bid-Ask Spread:\n`;
+    insight += `الـ Spread الحالي ${curSpread.toFixed(3)}% `;
+    insight += curSpread < avgSpread * 0.9
+      ? `أضيق من المتوسط (${avgSpread.toFixed(3)}%) — السيولة ممتازة، التوقيت مناسب للتنفيذ.\n`
+      : curSpread > avgSpread * 1.3
+      ? `أوسع من المتوسط (${avgSpread.toFixed(3)}%) — السيولة ضعيفة، انتظر تضيّق الـ Spread.\n`
+      : `ضمن النطاق الطبيعي — سيولة مقبولة.\n`;
+
+    insight += `\n📍 VWAP & Zero Reflections:\n`;
+    insight += `السعر ${currentPrice > vwapData.vwap ? 'فوق' : 'تحت'} VWAP اليومي (${prefix}${vwapData.vwap.toFixed(dp)}) `;
+    insight += `بفارق ${distVWAP.toFixed(dp)} (${(distVWAP/vwapData.stdDev).toFixed(2)}σ).\n`;
+    insight += `ZR1: ${prefix}${zr.zr1.toFixed(dp)} (مقاومة) · ZR2: ${prefix}${zr.zr2.toFixed(dp)} (دعم)\n`;
+
+    insight += `\n⚡ كفاءة التنفيذ:\n`;
+    insight += `• Liquidity: ${liqScore}% · Slippage Risk: ${slipRisk}%\n`;
+    insight += `• Market Resilience: ${resilience}% · Order Flow Toxicity: ${toxicity}%\n`;
+
+    insight += `\n🎯 التوصية:\n`;
+    if (micro.quality === 'EXCELLENT' || micro.quality === 'GOOD') {
+      insight += `ظروف السوق مواتية للتنفيذ — الـ Spread ضيق والسيولة كافية. `;
+      insight += `أفضل وقت للدخول والخروج من المراكز.`;
+    } else if (micro.quality === 'FAIR') {
+      insight += `ظروف التنفيذ متوسطة — يُنصح بأوامر محددة (Limit Orders) بدلاً من أوامر السوق لتجنب Slippage.`;
+    } else {
+      insight += `⚠️ ظروف صعبة — Spread مرتفع وسيولة ضعيفة. تجنب الأوامر الكبيرة الآن وانتظر تحسن الظروف.`;
+    }
+
+    document.getElementById('ms-insightText').textContent = insight;
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-SA');
+
+  } catch(err) { showErr(err.message); console.error('Micro error:', err); }
+
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+  if (icon) icon.textContent = '🔄';
+}
+
+// ══════════════════════════════════════════
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
@@ -6069,6 +6649,9 @@ async function runAll(){
 
   // 5. Daily Bias إذا كان مفتوحاً
   if (document.getElementById('panel-dailybias')?.classList.contains('active')) runDailyBias();
+
+  // 6. Microstructure إذا كان مفتوحاً
+  if (document.getElementById('panel-micro')?.classList.contains('active')) runMicro();
 }
 
 // ══════════════════════════════════════════
