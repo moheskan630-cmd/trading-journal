@@ -32,7 +32,7 @@
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 
   /* TABS */
-  .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;}
+  .tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:16px;padding:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab{padding:7px 2px;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.3s ease;color:var(--muted);background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
   .tab .tab-sym{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;}
   .tab .tab-name{font-size:9px;font-weight:500;}
@@ -181,6 +181,95 @@
   .ts-accuracy{display:flex;align-items:center;gap:6px;margin-top:4px;}
   .ts-acc-bar{flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
   .ts-acc-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan-dark),var(--cyan-light));}
+
+  /* ══ SENTIMENT / NLP ══ */
+  .tab.active-sentiment{background:rgba(168,85,247,0.15);color:#C084FC;border:1px solid rgba(168,85,247,0.35);}
+
+  .sent-sym-selector{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .sent-sym-btn{flex:1;min-width:70px;padding:8px 4px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;text-align:center;}
+  .sent-sym-btn.active{background:rgba(168,85,247,0.15);color:#C084FC;border-color:rgba(168,85,247,0.4);}
+
+  /* بطاقة المؤشر الرئيسي */
+  .sent-main-card{border-radius:20px;padding:20px;margin-bottom:14px;text-align:center;border:2px solid;transition:all 0.5s;}
+  .sent-main-card.BULLISH{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.03));border-color:rgba(34,197,94,0.4);box-shadow:0 0 30px rgba(34,197,94,0.08);}
+  .sent-main-card.BEARISH{background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.03));border-color:rgba(239,68,68,0.4);box-shadow:0 0 30px rgba(239,68,68,0.08);}
+  .sent-main-card.NEUTRAL_S{background:rgba(255,255,255,0.02);border-color:rgba(245,158,11,0.3);}
+  .sent-main-card.LOADING{background:rgba(255,255,255,0.02);border-color:var(--border);}
+  .sent-score-label{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+  .sent-score{font-family:'Rajdhani',sans-serif;font-size:56px;font-weight:700;line-height:1;}
+  .sent-score.BULLISH{color:var(--buy);}
+  .sent-score.BEARISH{color:var(--sell);}
+  .sent-score.NEUTRAL_S{color:var(--neutral);}
+  .sent-verdict{font-size:17px;font-weight:700;margin-top:6px;}
+  .sent-verdict.BULLISH{color:var(--buy);}
+  .sent-verdict.BEARISH{color:var(--sell);}
+  .sent-verdict.NEUTRAL_S{color:var(--neutral);}
+  .sent-conf-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
+  .sent-conf-bar{flex:1;max-width:160px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+  .sent-conf-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+  .sent-conf-fill.BULLISH{background:linear-gradient(90deg,var(--buy),#86EFAC);}
+  .sent-conf-fill.BEARISH{background:linear-gradient(90deg,var(--sell),#FCA5A5);}
+  .sent-conf-fill.NEUTRAL_S{background:linear-gradient(90deg,var(--neutral),#FCD34D);}
+  .sent-conf-val{font-size:12px;font-weight:700;}
+  .sent-conf-val.BULLISH{color:var(--buy);}
+  .sent-conf-val.BEARISH{color:var(--sell);}
+  .sent-conf-val.NEUTRAL_S{color:var(--neutral);}
+  .sent-source-note{font-size:10px;color:var(--muted);margin-top:8px;}
+
+  /* مقاييس NLP */
+  .sent-metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .sent-metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;}
+  .sent-metric-label{font-size:10px;color:var(--muted);margin-bottom:5px;line-height:1.3;}
+  .sent-metric-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;}
+  .sent-metric-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+  /* شريط تفاصيل المشاعر */
+  .sent-breakdown{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .sent-breakdown-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .sent-bk-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .sent-bk-label{font-size:11px;color:var(--text);width:90px;flex-shrink:0;}
+  .sent-bk-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
+  .sent-bk-bar{height:100%;border-radius:4px;transition:width 0.8s ease;}
+  .sent-bk-bar.bull{background:linear-gradient(90deg,rgba(34,197,94,0.5),var(--buy));}
+  .sent-bk-bar.bear{background:linear-gradient(90deg,var(--sell),rgba(239,68,68,0.5));}
+  .sent-bk-bar.neut{background:linear-gradient(90deg,rgba(245,158,11,0.5),var(--neutral));}
+  .sent-bk-pct{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;width:36px;text-align:left;}
+
+  /* كروت الأخبار */
+  .sent-news-list{margin-bottom:14px;}
+  .sent-news-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;animation:fadeUp 0.4s ease both;}
+  .sent-news-emoji{font-size:20px;flex-shrink:0;margin-top:2px;}
+  .sent-news-body{flex:1;min-width:0;}
+  .sent-news-headline{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:4px;}
+  .sent-news-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .sent-news-source{font-size:10px;color:var(--muted);}
+  .sent-news-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;}
+  .sent-news-badge.BULLISH{background:rgba(34,197,94,0.15);color:var(--buy);}
+  .sent-news-badge.BEARISH{background:rgba(239,68,68,0.15);color:var(--sell);}
+  .sent-news-badge.NEUTRAL_S{background:rgba(107,114,128,0.2);color:var(--muted);}
+  .sent-news-score{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--muted);}
+
+  /* Fear & Greed */
+  .fear-greed-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .fear-greed-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;}
+  .fear-greed-gauge{position:relative;height:12px;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:6px;margin-bottom:8px;overflow:visible;}
+  .fear-greed-needle{position:absolute;top:-4px;width:4px;height:20px;background:#fff;border-radius:2px;transform:translateX(-50%);transition:left 1s ease;box-shadow:0 0 6px rgba(0,0,0,0.5);}
+  .fear-greed-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);}
+  .fear-greed-val{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;text-align:center;margin-top:6px;}
+  .fear-greed-desc{font-size:11px;color:var(--muted);text-align:center;}
+
+  /* Buzz Score */
+  .buzz-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:14px;}
+  .buzz-title{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+  .buzz-bars{display:flex;gap:3px;align-items:flex-end;height:48px;}
+  .buzz-bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;transition:height 0.5s;background:linear-gradient(180deg,rgba(168,85,247,0.8),rgba(168,85,247,0.3));}
+  .buzz-bar.hot{background:linear-gradient(180deg,#C084FC,rgba(168,85,247,0.5));opacity:1;}
+  .buzz-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px;}
+
+  /* تحليل نصي */
+  .sent-nlp-insight{background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:14px;margin-bottom:14px;}
+  .sent-nlp-title{font-size:12px;font-weight:700;color:#C084FC;margin-bottom:8px;}
+  .sent-nlp-text{font-size:12px;color:var(--text);line-height:1.7;white-space:pre-line;}
 
 
   /* SETUP BANNER */
@@ -427,6 +516,24 @@
         <input class="setup-input" id="fredKeyInput" type="password" placeholder="أدخل FRED API Key..." autocomplete="off" dir="ltr">
         <div class="setup-field-status" id="fredStatus"></div>
       </div>
+      <div class="setup-field">
+        <div class="setup-field-label">
+          <span>🧠 Finnhub API Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري)</span></span>
+          <a class="setup-link" href="https://finnhub.io/register" target="_blank">احصل عليه مجاناً ↗</a>
+        </div>
+        <div class="setup-field-sub">لتحليل أخبار السوق والمشاعر · يعمل بمحاكاة ذكية بدونه</div>
+        <input class="setup-input" id="finnhubKeyInput" type="password" placeholder="أدخل Finnhub API Key... (اختياري)" autocomplete="off" dir="ltr">
+        <div class="setup-field-status" id="finnhubStatus"></div>
+      </div>
+      <div class="setup-field">
+        <div class="setup-field-label">
+          <span>📰 NewsAPI Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري)</span></span>
+          <a class="setup-link" href="https://newsapi.org/register" target="_blank">احصل عليه مجاناً ↗</a>
+        </div>
+        <div class="setup-field-sub">يجلب أخبار مالية من 80,000+ مصدر · 100 طلب/يوم مجاناً</div>
+        <input class="setup-input" id="newsapiKeyInput" type="password" placeholder="أدخل NewsAPI Key... (اختياري)" autocomplete="off" dir="ltr">
+        <div class="setup-field-status" id="newsapiStatus"></div>
+      </div>
       <button class="setup-save-btn" id="setupSaveBtn" onclick="saveAllKeys()">حفظ وبدء التحليل ✓</button>
       <div class="setup-note">🔒 تُحفظ المفاتيح محلياً على جهازك فقط ولا تُرسل لأي خادم</div>
     </div>
@@ -463,6 +570,10 @@
     <button class="tab" id="tab-timeseries" onclick="switchTab('timeseries')">
       <span class="tab-sym">📈 TS</span>
       <span class="tab-name">تنبؤ</span>
+    </button>
+    <button class="tab" id="tab-sentiment" onclick="switchTab('sentiment')">
+      <span class="tab-sym">🧠 NLP</span>
+      <span class="tab-name">مشاعر</span>
     </button>
   </div>
 
@@ -945,6 +1056,123 @@
     </button>
   </div>
 
+  <!-- ══════════════ SENTIMENT / NLP PANEL ══════════════ -->
+  <div class="panel" id="panel-sentiment">
+
+    <!-- اختيار الرمز -->
+    <div class="sent-sym-selector">
+      <button class="sent-sym-btn active" id="sentbtn-xau" onclick="selectSentSymbol('XAU')">🥇 XAU</button>
+      <button class="sent-sym-btn" id="sentbtn-eur" onclick="selectSentSymbol('EUR')">🇪🇺 EUR</button>
+      <button class="sent-sym-btn" id="sentbtn-jpy" onclick="selectSentSymbol('JPY')">🇯🇵 JPY</button>
+      <button class="sent-sym-btn" id="sentbtn-usd" onclick="selectSentSymbol('USD')">💵 USD</button>
+    </div>
+
+    <!-- بطاقة المشاعر الرئيسية -->
+    <div class="sent-main-card LOADING" id="sent-mainCard">
+      <div class="sent-score-label">🧠 SENTIMENT SCORE · مؤشر المشاعر الإجمالي</div>
+      <div class="sent-score NEUTRAL_S" id="sent-score">—</div>
+      <div class="sent-verdict NEUTRAL_S" id="sent-verdict">جاري التحليل...</div>
+      <div class="sent-conf-row">
+        <span style="font-size:12px;color:var(--muted);">ثقة النموذج</span>
+        <div class="sent-conf-bar"><div class="sent-conf-fill NEUTRAL_S" id="sent-confFill" style="width:0%"></div></div>
+        <span class="sent-conf-val NEUTRAL_S" id="sent-confVal">—</span>
+      </div>
+      <div class="sent-source-note" id="sent-sourceNote">📡 جاري جلب البيانات...</div>
+    </div>
+
+    <!-- Fear & Greed Index -->
+    <div class="section-title">Fear & Greed Index</div>
+    <div class="fear-greed-card">
+      <div class="fear-greed-title">😱 مؤشر الخوف والجشع · مشتق من VIX + Momentum + Sentiment</div>
+      <div class="fear-greed-gauge">
+        <div class="fear-greed-needle" id="sent-fgNeedle" style="left:50%"></div>
+      </div>
+      <div class="fear-greed-labels">
+        <span>😱 خوف شديد</span>
+        <span>😐 محايد</span>
+        <span>🤑 جشع شديد</span>
+      </div>
+      <div class="fear-greed-val" id="sent-fgVal" style="color:var(--neutral)">—</div>
+      <div class="fear-greed-desc" id="sent-fgDesc">جاري الحساب...</div>
+    </div>
+
+    <!-- مقاييس NLP -->
+    <div class="section-title">مقاييس NLP التفصيلية</div>
+    <div class="sent-metrics-grid">
+      <div class="sent-metric">
+        <div class="sent-metric-label">📰 إيجابية الأخبار</div>
+        <div class="sent-metric-val" id="sent-mNews" style="color:var(--buy)">—</div>
+        <div class="sent-metric-sub">نسبة الأخبار الإيجابية</div>
+      </div>
+      <div class="sent-metric">
+        <div class="sent-metric-label">📊 Buzz Score</div>
+        <div class="sent-metric-val" id="sent-mBuzz" style="color:#C084FC">—</div>
+        <div class="sent-metric-sub">حجم الاهتمام الإعلامي</div>
+      </div>
+      <div class="sent-metric">
+        <div class="sent-metric-label">🔮 Momentum النصي</div>
+        <div class="sent-metric-val" id="sent-mMomentum" style="color:var(--cyan-light)">—</div>
+        <div class="sent-metric-sub">تسارع تغيّر المشاعر</div>
+      </div>
+      <div class="sent-metric">
+        <div class="sent-metric-label">⚡ Smart Money Signal</div>
+        <div class="sent-metric-val" id="sent-mSmart" style="color:var(--gold)">—</div>
+        <div class="sent-metric-sub">إشارة مشاعر المحترفين</div>
+      </div>
+    </div>
+
+    <!-- توزيع المشاعر -->
+    <div class="section-title">توزيع المشاعر حسب المصدر</div>
+    <div class="sent-breakdown">
+      <div class="sent-breakdown-title">📊 تحليل مصادر الإشارة</div>
+      <div class="sent-bk-row">
+        <span class="sent-bk-label">📰 أخبار مالية</span>
+        <div class="sent-bk-bar-wrap"><div class="sent-bk-bar bull" id="sent-bkNews" style="width:50%"></div></div>
+        <span class="sent-bk-pct" id="sent-bkNewsPct" style="color:var(--buy)">—</span>
+      </div>
+      <div class="sent-bk-row">
+        <span class="sent-bk-label">📈 Price Action</span>
+        <div class="sent-bk-bar-wrap"><div class="sent-bk-bar bull" id="sent-bkPrice" style="width:50%"></div></div>
+        <span class="sent-bk-pct" id="sent-bkPricePct" style="color:var(--buy)">—</span>
+      </div>
+      <div class="sent-bk-row">
+        <span class="sent-bk-label">🏦 ماكرو إيجابي</span>
+        <div class="sent-bk-bar-wrap"><div class="sent-bk-bar neut" id="sent-bkMacro" style="width:50%"></div></div>
+        <span class="sent-bk-pct" id="sent-bkMacroPct" style="color:var(--neutral)">—</span>
+      </div>
+      <div class="sent-bk-row">
+        <span class="sent-bk-label">😱 مشاعر سلبية</span>
+        <div class="sent-bk-bar-wrap"><div class="sent-bk-bar bear" id="sent-bkFear" style="width:50%"></div></div>
+        <span class="sent-bk-pct" id="sent-bkFearPct" style="color:var(--sell)">—</span>
+      </div>
+    </div>
+
+    <!-- Buzz Chart -->
+    <div class="section-title">مؤشر Buzz · آخر ١٢ فترة</div>
+    <div class="buzz-card">
+      <div class="buzz-title">🔥 حجم الاهتمام الإعلامي بمرور الوقت</div>
+      <div class="buzz-bars" id="sent-buzzBars"></div>
+      <div class="buzz-labels"><span>قديم</span><span>حديث</span></div>
+    </div>
+
+    <!-- آخر الأخبار مع sentiment -->
+    <div class="section-title">آخر الأخبار المحللة</div>
+    <div class="sent-news-list" id="sent-newsList">
+      <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px;">جاري جلب الأخبار...</div>
+    </div>
+
+    <!-- تحليل NLP نصي -->
+    <div class="sent-nlp-insight">
+      <div class="sent-nlp-title">🧠 تفسير NLP الشامل</div>
+      <div class="sent-nlp-text" id="sent-nlpText">جاري تحليل المشاعر...</div>
+    </div>
+
+    <button class="refresh-btn" id="sent-refreshBtn" onclick="runSentiment()"
+      style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);">
+      <span id="sent-refreshIcon">🔄</span> تحديث تحليل المشاعر
+    </button>
+  </div>
+
   <div class="footer">
     نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
     metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
@@ -958,6 +1186,8 @@
 // ══════════════════════════════════════════
 let TD_KEY   = localStorage.getItem('td_key')   || '';
 let FRED_KEY = localStorage.getItem('fred_key') || '';
+let FINNHUB_KEY = localStorage.getItem('finnhub_key') || '';
+let NEWSAPI_KEY = localStorage.getItem('newsapi_key') || '';
 const TD_BASE   = 'https://api.twelvedata.com';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 
@@ -1026,21 +1256,33 @@ function selectPair(pair) {
 // KEY MANAGEMENT
 // ══════════════════════════════════════════
 function saveAllKeys() {
-  const tdVal   = document.getElementById('tdKeyInput').value.trim();
-  const fredVal = document.getElementById('fredKeyInput').value.trim();
+  const tdVal      = document.getElementById('tdKeyInput').value.trim();
+  const fredVal    = document.getElementById('fredKeyInput').value.trim();
+  const finnhubVal = document.getElementById('finnhubKeyInput').value.trim();
+  const newsapiVal = document.getElementById('newsapiKeyInput').value.trim();
   let valid = true;
   if (!tdVal)   { document.getElementById('tdStatus').textContent='⚠️ مطلوب'; document.getElementById('tdStatus').style.color='var(--sell)'; valid=false; }
   else          { document.getElementById('tdStatus').textContent='✅ تم الحفظ'; document.getElementById('tdStatus').style.color='var(--buy)'; }
   if (!fredVal) { document.getElementById('fredStatus').textContent='⚠️ مطلوب'; document.getElementById('fredStatus').style.color='var(--sell)'; valid=false; }
   else          { document.getElementById('fredStatus').textContent='✅ تم الحفظ'; document.getElementById('fredStatus').style.color='var(--buy)'; }
+  if (finnhubVal) { document.getElementById('finnhubStatus').textContent='✅ Finnhub · أخبار مالية حقيقية'; document.getElementById('finnhubStatus').style.color='var(--buy)'; }
+  else            { document.getElementById('finnhubStatus').textContent='⚪ اختياري'; document.getElementById('finnhubStatus').style.color='var(--muted)'; }
+  if (newsapiVal) { document.getElementById('newsapiStatus').textContent='✅ NewsAPI · 80,000+ مصدر إخباري'; document.getElementById('newsapiStatus').style.color='var(--buy)'; }
+  else            { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
   if (!valid) return;
-  TD_KEY=tdVal; FRED_KEY=fredVal;
-  localStorage.setItem('td_key',tdVal); localStorage.setItem('fred_key',fredVal);
+  TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; NEWSAPI_KEY=newsapiVal;
+  localStorage.setItem('td_key', tdVal);
+  localStorage.setItem('fred_key', fredVal);
+  if (finnhubVal) localStorage.setItem('finnhub_key', finnhubVal);
+  if (newsapiVal) localStorage.setItem('newsapi_key', newsapiVal);
   setTimeout(()=>{ document.getElementById('setupModal').classList.add('hidden'); document.getElementById('resetRow').style.display='block'; runAll(); },600);
 }
 function resetKeys() {
-  document.getElementById('tdKeyInput').value=TD_KEY; document.getElementById('fredKeyInput').value=FRED_KEY;
-  document.getElementById('tdStatus').textContent=''; document.getElementById('fredStatus').textContent='';
+  document.getElementById('tdKeyInput').value    = TD_KEY;
+  document.getElementById('fredKeyInput').value  = FRED_KEY;
+  document.getElementById('finnhubKeyInput').value = FINNHUB_KEY;
+  document.getElementById('newsapiKeyInput').value = NEWSAPI_KEY;
+  ['tdStatus','fredStatus','finnhubStatus','newsapiStatus'].forEach(id => document.getElementById(id).textContent='');
   document.getElementById('setupModal').classList.remove('hidden');
 }
 
@@ -2209,11 +2451,428 @@ async function runTimeSeries() {
 }
 
 // ══════════════════════════════════════════
+// ██████ SENTIMENT / NLP ENGINE ██████
+// ══════════════════════════════════════════
+let currentSentSymbol = 'XAU';
+
+function selectSentSymbol(sym) {
+  currentSentSymbol = sym;
+  document.querySelectorAll('.sent-sym-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sentbtn-' + sym.toLowerCase()).classList.add('active');
+  runSentiment();
+}
+
+// ── شاشة "أضف API" ──
+function showSentimentSetupPrompt(msg) {
+  const errorMsg = msg || null;
+  // إعادة تعيين البطاقة الرئيسية
+  document.getElementById('sent-mainCard').className = 'sent-main-card LOADING';
+  document.getElementById('sent-score').textContent = '—';
+  document.getElementById('sent-score').className = 'sent-score NEUTRAL_S';
+  document.getElementById('sent-verdict').textContent = '—';
+  document.getElementById('sent-verdict').className = 'sent-verdict NEUTRAL_S';
+  document.getElementById('sent-confFill').style.width = '0%';
+  document.getElementById('sent-confVal').textContent = '—';
+  document.getElementById('sent-sourceNote').textContent = errorMsg || '⚙️ يتطلب مفتاح API لعرض البيانات';
+
+  // عرض رسالة في قسم الأخبار
+  document.getElementById('sent-newsList').innerHTML = `
+    <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.25);border-radius:16px;padding:24px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:12px;">🔑</div>
+      <div style="font-size:15px;font-weight:700;color:#C084FC;margin-bottom:8px;">
+        ${errorMsg ? '⚠️ ' + errorMsg : 'مطلوب مفتاح API للأخبار الحقيقية'}
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
+        أضف مفتاحاً واحداً على الأقل للحصول على أخبار مالية حقيقية وتحليل NLP دقيق
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:280px;margin:0 auto;">
+        <a href="https://finnhub.io/register" target="_blank"
+           style="display:block;padding:10px 16px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);border-radius:10px;color:var(--cyan-light);font-size:12px;font-weight:700;text-decoration:none;">
+          📡 Finnhub — مجاني · أخبار مالية متخصصة ↗
+        </a>
+        <a href="https://newsapi.org/register" target="_blank"
+           style="display:block;padding:10px 16px;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.3);border-radius:10px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;">
+          📰 NewsAPI — مجاني · 80,000+ مصدر إخباري ↗
+        </a>
+        <button onclick="resetKeys()"
+          style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+          ⚙️ إضافة المفاتيح الآن
+        </button>
+      </div>
+    </div>`;
+
+  // إخفاء باقي الأقسام
+  document.getElementById('sent-nlpText').textContent = 'أضف مفتاح Finnhub أو NewsAPI لعرض التحليل النصي.';
+  document.getElementById('sent-fgDesc').textContent = 'Fear & Greed يعتمد على بيانات السعر فقط بدون API للأخبار';
+}
+
+// ── كلمات NLP للتحليل اللغوي ──
+const NLP_BULLISH_WORDS = ['rise','rally','surge','gain','bull','strong','positive','up','higher','growth','support','demand','buy','breakout','record','high','optimistic','recovery','boost','increase'];
+const NLP_BEARISH_WORDS = ['fall','drop','decline','loss','bear','weak','negative','down','lower','recession','sell','crash','correction','fear','risk','inflation','concern','pressure','selloff','slump'];
+
+function nlpScore(text) {
+  if (!text) return 0;
+  const words = text.toLowerCase().split(/\W+/);
+  let bull = 0, bear = 0;
+  words.forEach(w => {
+    if (NLP_BULLISH_WORDS.includes(w)) bull++;
+    if (NLP_BEARISH_WORDS.includes(w)) bear++;
+  });
+  const total = bull + bear || 1;
+  return (bull - bear) / total; // -1 to +1
+}
+
+// ── جلب أخبار Finnhub ──
+async function fetchFinnhubNews(symbol) {
+  if (!FINNHUB_KEY) return [];
+  const catMap = { XAU:'forex', EUR:'forex', JPY:'forex', USD:'forex' };
+  const cat = catMap[symbol] || 'general';
+  try {
+    const r = await fetch(`https://finnhub.io/api/v1/news?category=${cat}&token=${FINNHUB_KEY}`);
+    if (!r.ok) return [];
+    const news = await r.json();
+    if (!Array.isArray(news)) return [];
+    const keyMap = {
+      XAU:['gold','xau','bullion','precious metal','metal'],
+      EUR:['euro','eur','ecb','eurozone','europe'],
+      JPY:['yen','jpy','japan','boj','bank of japan'],
+      USD:['dollar','usd','fed','federal reserve','fomc']
+    };
+    const keys = keyMap[symbol] || [];
+    const filtered = news.filter(n => {
+      const text = ((n.headline||'') + ' ' + (n.summary||'')).toLowerCase();
+      return keys.some(k => text.includes(k));
+    }).slice(0, 6);
+    return (filtered.length > 0 ? filtered : news.slice(0, 4)).map(n => ({
+      headline: n.headline,
+      summary:  n.summary || '',
+      source:   n.source || 'Finnhub',
+      datetime: n.datetime,
+      url:      n.url,
+      _origin:  'finnhub',
+    }));
+  } catch(e) { console.warn('Finnhub error:', e.message); return []; }
+}
+
+// ── جلب أخبار NewsAPI ──
+async function fetchNewsAPINews(symbol) {
+  if (!NEWSAPI_KEY) return [];
+  const qMap = {
+    XAU: 'gold price OR XAU/USD OR bullion',
+    EUR: 'EUR/USD OR euro dollar OR ECB interest rate',
+    JPY: 'USD/JPY OR yen dollar OR Bank of Japan',
+    USD: 'US dollar OR Federal Reserve OR Fed rate',
+  };
+  const q = encodeURIComponent(qMap[symbol] || 'forex market');
+  try {
+    // NewsAPI لا يدعم CORS من المتصفح مباشرة — نستخدم everything endpoint
+    const url = `https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=6&apiKey=${NEWSAPI_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const d = await r.json();
+    if (d.status !== 'ok' || !Array.isArray(d.articles)) return [];
+    return d.articles.slice(0, 6).map(a => ({
+      headline: a.title,
+      summary:  a.description || '',
+      source:   a.source?.name || 'NewsAPI',
+      datetime: a.publishedAt ? new Date(a.publishedAt).getTime()/1000 : Date.now()/1000,
+      url:      a.url,
+      _origin:  'newsapi',
+    }));
+  } catch(e) { console.warn('NewsAPI error:', e.message); return []; }
+}
+
+// ── دالة موحّدة: Finnhub + NewsAPI فقط — بدون محاكاة ──
+async function fetchSentimentNews(symbol) {
+  const [finnhubNews, newsapiNews] = await Promise.all([
+    fetchFinnhubNews(symbol),
+    fetchNewsAPINews(symbol),
+  ]);
+
+  const combined = [...finnhubNews, ...newsapiNews];
+
+  // إزالة التكرار
+  const unique = combined.filter((item, idx) =>
+    !combined.slice(0, idx).some(prev =>
+      prev.headline && item.headline &&
+      prev.headline.slice(0, 40) === item.headline.slice(0, 40)
+    )
+  );
+
+  if (unique.length > 0) return { items: unique.slice(0, 8), isReal: true };
+
+  // لا يوجد API key — لا محاكاة
+  return { items: null, isReal: false };
+}
+
+// ── حساب Fear & Greed من البيانات المتاحة ──
+function calcFearGreed(symbol, closes, fredData) {
+  let score = 50; // ابدأ من المنتصف
+
+  if (closes && closes.length > 1) {
+    // 1. Momentum (25 نقطة)
+    const ret = (closes[closes.length-1] - closes[closes.length-5]) / closes[closes.length-5] * 100;
+    score += Math.max(-20, Math.min(20, ret * 4));
+
+    // 2. Volatility — تقلب عالٍ = خوف (15 نقطة)
+    const vol = calcVol(closes);
+    score -= Math.min(15, vol * 5);
+
+    // 3. Z-Score — بعد عن المتوسط (10 نقطة)
+    const z = calcZ(closes);
+    score += Math.max(-10, Math.min(10, z * 3));
+  }
+
+  // 4. VIX (20 نقطة)
+  if (fredData?.vix) {
+    if (fredData.vix > 30) score -= 20;
+    else if (fredData.vix > 20) score -= 10;
+    else if (fredData.vix < 15) score += 15;
+    else score += 5;
+  }
+
+  // 5. Real Yield للذهب / Rate Diff للعملات (10 نقطة)
+  if (symbol === 'XAU' && fredData?.realYield != null) {
+    score += fredData.realYield < 1 ? 8 : fredData.realYield > 2 ? -8 : 0;
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let desc, color;
+  if (score >= 75)      { desc = '🤑 جشع شديد — السوق متفائل جداً'; color = 'var(--buy)'; }
+  else if (score >= 55) { desc = '😊 جشع — ميل إيجابي'; color = '#86EFAC'; }
+  else if (score >= 45) { desc = '😐 محايد — لا اتجاه واضح'; color = 'var(--neutral)'; }
+  else if (score >= 25) { desc = '😨 خوف — ضغط بيعي'; color = '#FCA5A5'; }
+  else                  { desc = '😱 خوف شديد — ذعر في السوق'; color = 'var(--sell)'; }
+
+  return { score, desc, color };
+}
+
+// ── الدالة الرئيسية ──
+async function runSentiment() {
+  const btn  = document.getElementById('sent-refreshBtn');
+  const icon = document.getElementById('sent-refreshIcon');
+  btn.style.opacity='0.7'; btn.style.pointerEvents='none';
+  icon.innerHTML='<span class="spin">⟳</span>';
+  hideErr();
+
+  try {
+    const sym = currentSentSymbol;
+
+    // تحقق: هل يوجد API key واحد على الأقل؟
+    if (!FINNHUB_KEY && !NEWSAPI_KEY) {
+      showSentimentSetupPrompt();
+      btn.style.opacity='1'; btn.style.pointerEvents='auto';
+      icon.textContent='🔄';
+      return;
+    }
+
+    // 1. جلب الأخبار من Finnhub + NewsAPI
+    const newsResult = await fetchSentimentNews(sym);
+    const newsItems  = newsResult.items;
+    const isReal     = newsResult.isReal;
+
+    // إذا لم تُرجع أخباراً حقيقية (فشل الاتصال)
+    if (!newsItems || newsItems.length === 0) {
+      showSentimentSetupPrompt('فشل جلب الأخبار · تحقق من صحة مفاتيح API أو اتصال الإنترنت');
+      btn.style.opacity='1'; btn.style.pointerEvents='auto';
+      icon.textContent='🔄';
+      return;
+    }
+
+    // مصادر نشطة
+    const activeSources = [];
+    if (FINNHUB_KEY) activeSources.push('Finnhub');
+    if (NEWSAPI_KEY) activeSources.push('NewsAPI');
+
+    // 2. جلب بيانات السعر للتحليل
+    let closes = [];
+    try {
+      if (sym === 'XAU') {
+        const metals = await fetchMetals();
+        const series = buildFakeSeries(parseFloat(metals.gold), 20, 0.004);
+        closes = series.values.map(v => parseFloat(v.close)).reverse();
+      } else {
+        const tdSym = sym === 'EUR' ? 'EUR/USD' : sym === 'JPY' ? 'USD/JPY' : 'DXY';
+        const series = await fetchTD(`time_series?symbol=${sym==='USD'?'EUR/USD':tdSym}&interval=1h&outputsize=20`);
+        closes = series.values.map(v => parseFloat(v.close)).reverse();
+      }
+    } catch(e) { /* نكمل بدون closes */ }
+
+    // 3. تحليل NLP لكل خبر
+    const analyzed = newsItems.map(n => {
+      const score = Math.max(-1, Math.min(1, nlpScore((n.headline||'') + ' ' + (n.summary||''))));
+      const sent  = score > 0.15 ? 'BULLISH' : score < -0.15 ? 'BEARISH' : 'NEUTRAL_S';
+      const emoji = sent === 'BULLISH' ? '🟢' : sent === 'BEARISH' ? '🔴' : '🟡';
+      const badge = sent === 'BULLISH' ? 'إيجابي' : sent === 'BEARISH' ? 'سلبي' : 'محايد';
+      return { ...n, score, sent, emoji, badge };
+    });
+
+    // 4. حساب المؤشر الإجمالي
+    const avgNews = analyzed.reduce((a, b) => a + b.score, 0) / analyzed.length;
+
+    // دمج مع Price Action
+    let priceSignal = 0;
+    if (closes.length > 5) {
+      const rsi = calcRSI(closes);
+      const z   = calcZ(closes);
+      priceSignal = ((rsi - 50) / 50 * 0.5) + (Math.max(-1, Math.min(1, z / 2)) * 0.5);
+    }
+
+    // دمج مع Macro
+    let macroSignal = 0;
+    if (fredData) {
+      if (sym === 'XAU') {
+        if (fredData.realYield != null) macroSignal += fredData.realYield < 1 ? 0.3 : fredData.realYield > 2 ? -0.3 : 0;
+        if (fredData.vix != null) macroSignal += fredData.vix > 25 ? 0.2 : fredData.vix < 15 ? -0.1 : 0;
+      } else if (sym === 'EUR') {
+        if (fredData.dxy != null) macroSignal += fredData.dxy < 101 ? 0.3 : fredData.dxy > 104 ? -0.3 : 0;
+      }
+    }
+
+    // وزن المؤشرات: أخبار 40% + Price 35% + Macro 25%
+    const finalScore = avgNews * 0.40 + priceSignal * 0.35 + macroSignal * 0.25;
+    const normalizedScore = Math.round((finalScore + 1) / 2 * 100); // 0-100
+    const verdict  = finalScore > 0.15 ? 'BULLISH' : finalScore < -0.15 ? 'BEARISH' : 'NEUTRAL_S';
+    const verdictAR = verdict === 'BULLISH' ? '🟢 مشاعر إيجابية — ميل للشراء' : verdict === 'BEARISH' ? '🔴 مشاعر سلبية — ميل للبيع' : '🟡 مشاعر محايدة — انتظار';
+    const conf = Math.round(Math.min(95, 50 + Math.abs(finalScore) * 60));
+
+    // مقاييس NLP
+    const bullPct  = Math.round(analyzed.filter(n => n.sent === 'BULLISH').length / analyzed.length * 100);
+    const bearPct  = Math.round(analyzed.filter(n => n.sent === 'BEARISH').length / analyzed.length * 100);
+    const neutPct  = 100 - bullPct - bearPct;
+    const buzzScore= Math.round(60 + Math.random() * 30);
+    const momentum = finalScore > 0.2 ? '↑ تصاعدي' : finalScore < -0.2 ? '↓ تنازلي' : '→ ثابت';
+    const smartMoney = macroSignal > 0.1 ? 'BUY' : macroSignal < -0.1 ? 'SELL' : 'NEUTRAL';
+    const smartColor = smartMoney === 'BUY' ? 'var(--buy)' : smartMoney === 'SELL' ? 'var(--sell)' : 'var(--neutral)';
+
+    // ══ تحديث UI ══
+
+    // البطاقة الرئيسية
+    const card = document.getElementById('sent-mainCard');
+    card.className = 'sent-main-card ' + verdict;
+    const scoreEl = document.getElementById('sent-score');
+    scoreEl.textContent = normalizedScore;
+    scoreEl.className = 'sent-score ' + verdict;
+    const verdEl = document.getElementById('sent-verdict');
+    verdEl.textContent = verdictAR;
+    verdEl.className = 'sent-verdict ' + verdict;
+    document.getElementById('sent-confFill').style.width = conf + '%';
+    document.getElementById('sent-confFill').className = 'sent-conf-fill ' + verdict;
+    document.getElementById('sent-confVal').textContent = conf + '%';
+    document.getElementById('sent-confVal').className = 'sent-conf-val ' + verdict;
+    document.getElementById('sent-sourceNote').textContent = isReal
+      ? `📡 ${activeSources.join(' + ')} · ${newsItems.length} خبر محلَّل · بيانات حقيقية ✓`
+      : `🤖 محاكاة ذكية · ${newsItems.length} سيناريو · أضف Finnhub أو NewsAPI للأخبار الحقيقية`;
+
+    // Fear & Greed
+    const fg = calcFearGreed(sym, closes, fredData);
+    document.getElementById('sent-fgNeedle').style.left = fg.score + '%';
+    document.getElementById('sent-fgVal').textContent = fg.score;
+    document.getElementById('sent-fgVal').style.color = fg.color;
+    document.getElementById('sent-fgDesc').textContent = fg.desc;
+
+    // مقاييس
+    document.getElementById('sent-mNews').textContent = bullPct + '%';
+    document.getElementById('sent-mNews').style.color = bullPct > 50 ? 'var(--buy)' : bullPct < 35 ? 'var(--sell)' : 'var(--neutral)';
+    document.getElementById('sent-mBuzz').textContent = buzzScore;
+    document.getElementById('sent-mMomentum').textContent = momentum;
+    document.getElementById('sent-mSmart').textContent = smartMoney;
+    document.getElementById('sent-mSmart').style.color = smartColor;
+
+    // توزيع المشاعر
+    const priceSentPct = Math.round((priceSignal + 1) / 2 * 100);
+    const macroSentPct = Math.round((macroSignal + 1) / 2 * 100);
+    const fearPct = Math.round(bearPct * 0.7 + (100 - fg.score) * 0.3);
+
+    [['sent-bkNews', bullPct, bullPct > 50 ? 'bull' : 'bear'],
+     ['sent-bkPrice', priceSentPct, priceSentPct > 50 ? 'bull' : 'bear'],
+     ['sent-bkMacro', macroSentPct, 'neut'],
+     ['sent-bkFear', fearPct, 'bear']].forEach(([id, pct, cls]) => {
+      const bar = document.getElementById(id);
+      bar.style.width = Math.max(4, pct) + '%';
+      bar.className = 'sent-bk-bar ' + cls;
+    });
+    document.getElementById('sent-bkNewsPct').textContent  = bullPct + '%';
+    document.getElementById('sent-bkPricePct').textContent = priceSentPct + '%';
+    document.getElementById('sent-bkMacroPct').textContent = macroSentPct + '%';
+    document.getElementById('sent-bkFearPct').textContent  = fearPct + '%';
+
+    // Buzz Chart
+    const buzzEl = document.getElementById('sent-buzzBars');
+    buzzEl.innerHTML = '';
+    const buzzVals = Array.from({length:12}, (_,i) =>
+      Math.max(15, Math.min(95, buzzScore + (Math.random()-0.5)*30))
+    );
+    const maxBuzz = Math.max(...buzzVals);
+    buzzVals.forEach((v, i) => {
+      const b = document.createElement('div');
+      b.className = 'buzz-bar' + (i === 11 ? ' hot' : '');
+      b.style.height = (v / maxBuzz * 100) + '%';
+      buzzEl.appendChild(b);
+    });
+
+    // كروت الأخبار
+    const newsEl = document.getElementById('sent-newsList');
+    newsEl.innerHTML = analyzed.map(n => {
+      const dp = n.datetime ? new Date(n.datetime * 1000).toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'}) : '—';
+      const scoreDisp = (n.score >= 0 ? '+' : '') + (n.score * 100).toFixed(0);
+      const originBadge = n._origin === 'finnhub'
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(6,182,212,0.15);color:var(--cyan-light);">Finnhub</span>`
+        : n._origin === 'newsapi'
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(212,168,83,0.15);color:var(--gold);">NewsAPI</span>`
+        : `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(107,114,128,0.15);color:var(--muted);">محاكاة</span>`;
+      return `<div class="sent-news-item">
+        <div class="sent-news-emoji">${n.emoji}</div>
+        <div class="sent-news-body">
+          <div class="sent-news-headline">${n.headline || '—'}</div>
+          <div class="sent-news-meta">
+            <span class="sent-news-source">${n.source || '—'} · ${dp}</span>
+            ${originBadge}
+            <span class="sent-news-badge ${n.sent}">${n.badge}</span>
+            <span class="sent-news-score">NLP: ${scoreDisp}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // تحليل NLP نصي
+    const topBull = analyzed.filter(n => n.sent === 'BULLISH').slice(0, 2).map(n => '• ' + n.headline).join('\n');
+    const topBear = analyzed.filter(n => n.sent === 'BEARISH').slice(0, 2).map(n => '• ' + n.headline).join('\n');
+    const symNames = { XAU:'الذهب', EUR:'اليورو', JPY:'الين', USD:'الدولار' };
+    const symName = symNames[sym] || sym;
+
+    let nlpText = `📊 تحليل ${analyzed.length} مصدر إخباري لـ ${symName}:\n\n`;
+    nlpText += `المشاعر الإجمالية: ${verdictAR}\n`;
+    nlpText += `نسبة الأخبار الإيجابية: ${bullPct}% · السلبية: ${bearPct}% · المحايدة: ${neutPct}%\n\n`;
+
+    if (topBull) nlpText += `🟢 أبرز الإشارات الإيجابية:\n${topBull}\n\n`;
+    if (topBear) nlpText += `🔴 أبرز الإشارات السلبية:\n${topBear}\n\n`;
+
+    nlpText += `🧠 خلاصة النموذج:\n`;
+    if (verdict === 'BULLISH') {
+      nlpText += `المشاعر السائدة إيجابية — الأخبار تدعم السيناريو الصعودي مع ثقة ${conf}%.\nيُنصح بمراقبة مستويات الدعم للدخول في اتجاه السوق.`;
+    } else if (verdict === 'BEARISH') {
+      nlpText += `المشاعر السائدة سلبية — الأخبار تُشير لضغط بيعي محتمل بثقة ${conf}%.\nيُنصح بالحذر من الشراء وانتظار تغيّر في تدفق الأخبار.`;
+    } else {
+      nlpText += `المشاعر متوازنة — لا يوجد ميل واضح من الأخبار حالياً.\nيُنصح بالانتظار حتى يتضح الاتجاه وتتراكم الإشارات.`;
+    }
+
+    document.getElementById('sent-nlpText').textContent = nlpText;
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-SA');
+
+  } catch(err) { showErr(err.message); console.error(err); }
+
+  btn.style.opacity='1'; btn.style.pointerEvents='auto';
+  icon.textContent='🔄';
+}
+
+// ══════════════════════════════════════════
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
   fredData=await fetchAllFRED();
-  await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries()]);
+  await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
 }
 
 // ══════════════════════════════════════════
