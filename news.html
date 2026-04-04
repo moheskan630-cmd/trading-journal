@@ -71,6 +71,7 @@
 
   .tab.active-orderflow{background:rgba(244,63,94,0.15);color:var(--rose-light);border:1px solid rgba(244,63,94,0.3);}
   .tab.active-timeseries{background:rgba(6,182,212,0.15);color:var(--cyan-light);border:1px solid rgba(6,182,212,0.3);}
+  .tab.active-dailybias{background:rgba(251,191,36,0.15);color:#FCD34D;border:1px solid rgba(251,191,36,0.35);}
 
   /* ══════════════ MTF CONFLUENCE WIDGET ══════════════ */
   .mtf-widget {
@@ -996,6 +997,149 @@
     font-size: 11px; color: var(--text); line-height: 1.7;
   }
 
+  /* ══════════════ DAILY BIAS SENSOR ══════════════ */
+  .db-hero {
+    background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.04));
+    border: 1px solid rgba(251,191,36,0.25); border-radius: 20px;
+    padding: 18px 20px; margin-bottom: 16px; text-align: center; position: relative; overflow: hidden;
+  }
+  .db-hero::before {
+    content: '🎯'; position: absolute; font-size: 100px; opacity: 0.04;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+  }
+  .db-hero-label { font-size: 10px; color: var(--gold); letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
+  .db-hero-title { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; color: var(--gold-light); }
+  .db-hero-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* بطاقة التحيز الرئيسية */
+  .db-bias-card {
+    border-radius: 22px; padding: 22px 20px; margin-bottom: 14px;
+    border: 2px solid; text-align: center; transition: all 0.6s ease; position: relative; overflow: hidden;
+  }
+  .db-bias-card.BULLISH  { background: linear-gradient(135deg,rgba(34,197,94,0.14),rgba(34,197,94,0.04)); border-color: rgba(34,197,94,0.5); box-shadow: 0 0 40px rgba(34,197,94,0.12); }
+  .db-bias-card.BEARISH  { background: linear-gradient(135deg,rgba(239,68,68,0.14),rgba(239,68,68,0.04)); border-color: rgba(239,68,68,0.5); box-shadow: 0 0 40px rgba(239,68,68,0.12); }
+  .db-bias-card.NEUTRAL  { background: rgba(255,255,255,0.02); border-color: rgba(245,158,11,0.3); }
+  .db-bias-card.LOADING  { background: rgba(255,255,255,0.02); border-color: var(--border); }
+  .db-bias-card.EXPLOSIVE { background: linear-gradient(135deg,rgba(139,92,246,0.14),rgba(139,92,246,0.04)); border-color: rgba(139,92,246,0.5); box-shadow: 0 0 40px rgba(139,92,246,0.12); }
+
+  .db-bias-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 10px; font-weight: 700; }
+  .db-bias-main {
+    font-family: 'Rajdhani', sans-serif; font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 6px;
+  }
+  .db-bias-main.BULLISH  { color: var(--buy); }
+  .db-bias-main.BEARISH  { color: var(--sell); }
+  .db-bias-main.NEUTRAL  { color: var(--neutral); }
+  .db-bias-main.EXPLOSIVE { color: #A78BFA; }
+  .db-bias-main.LOADING  { color: var(--muted); }
+
+  .db-bias-ar { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .db-bias-ar.BULLISH  { color: var(--buy); }
+  .db-bias-ar.BEARISH  { color: var(--sell); }
+  .db-bias-ar.NEUTRAL  { color: var(--neutral); }
+  .db-bias-ar.EXPLOSIVE { color: #A78BFA; }
+
+  .db-prob-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .db-prob-label { font-size: 12px; color: var(--muted); }
+  .db-prob-bar { flex: 1; max-width: 160px; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+  .db-prob-fill { height: 100%; border-radius: 4px; transition: width 1.2s ease; }
+  .db-prob-fill.BULLISH  { background: linear-gradient(90deg,var(--buy),#86EFAC); }
+  .db-prob-fill.BEARISH  { background: linear-gradient(90deg,var(--sell),#FCA5A5); }
+  .db-prob-fill.NEUTRAL  { background: linear-gradient(90deg,#92400E,var(--neutral)); }
+  .db-prob-fill.EXPLOSIVE { background: linear-gradient(90deg,#5B21B6,#A78BFA); }
+  .db-prob-val { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; }
+  .db-prob-val.BULLISH  { color: var(--buy); }
+  .db-prob-val.BEARISH  { color: var(--sell); }
+  .db-prob-val.NEUTRAL  { color: var(--neutral); }
+  .db-prob-val.EXPLOSIVE { color: #A78BFA; }
+
+  /* مثلث التحيز — Trinity */
+  .db-trinity-title {
+    font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .db-trinity-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .db-trinity-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .db-trinity-card {
+    border-radius: 16px; padding: 12px 10px; text-align: center;
+    border: 1px solid var(--border); background: var(--card); transition: all 0.4s;
+  }
+  .db-trinity-card.bull { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); }
+  .db-trinity-card.bear { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
+  .db-trinity-card.neut { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
+  .db-trinity-card.expl { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3); }
+
+  .db-trinity-icon { font-size: 20px; margin-bottom: 6px; }
+  .db-trinity-name { font-size: 9px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.3; }
+  .db-trinity-val {
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; line-height: 1; margin-bottom: 3px;
+  }
+  .db-trinity-val.bull { color: var(--buy); }
+  .db-trinity-val.bear { color: var(--sell); }
+  .db-trinity-val.neut { color: var(--neutral); }
+  .db-trinity-val.expl { color: #A78BFA; }
+  .db-trinity-sub { font-size: 9px; color: var(--muted); }
+
+  /* عامل DXY الارتباط */
+  .db-dxy-card {
+    border-radius: 16px; padding: 14px 16px; margin-bottom: 14px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.07), rgba(59,130,246,0.02));
+    border: 1px solid rgba(59,130,246,0.25);
+  }
+  .db-dxy-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .db-dxy-title { font-size: 12px; font-weight: 700; color: var(--blue-light); }
+  .db-dxy-badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: rgba(59,130,246,0.15); color: var(--blue-light); font-weight: 700; }
+  .db-dxy-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .db-dxy-label { font-size: 11px; color: var(--muted); }
+  .db-dxy-val { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; }
+  .db-dxy-corr-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .db-dxy-corr-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,var(--blue-dark),var(--blue-light)); transition: width 1s ease; }
+  .db-dxy-impact { font-size: 11px; color: var(--text); margin-top: 4px; padding: 6px 10px; background: rgba(59,130,246,0.08); border-radius: 8px; }
+
+  /* تقويم الأيام */
+  .db-session-title {
+    font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .db-session-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .db-sessions-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .db-session-card {
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+    border: 1px solid var(--border); background: var(--card);
+  }
+  .db-session-card.active-session { border-color: rgba(212,168,83,0.4); background: rgba(212,168,83,0.08); }
+  .db-session-icon { font-size: 16px; margin-bottom: 4px; }
+  .db-session-name { font-size: 10px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .db-session-bias { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; }
+  .db-session-bias.bull { color: var(--buy); }
+  .db-session-bias.bear { color: var(--sell); }
+  .db-session-bias.neut { color: var(--neutral); }
+
+  /* سجل اليوم السابق */
+  .db-prev-card {
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+    background: var(--card); border: 1px solid var(--border);
+  }
+  .db-prev-title { font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px; }
+  .db-prev-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .db-prev-label { font-size: 11px; color: var(--muted); }
+  .db-prev-val { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; }
+
+  /* شريط التدرج للـ range position */
+  .db-range-wrap { margin-bottom: 12px; }
+  .db-range-label { font-size: 10px; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .db-range-bar { height: 10px; background: linear-gradient(90deg, rgba(239,68,68,0.3), rgba(245,158,11,0.3), rgba(34,197,94,0.3)); border-radius: 5px; position: relative; }
+  .db-range-needle { position: absolute; top: -3px; width: 4px; height: 16px; background: #fff; border-radius: 2px; transform: translateX(-50%); transition: left 1s ease; box-shadow: 0 0 6px rgba(0,0,0,0.5); }
+
+  /* تفسير نصي */
+  .db-insight-card {
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+    background: rgba(212,168,83,0.06); border: 1px solid rgba(212,168,83,0.2);
+  }
+  .db-insight-title { font-size: 11px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+  .db-insight-text { font-size: 12px; color: var(--text); line-height: 1.8; white-space: pre-line; }
+
   /* ══════════════ QUANT BRAIN — BOTTOM TAB NAV ══════════════ */
   .qb-bottom-nav {
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -1363,6 +1507,10 @@
     <button class="tab" id="tab-sentiment" onclick="switchTab('sentiment')">
       <span class="tab-sym">🧠 NLP</span>
       <span class="tab-name">مشاعر</span>
+    </button>
+    <button class="tab" id="tab-dailybias" onclick="switchTab('dailybias')">
+      <span class="tab-sym">🎯 DB</span>
+      <span class="tab-name">تحيز</span>
     </button>
   </div>
 
@@ -2108,6 +2256,140 @@
   </div>
 
   <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
+  <div class="panel" id="panel-dailybias">
+
+    <!-- Hero -->
+    <div class="db-hero">
+      <div class="db-hero-label">⚡ DAILY BIAS SENSOR · مستشعر التحيز</div>
+      <div class="db-hero-title">🎯 التحيز اليومي</div>
+      <div class="db-hero-sub">Trinity Model × DXY Correlation × جلسات السوق</div>
+    </div>
+
+    <!-- بطاقة التحيز الرئيسية -->
+    <div class="db-bias-card LOADING" id="db-biasCard">
+      <div class="db-bias-label">📅 تحيز الشمعة اليومية القادمة · XAU/USD</div>
+      <div class="db-bias-main LOADING" id="db-biasMain">—</div>
+      <div class="db-bias-ar LOADING" id="db-biasAr">جاري التحليل...</div>
+      <div class="db-prob-row">
+        <div class="db-prob-label">الاحتمالية</div>
+        <div class="db-prob-bar"><div class="db-prob-fill LOADING" id="db-probFill" style="width:0%"></div></div>
+        <div class="db-prob-val LOADING" id="db-probVal">—</div>
+      </div>
+    </div>
+
+    <!-- Trinity — المثلث الثلاثي -->
+    <div class="db-trinity-title">🔺 TRINITY MODEL — المحركات الثلاثة</div>
+    <div class="db-trinity-grid">
+      <div class="db-trinity-card" id="db-t1card">
+        <div class="db-trinity-icon">📍</div>
+        <div class="db-trinity-name">موقع الإغلاق من المدى</div>
+        <div class="db-trinity-val" id="db-t1val">—</div>
+        <div class="db-trinity-sub" id="db-t1sub">Close-to-Range</div>
+      </div>
+      <div class="db-trinity-card" id="db-t2card">
+        <div class="db-trinity-icon">💧</div>
+        <div class="db-trinity-name">مؤشر السيولة</div>
+        <div class="db-trinity-val" id="db-t2val">—</div>
+        <div class="db-trinity-sub" id="db-t2sub">Liquidity Grab</div>
+      </div>
+      <div class="db-trinity-card" id="db-t3card">
+        <div class="db-trinity-icon">💥</div>
+        <div class="db-trinity-name">التذبذب النسبي</div>
+        <div class="db-trinity-val" id="db-t3val">—</div>
+        <div class="db-trinity-sub" id="db-t3sub">Rel. Volatility</div>
+      </div>
+    </div>
+
+    <!-- سجل اليوم السابق -->
+    <div class="db-session-title">📊 بيانات الشمعة اليومية</div>
+    <div class="db-prev-card">
+      <div class="db-prev-title">📅 آخر شمعة يومية مكتملة</div>
+      <div class="db-prev-row">
+        <span class="db-prev-label">افتتاح</span>
+        <span class="db-prev-val" id="db-prevOpen" style="color:var(--text)">—</span>
+      </div>
+      <div class="db-prev-row">
+        <span class="db-prev-label">أعلى سعر</span>
+        <span class="db-prev-val" id="db-prevHigh" style="color:var(--buy)">—</span>
+      </div>
+      <div class="db-prev-row">
+        <span class="db-prev-label">أدنى سعر</span>
+        <span class="db-prev-val" id="db-prevLow" style="color:var(--sell)">—</span>
+      </div>
+      <div class="db-prev-row">
+        <span class="db-prev-label">إغلاق</span>
+        <span class="db-prev-val" id="db-prevClose" style="color:var(--gold-light)">—</span>
+      </div>
+      <div class="db-prev-row">
+        <span class="db-prev-label">المدى اليومي</span>
+        <span class="db-prev-val" id="db-prevRange" style="color:var(--muted)">—</span>
+      </div>
+      <!-- شريط موقع الإغلاق -->
+      <div class="db-range-wrap" style="margin-top:10px;">
+        <div class="db-range-label">
+          <span>أدنى</span>
+          <span>موقع الإغلاق في المدى</span>
+          <span>أعلى</span>
+        </div>
+        <div class="db-range-bar">
+          <div class="db-range-needle" id="db-rangeNeedle" style="left:50%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- عامل الدولار DXY -->
+    <div class="db-dxy-card">
+      <div class="db-dxy-header">
+        <div class="db-dxy-title">💵 عامل الدولار · DXY Correlation</div>
+        <div class="db-dxy-badge" id="db-dxyBadge">جاري...</div>
+      </div>
+      <div class="db-dxy-row">
+        <span class="db-dxy-label">USD/JPY (مرجع DXY)</span>
+        <span class="db-dxy-val" id="db-dxyVal" style="color:var(--blue-light)">—</span>
+      </div>
+      <div class="db-dxy-row">
+        <span class="db-dxy-label">اتجاه الدولار</span>
+        <span class="db-dxy-val" id="db-dxyTrend" style="font-size:12px">—</span>
+      </div>
+      <div class="db-dxy-corr-bar">
+        <div class="db-dxy-corr-fill" id="db-dxyCorr" style="width:50%"></div>
+      </div>
+      <div class="db-dxy-impact" id="db-dxyImpact">جاري حساب تأثير الدولار على الذهب...</div>
+    </div>
+
+    <!-- جلسات السوق -->
+    <div class="db-session-title">🌍 التحيز حسب الجلسة</div>
+    <div class="db-sessions-grid">
+      <div class="db-session-card" id="db-sess-asia">
+        <div class="db-session-icon">🌏</div>
+        <div class="db-session-name">آسيا</div>
+        <div class="db-session-bias" id="db-sess-asia-bias">—</div>
+      </div>
+      <div class="db-session-card" id="db-sess-eur">
+        <div class="db-session-icon">🌍</div>
+        <div class="db-session-name">أوروبا</div>
+        <div class="db-session-bias" id="db-sess-eur-bias">—</div>
+      </div>
+      <div class="db-session-card" id="db-sess-us">
+        <div class="db-session-icon">🌎</div>
+        <div class="db-session-name">أمريكا</div>
+        <div class="db-session-bias" id="db-sess-us-bias">—</div>
+      </div>
+    </div>
+
+    <!-- التفسير الشامل -->
+    <div class="db-insight-card">
+      <div class="db-insight-title">🎯 تحليل التحيز اليومي الشامل</div>
+      <div class="db-insight-text" id="db-insightText">جاري تحليل البيانات...</div>
+    </div>
+
+    <button class="refresh-btn" id="db-refreshBtn" onclick="runDailyBias()"
+      style="background:linear-gradient(135deg,#92400E,#D97706);">
+      <span id="db-refreshIcon">🔄</span> تحديث التحيز اليومي
+    </button>
+  </div>
+
+  <!-- ══════════════ QUANT BRAIN PANEL ══════════════ -->
   <div class="panel" id="panel-quantbrain">
 
     <!-- Hero Header -->
@@ -2281,6 +2563,9 @@ const _tdCache = {
 let _tdCacheTime = 0;          // آخر تحديث للكاش
 const TD_CACHE_TTL = 14 * 60 * 1000; // 14 دقيقة صلاحية الكاش
 
+// كاش أسعار Quote — يُستخرج من آخر شمعة (بدون طلبات quote منفصلة)
+const _tdQuoteCache = {};  // { 'EUR/USD': { price, prev }, ... }
+
 let currentMTFSym = 'EUR';     // الرمز النشط في بطاقة MTF
 let currentTSTF   = '1h';      // الإطار الزمني النشط في تاب TS
 
@@ -2296,6 +2581,8 @@ function switchTab(tab) {
   // تأكد أننا في وضع Main
   document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
   document.getElementById('qbnav-brain').className = 'qb-nav-btn';
+  // شغّل Daily Bias تلقائياً عند فتح التاب إذا كان الكاش جاهزاً
+  if (tab === 'dailybias' && Object.keys(_tdCache['1day']).length > 0) runDailyBias();
 }
 
 function switchBottomNav(mode) {
@@ -2374,8 +2661,8 @@ async function fetchTD(path) {
 // ══════════════════════════════════════════
 // ██████ BATCH FETCH & CACHE ENGINE ██████
 // ══════════════════════════════════════════
-// يجلب رموزاً متعددة في طلب واحد لكل إطار زمني
-// ويخزّن النتيجة في _tdCache لمشاركتها بين التابات
+// طلب واحد لكل إطار زمني يجلب جميع الرموز دفعةً واحدة
+// الخطة المجانية: 8 credits/دقيقة — نستخدم 3 فقط
 async function fetchTDBatchAll(force = false) {
   const now = Date.now();
   if (!force && now - _tdCacheTime < TD_CACHE_TTL && Object.keys(_tdCache['1h']).length > 0) {
@@ -2384,26 +2671,24 @@ async function fetchTDBatchAll(force = false) {
 
   if (!TD_KEY) return;
 
-  // الرموز المطلوبة لكل إطار
-  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD';
-  const SYMS_4H   = 'EUR/USD,USD/JPY';
-  const SYMS_1DAY = 'EUR/USD,USD/JPY';
+  // ── جميع الرموز المطلوبة في طلب واحد لكل إطار ──
+  // هذا يستهلك 1 credit لكل طلب (batch) بدلاً من credit لكل رمز
+  const SYMS_1H   = 'EUR/USD,USD/JPY,GBP/USD,XAU/USD,XAG/USD';
+  const SYMS_4H   = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
+  const SYMS_1DAY = 'EUR/USD,USD/JPY,XAU/USD,XAG/USD';
 
   try {
-    // 3 طلبات متوازية — batch بالرموز وليس بالإطارات
+    // 3 طلبات فقط — كل طلب يجلب جميع الرموز لإطار واحد
     const [res1h, res4h, res1d] = await Promise.all([
       fetchTD(`time_series?symbol=${SYMS_1H}&interval=1h&outputsize=60`),
       fetchTD(`time_series?symbol=${SYMS_4H}&interval=4h&outputsize=40`),
       fetchTD(`time_series?symbol=${SYMS_1DAY}&interval=1day&outputsize=30`),
     ]);
 
-    // تحليل الردود — عندما رموز متعددة يعيد TD كائناً مفهرساً بالرمز
     function parseBatchRes(res, symsStr) {
       const syms = symsStr.split(',');
       const out = {};
-      // إذا كان رمز واحد فقط يعيد مباشرةً وإلا يعيد object
       if (res.values) {
-        // رمز واحد
         out[syms[0]] = res.values;
       } else {
         syms.forEach(s => {
@@ -2416,25 +2701,41 @@ async function fetchTDBatchAll(force = false) {
     _tdCache['1h']   = parseBatchRes(res1h,   SYMS_1H);
     _tdCache['4h']   = parseBatchRes(res4h,   SYMS_4H);
     _tdCache['1day'] = parseBatchRes(res1d,   SYMS_1DAY);
+
+    // ── استخراج أسعار Quote من آخر شمعة في الكاش (بدون طلبات quote منفصلة) ──
+    ['EUR/USD','USD/JPY','XAU/USD','XAG/USD','GBP/USD'].forEach(sym => {
+      const vals = _tdCache['1h'][sym];
+      if (vals && vals.length >= 2) {
+        _tdQuoteCache[sym] = {
+          price: parseFloat(vals[0].close),
+          prev:  parseFloat(vals[1].close),
+        };
+      }
+    });
+
     _tdCacheTime = Date.now();
 
-    console.log('✅ TD Batch Cache refreshed:', {
+    console.log('✅ TD Batch Cache refreshed (3 requests):', {
       '1h':   Object.keys(_tdCache['1h']),
       '4h':   Object.keys(_tdCache['4h']),
       '1day': Object.keys(_tdCache['1day']),
     });
   } catch(e) {
-    console.warn('⚠️ TD Batch fetch failed, will use single fetches as fallback:', e.message);
+    console.warn('⚠️ TD Batch fetch failed:', e.message);
   }
 }
 
-// helper: يعيد قيم من الكاش أو يجلب مباشرةً كـ fallback
+// helper: يعيد قيم من الكاش فقط — لا طلبات فردية لتوفير الـ credits
 async function getTDValues(symbol, interval, outputsize = 40) {
   const cached = _tdCache[interval]?.[symbol];
   if (cached && cached.length > 0) return cached;
-  // fallback للجلب المباشر إذا لم يكن في الكاش
-  const res = await fetchTD(`time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}`);
-  return res.values;
+  // إذا لم يكن في الكاش — حاول تحميل الكاش أولاً
+  if (Object.keys(_tdCache['1h']).length === 0) {
+    await fetchTDBatchAll(true);
+    const retried = _tdCache[interval]?.[symbol];
+    if (retried && retried.length > 0) return retried;
+  }
+  throw new Error(`بيانات ${symbol} غير متوفرة في الكاش · يرجى الانتظار للتحديث التلقائي`);
 }
 
 // ══════════════════════════════════════════
@@ -2458,7 +2759,8 @@ function calcMTFSignal(values) {
 
 async function runMTFConfluence() {
   // لا تحديث إذا الكاش فارغ
-  const tdSym = currentMTFSym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+  const tdSym = currentMTFSym === 'EUR' ? 'EUR/USD' :
+                currentMTFSym === 'XAU' ? 'XAU/USD' : 'USD/JPY';
 
   // حسب الكاش المتاح
   const v1d = _tdCache['1day']?.[tdSym];
@@ -2942,21 +3244,22 @@ function setRegime(p, regimeData) {
 async function runGold(){
   setBtnLoading('g',true); hideErr();
   try{
-    // جلب الذهب من metals.live (مجاني)
-    const metals = await fetchMetals();
-    const price = parseFloat(metals.gold);
-    if (!price || isNaN(price)) throw new Error('تعذّر جلب سعر الذهب من metals.live');
+    // جلب بيانات حقيقية لـ XAU/USD من Twelve Data
+    const values1h = await getTDValues('XAU/USD', '1h', 30);
+    if (!values1h || values1h.length < 2) throw new Error('تعذّر جلب بيانات XAU/USD من Twelve Data');
+
+    // السعر الحالي والسابق من البيانات الحقيقية
+    const latestCandle = values1h[0];
+    const prevCandle   = values1h[1];
+    const price    = parseFloat(latestCandle.close);
+    const prevPrice = parseFloat(prevCandle.close);
+    const change   = price - prevPrice;
+    const pct      = (change / prevPrice) * 100;
 
     if(!fredData) fredData=await fetchAllFRED();
 
-    // نبني سعر الأمس تقريبياً من FRED أو نقدّره
-    const prevApprox = price * (1 - (Math.random() * 0.004 - 0.002));
-    const change = price - prevApprox;
-    const pct = (change / prevApprox) * 100;
-
-    // بناء سلسلة زمنية تقريبية للتحليل الكمي
-    const series = buildFakeSeries(price, 30, 0.004);
-    const closes = series.values.map(v=>parseFloat(v.close)).reverse();
+    // بناء سلسلة زمنية من البيانات الحقيقية (مرتبة من الأقدم للأحدث)
+    const closes = values1h.slice().reverse().map(v=>parseFloat(v.close));
 
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
 
@@ -2972,7 +3275,7 @@ async function runGold(){
     res = applyRegimeFilter(res, regimeData.regime);
 
     const live=!!fredData;
-    setPrice('g',price,change,pct,live?'📡 metals.live + FRED · بيانات حقيقية ✓':'📡 metals.live · ذهب حقيقي ✓','$');
+    setPrice('g',price,change,pct,live?'📡 Twelve Data + FRED · بيانات حقيقية ✓':'📡 Twelve Data · بيانات حقيقية ✓','$');
     setSignal('g',res);
     setModel('g','m1',m1.sig,m1.val); setModel('g','m2',m2.sig,m2.val);
     setModel('g','m3',m3.sig,m3.val); setModel('g','m4',m4.sig,m4.val);
@@ -2981,7 +3284,7 @@ async function runGold(){
     setFactor('g',2,fredData?.dxy!=null?fv(fredData.dxy,1):'—',mac[1],fredData?.dxyLive,'td');
     setFactor('g',3,fredData?.vix!=null?fv(fredData.vix,1):'—',mac[2],fredData?.vixLive,'td');
     setFactor('g',4,fredData?.breakeven!=null?fv(fredData.breakeven,2)+'%':'—',mac[3],fredData?.breakeven!=null);
-    buildCandles('g',series.values,'$',1);
+    buildCandles('g',values1h,'$',1);
     buildVol('g',vol,price,'gold-bar','$',0);
     document.getElementById('lastUpdate').textContent=new Date().toLocaleString('ar-SA');
   }catch(err){showErr(err.message);console.error(err);}
@@ -2994,12 +3297,12 @@ async function runGold(){
 async function runEUR(){
   setBtnLoading('e',true); hideErr();
   try{
-    // استخدام الكاش أولاً ثم الجلب المباشر كـ fallback
     const values1h = await getTDValues('EUR/USD', '1h', 30);
-    const [quote] = await Promise.all([fetchTD('quote?symbol=EUR/USD')]);
     if(!fredData) fredData=await fetchAllFRED();
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
+
+    // السعر من الكاش — آخر شمعتين (بدون طلب quote منفصل)
+    const qt = _tdQuoteCache['EUR/USD'] || { price: parseFloat(values1h[0].close), prev: parseFloat(values1h[1]?.close || values1h[0].close) };
+    const price = qt.price, prev = qt.prev;
     const change=price-prev, pct=(change/prev)*100;
     const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
@@ -3048,10 +3351,11 @@ async function runJPY(){
   setBtnLoading('j',true); hideErr();
   try{
     const values1h = await getTDValues('USD/JPY', '1h', 30);
-    const [quote] = await Promise.all([fetchTD('quote?symbol=USD/JPY')]);
     if(!fredData) fredData=await fetchAllFRED();
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
+
+    // السعر من الكاش — بدون طلب quote منفصل
+    const qt = _tdQuoteCache['USD/JPY'] || { price: parseFloat(values1h[0].close), prev: parseFloat(values1h[1]?.close || values1h[0].close) };
+    const price = qt.price, prev = qt.prev;
     const change=price-prev, pct=(change/prev)*100;
     const closes=values1h.slice().reverse().map(v=>parseFloat(v.close));
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
@@ -3108,23 +3412,19 @@ async function runPairs(){
     let closesA, closesB, priceA, priceB;
 
     if (isXAUXAG) {
-      // استخدام metals.live للذهب والفضة (مجاني)
-      const metals = await fetchMetals();
-      priceA = parseFloat(metals.gold);
-      priceB = parseFloat(metals.silver);
-      if (!priceA || !priceB) throw new Error('تعذّر جلب أسعار المعادن من metals.live');
-      const seriesA = buildFakeSeries(priceA, 30, 0.004);
-      const seriesB = buildFakeSeries(priceB, 30, 0.005);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+      // جلب من الكاش — XAU/USD و XAG/USD محفوظان من الـ batch
+      const valsA = await getTDValues('XAU/USD', '1h', 30);
+      const valsB = await getTDValues('XAG/USD', '1h', 30);
+      closesA = valsA.slice().reverse().map(v=>parseFloat(v.close));
+      closesB = valsB.slice().reverse().map(v=>parseFloat(v.close));
+      priceA = closesA[closesA.length - 1];
+      priceB = closesB[closesB.length - 1];
     } else {
-      // EUR/USD و GBP/USD من Twelve Data (متاحة في الخطة المجانية)
-      const [seriesA, seriesB] = await Promise.all([
-        fetchTD(`time_series?symbol=EUR/USD&interval=1h&outputsize=30`),
-        fetchTD(`time_series?symbol=GBP/USD&interval=1h&outputsize=30`),
-      ]);
-      closesA = seriesA.values.map(v=>parseFloat(v.close)).reverse();
-      closesB = seriesB.values.map(v=>parseFloat(v.close)).reverse();
+      // EUR/USD و GBP/USD من الكاش
+      const valsA = await getTDValues('EUR/USD', '1h', 30);
+      const valsB = await getTDValues('GBP/USD', '1h', 30);
+      closesA = valsA.slice().reverse().map(v=>parseFloat(v.close));
+      closesB = valsB.slice().reverse().map(v=>parseFloat(v.close));
       priceA  = closesA[closesA.length-1];
       priceB  = closesB[closesB.length-1];
     }
@@ -3316,14 +3616,11 @@ async function runOrderFlow() {
     const sym = currentOFSymbol;
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      const price = parseFloat(metals.gold);
-      const series = buildFakeSeries(price, 30, 0.004);
-      ohlcv = series.values;
+      // جلب بيانات حقيقية من الكاش
+      ohlcv = await getTDValues('XAU/USD', '1h', 30);
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
-      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=30`);
-      ohlcv = series.values;
+      ohlcv = await getTDValues(tdSym, '1h', 30);
     }
 
     const of = calcOrderFlow(ohlcv.slice().reverse());
@@ -3604,10 +3901,10 @@ async function runTimeSeries() {
     const tf  = currentTSTF || '1h';
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      currentPrice = parseFloat(metals.gold);
-      const series = buildFakeSeries(currentPrice, 40, 0.004);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      // جلب بيانات حقيقية من Twelve Data للذهب
+      const values = await getTDValues('XAU/USD', tf, 50);
+      closes = values.slice().reverse().map(v => parseFloat(v.close));
+      currentPrice = closes[closes.length - 1];
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
       // استخدام الكاش إذا متاح، وإلا جلب مباشر
@@ -3961,15 +4258,9 @@ async function runSentiment() {
     // 2. جلب بيانات السعر للتحليل
     let closes = [];
     try {
-      if (sym === 'XAU') {
-        const metals = await fetchMetals();
-        const series = buildFakeSeries(parseFloat(metals.gold), 20, 0.004);
-        closes = series.values.map(v => parseFloat(v.close)).reverse();
-      } else {
-        const tdSym = sym === 'EUR' ? 'EUR/USD' : sym === 'JPY' ? 'USD/JPY' : 'DXY';
-        const series = await fetchTD(`time_series?symbol=${sym==='USD'?'EUR/USD':tdSym}&interval=1h&outputsize=20`);
-        closes = series.values.map(v => parseFloat(v.close)).reverse();
-      }
+      const tdSym = sym === 'XAU' ? 'XAU/USD' : sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+      const vals = _tdCache['1h']?.[tdSym];
+      if (vals && vals.length > 0) closes = vals.slice().reverse().map(v => parseFloat(v.close));
     } catch(e) { /* نكمل بدون closes */ }
 
     // 3. تحليل NLP لكل خبر
@@ -4593,13 +4884,12 @@ async function runQuantBrain() {
     const sym = _qbSymbol;
 
     if (sym === 'XAU') {
-      const metals = await fetchMetals();
-      const series = buildFakeSeries(parseFloat(metals.gold), 40, 0.004);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      const vals = await getTDValues('XAU/USD', '1h', 40);
+      closes = vals.slice().reverse().map(v => parseFloat(v.close));
     } else {
       const tdSym = sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
-      const series = await fetchTD(`time_series?symbol=${tdSym}&interval=1h&outputsize=40`);
-      closes = series.values.map(v => parseFloat(v.close)).reverse();
+      const vals = await getTDValues(tdSym, '1h', 40);
+      closes = vals.slice().reverse().map(v => parseFloat(v.close));
     }
 
     // تأكد أن fredData موجود
@@ -5454,23 +5744,309 @@ function startRSSMonitor() {
 }
 
 // ══════════════════════════════════════════
+// ██████ DAILY BIAS SENSOR ENGINE ██████
+// ══════════════════════════════════════════
+
+async function runDailyBias() {
+  const btn  = document.getElementById('db-refreshBtn');
+  const icon = document.getElementById('db-refreshIcon');
+  if (btn)  { btn.style.opacity = '0.7'; btn.style.pointerEvents = 'none'; }
+  if (icon) icon.innerHTML = '<span class="spin">⟳</span>';
+
+  try {
+    // ── 1. جلب بيانات XAU/USD اليومية من الكاش ──
+    const xauDaily = _tdCache['1day']?.['XAU/USD'];
+    const xau1h    = _tdCache['1h']?.['XAU/USD'];
+    const jpyDaily = _tdCache['1day']?.['USD/JPY'];
+
+    if (!xauDaily || xauDaily.length < 3) throw new Error('بيانات XAU/USD اليومية غير متوفرة في الكاش');
+
+    // الشمعة اليومية الأخيرة (مكتملة = العنصر [1] لأن [0] هي الجارية)
+    const prev  = xauDaily[1];   // الشمعة اليومية السابقة المكتملة
+    const curr  = xauDaily[0];   // الشمعة الجارية (لم تكتمل بعد)
+    const prev2 = xauDaily[2];   // ما قبل السابقة
+
+    const prevH = parseFloat(prev.high);
+    const prevL = parseFloat(prev.low);
+    const prevO = parseFloat(prev.open);
+    const prevC = parseFloat(prev.close);
+    const currH = parseFloat(curr.high);
+    const currL = parseFloat(curr.low);
+    const currC = parseFloat(curr.close);
+
+    const prevRange  = prevH - prevL;
+    const prev2Range = parseFloat(prev2.high) - parseFloat(prev2.low);
+
+    // ── 2. TRINITY — المحركات الثلاثة ──
+
+    // T1: موقع الإغلاق من المدى (Close-to-Range Position)
+    const ctr = prevRange > 0 ? (prevC - prevL) / prevRange : 0.5;
+    const ctrPct = (ctr * 100).toFixed(1);
+    let t1Signal, t1Label, t1Sub, t1Class;
+    if (ctr >= 0.75) {
+      t1Signal = 'bull'; t1Label = `${ctrPct}%`;
+      t1Sub = 'أغلق بالأعلى → ↑ صعود';
+    } else if (ctr <= 0.25) {
+      t1Signal = 'bear'; t1Label = `${ctrPct}%`;
+      t1Sub = 'أغلق بالأسفل → ↓ هبوط';
+    } else {
+      t1Signal = 'neut'; t1Label = `${ctrPct}%`;
+      t1Sub = 'وسط المدى → محايد';
+    }
+    // الاحتمالية من T1
+    const t1Prob = ctr >= 0.75 ? 0.65 : ctr <= 0.25 ? 0.35 : 0.50;
+
+    // T2: مؤشر السيولة (Liquidity Grab)
+    // هل ضرب السعر الحالي أعلى اليوم السابق ثم ارتد؟
+    const bullLiqGrab = currH > prevH && currC < prevH; // اخترق الأعلى ثم انسحب
+    const bearLiqGrab = currL < prevL && currC > prevL; // اخترق الأدنى ثم ارتد
+    let t2Signal, t2Label, t2Sub;
+    let t2Prob = 0.5;
+    if (bullLiqGrab) {
+      t2Signal = 'bear'; t2Label = 'Bull Trap';
+      t2Sub = 'سيولة صاعدة ممتصة → ↓';
+      t2Prob = 0.30;
+    } else if (bearLiqGrab) {
+      t2Signal = 'bull'; t2Label = 'Bear Trap';
+      t2Sub = 'سيولة هابطة ممتصة → ↑';
+      t2Prob = 0.70;
+    } else {
+      t2Signal = 'neut'; t2Label = 'لا يوجد';
+      t2Sub = 'لا اختراق ومرتد';
+      t2Prob = 0.50;
+    }
+
+    // T3: التذبذب النسبي (Relative Volatility)
+    // هل اليوم السابق ضيق جداً مقارنة بالمتوسط؟
+    const dailyCloses = xauDaily.slice(0, 14).map(v => parseFloat(v.close));
+    const avgRange = xauDaily.slice(1, 15).reduce((s, v) =>
+      s + (parseFloat(v.high) - parseFloat(v.low)), 0) / Math.min(14, xauDaily.length - 1);
+    const relVol = avgRange > 0 ? prevRange / avgRange : 1;
+    let t3Signal, t3Label, t3Sub, t3Prob;
+    if (relVol < 0.6) {
+      t3Signal = 'expl'; t3Label = `${(relVol * 100).toFixed(0)}%`;
+      t3Sub = 'شمعة ضيقة → انفجار قادم';
+      t3Prob = 0.50; // لا يُحدد الاتجاه، فقط يُقوّي الإشارة
+    } else if (relVol > 1.5) {
+      t3Signal = 'bear'; t3Label = `${(relVol * 100).toFixed(0)}%`;
+      t3Sub = 'تذبذب عالٍ → إرهاق محتمل';
+      t3Prob = 0.42;
+    } else {
+      t3Signal = 'neut'; t3Label = `${(relVol * 100).toFixed(0)}%`;
+      t3Sub = 'تذبذب طبيعي';
+      t3Prob = 0.50;
+    }
+
+    // ── 3. عامل DXY (USD/JPY كمرجع) ──
+    let dxyBias = 0;      // سالب = دولار ضعيف = إيجابي للذهب
+    let dxyTrendTxt = '—';
+    let dxyVal = '—';
+    let dxyImpact = 'لا بيانات DXY متوفرة';
+    let dxyCorr = 0.5;
+    let dxyBadgeTxt = 'لا بيانات';
+
+    if (jpyDaily && jpyDaily.length >= 5) {
+      const jpyC  = parseFloat(jpyDaily[0].close);
+      const jpyP  = parseFloat(jpyDaily[1].close);
+      const jpyP5 = parseFloat(jpyDaily[Math.min(4, jpyDaily.length-1)].close);
+      const jpyChg1d = (jpyC - jpyP) / jpyP * 100;
+      const jpyChg5d = (jpyC - jpyP5) / jpyP5 * 100;
+
+      dxyVal = '¥' + jpyC.toFixed(2);
+
+      // الدولار قوي (USD/JPY صاعد) = سلبي للذهب
+      if (jpyChg1d > 0.2) {
+        dxyBias = -0.12;
+        dxyTrendTxt = `↑ دولار قوي (+${jpyChg1d.toFixed(2)}%)`;
+        dxyImpact = `💵 USD/JPY ارتفع ${jpyChg1d.toFixed(2)}% — الدولار قوي → يُخفض احتمالية صعود الذهب بنسبة 12%`;
+        dxyCorr = Math.max(0.1, 0.5 - jpyChg1d * 0.15);
+        dxyBadgeTxt = '⬇ يضغط على الذهب';
+      } else if (jpyChg1d < -0.2) {
+        dxyBias = +0.12;
+        dxyTrendTxt = `↓ دولار ضعيف (${jpyChg1d.toFixed(2)}%)`;
+        dxyImpact = `💛 USD/JPY انخفض ${Math.abs(jpyChg1d).toFixed(2)}% — الدولار ضعيف → يُعزز احتمالية صعود الذهب بنسبة 12%`;
+        dxyCorr = Math.min(0.9, 0.5 + Math.abs(jpyChg1d) * 0.15);
+        dxyBadgeTxt = '⬆ يدعم الذهب';
+      } else {
+        dxyTrendTxt = `◈ مستقر (${jpyChg1d.toFixed(2)}%)`;
+        dxyImpact = `◈ USD/JPY مستقر — الدولار محايد · لا تأثير قوي على الذهب`;
+        dxyBadgeTxt = '◈ محايد';
+      }
+
+      // تأثير 5 أيام
+      if (jpyChg5d > 1) dxyBias -= 0.05;
+      if (jpyChg5d < -1) dxyBias += 0.05;
+    }
+
+    // ── 4. الاحتمالية النهائية المُجمَّعة ──
+    // وزن كل عامل: T1=40%, T2=30%, T3=15%, DXY=15%
+    let rawProb = t1Prob * 0.40 + t2Prob * 0.30 + t3Prob * 0.15 + 0.50 * 0.15;
+    rawProb = Math.max(0.10, Math.min(0.90, rawProb + dxyBias));
+
+    // تعزيز إذا T3 انفجاري — يُقوّي الإشارة بدون تغيير اتجاهها
+    if (t3Signal === 'expl') {
+      rawProb = rawProb > 0.5
+        ? Math.min(0.90, rawProb + 0.05)
+        : Math.max(0.10, rawProb - 0.05);
+    }
+
+    const probPct = Math.round(rawProb * 100);
+
+    // ── 5. تحديد التحيز النهائي ──
+    let biasClass, biasMain, biasAr;
+    if (t3Signal === 'expl' && rawProb >= 0.45 && rawProb <= 0.55) {
+      biasClass = 'EXPLOSIVE'; biasMain = '💥 EXPLOSIVE';
+      biasAr = 'انتظر شمعة انفجارية — الاتجاه غير محدد';
+    } else if (rawProb >= 0.62) {
+      biasClass = 'BULLISH'; biasMain = '↑ BULLISH';
+      biasAr = rawProb >= 0.75 ? '🟢 تحيز صعودي قوي للغد' : '↑ تحيز صعودي للغد';
+    } else if (rawProb <= 0.38) {
+      biasClass = 'BEARISH'; biasMain = '↓ BEARISH';
+      biasAr = rawProb <= 0.25 ? '🔴 تحيز هبوطي قوي للغد' : '↓ تحيز هبوطي للغد';
+    } else {
+      biasClass = 'NEUTRAL'; biasMain = '◈ NEUTRAL';
+      biasAr = 'لا تحيز واضح — انتظر تأكيداً';
+    }
+
+    // ── 6. جلسات السوق (من آخر 5 شمعات ساعية لكل جلسة) ──
+    function sessionBias(hour_from, hour_to) {
+      if (!xau1h) return 'neut';
+      const now = new Date();
+      const relevant = xau1h.filter(v => {
+        const h = new Date(v.datetime).getUTCHours();
+        return h >= hour_from && h < hour_to;
+      }).slice(0, 5);
+      if (!relevant.length) return 'neut';
+      const closes = relevant.map(v => parseFloat(v.close));
+      const first = closes[closes.length - 1], last = closes[0];
+      const chg = (last - first) / first * 100;
+      return chg > 0.1 ? 'bull' : chg < -0.1 ? 'bear' : 'neut';
+    }
+    const asiaBias = sessionBias(0, 8);
+    const eurBias  = sessionBias(7, 15);
+    const usBias   = sessionBias(13, 21);
+    const sessLabel = { bull: '↑ صعود', bear: '↓ هبوط', neut: '◈ محايد' };
+
+    // ── 7. تحديث الـ UI ──
+
+    // بطاقة التحيز الرئيسية
+    const card = document.getElementById('db-biasCard');
+    card.className = `db-bias-card ${biasClass}`;
+    const mainEl = document.getElementById('db-biasMain');
+    mainEl.textContent = biasMain;
+    mainEl.className = `db-bias-main ${biasClass}`;
+    const arEl = document.getElementById('db-biasAr');
+    arEl.textContent = biasAr;
+    arEl.className = `db-bias-ar ${biasClass}`;
+    document.getElementById('db-probFill').style.width = probPct + '%';
+    document.getElementById('db-probFill').className = `db-prob-fill ${biasClass}`;
+    document.getElementById('db-probVal').textContent = probPct + '%';
+    document.getElementById('db-probVal').className = `db-prob-val ${biasClass}`;
+
+    // Trinity cards
+    function setTrinity(n, val, sub, cls) {
+      document.getElementById(`db-t${n}val`).textContent = val;
+      document.getElementById(`db-t${n}val`).className   = `db-trinity-val ${cls}`;
+      document.getElementById(`db-t${n}sub`).textContent = sub;
+      document.getElementById(`db-t${n}card`).className  = `db-trinity-card ${cls}`;
+    }
+    setTrinity(1, t1Label, t1Sub, t1Signal);
+    setTrinity(2, t2Label, t2Sub, t2Signal);
+    setTrinity(3, t3Label, t3Sub, t3Signal);
+
+    // بيانات الشمعة السابقة
+    document.getElementById('db-prevOpen').textContent  = '$' + prevO.toFixed(2);
+    document.getElementById('db-prevHigh').textContent  = '$' + prevH.toFixed(2);
+    document.getElementById('db-prevLow').textContent   = '$' + prevL.toFixed(2);
+    document.getElementById('db-prevClose').textContent = '$' + prevC.toFixed(2);
+    document.getElementById('db-prevRange').textContent = '$' + prevRange.toFixed(2);
+    document.getElementById('db-rangeNeedle').style.left = (ctr * 100).toFixed(1) + '%';
+
+    // DXY
+    document.getElementById('db-dxyVal').textContent    = dxyVal;
+    document.getElementById('db-dxyTrend').textContent  = dxyTrendTxt;
+    document.getElementById('db-dxyImpact').textContent = dxyImpact;
+    document.getElementById('db-dxyBadge').textContent  = dxyBadgeTxt;
+    document.getElementById('db-dxyCorr').style.width   = (dxyCorr * 100).toFixed(0) + '%';
+
+    // جلسات
+    const sessions = [
+      { id: 'asia', bias: asiaBias, label: sessLabel[asiaBias] },
+      { id: 'eur',  bias: eurBias,  label: sessLabel[eurBias]  },
+      { id: 'us',   bias: usBias,   label: sessLabel[usBias]   },
+    ];
+    const nowHour = new Date().getUTCHours();
+    sessions.forEach(s => {
+      const el = document.getElementById(`db-sess-${s.id}-bias`);
+      el.textContent = s.label;
+      el.className   = `db-session-bias ${s.bias}`;
+      const isActive = (s.id === 'asia' && nowHour >= 0  && nowHour < 8)  ||
+                       (s.id === 'eur'  && nowHour >= 7  && nowHour < 15) ||
+                       (s.id === 'us'   && nowHour >= 13 && nowHour < 21);
+      document.getElementById(`db-sess-${s.id}`).className =
+        'db-session-card' + (isActive ? ' active-session' : '');
+    });
+
+    // ── 8. التفسير الشامل ──
+    const dp = prevC.toFixed(2);
+    let insight = `📅 تحليل شمعة ${prev.datetime?.split(' ')[0] || 'أمس'}:\n\n`;
+
+    insight += `📍 T1 — موقع الإغلاق: الشمعة أغلقت عند ${ctrPct}% من مداها`;
+    insight += ctr >= 0.75 ? ' (منطقة قوة — الثيران يسيطرون)\n' :
+               ctr <= 0.25 ? ' (منطقة ضعف — الدببة يسيطرون)\n' :
+               ' (منطقة وسط — توازن القوى)\n';
+
+    insight += `\n💧 T2 — مؤشر السيولة: `;
+    insight += bullLiqGrab ? `تم اختراق أعلى سعر أمس ($${prevH.toFixed(2)}) ثم الارتداد — هذا Bull Trap كلاسيكي ومؤشر هبوطي.\n` :
+               bearLiqGrab ? `تم اختراق أدنى سعر أمس ($${prevL.toFixed(2)}) ثم الارتداد — هذا Bear Trap كلاسيكي ومؤشر صعودي.\n` :
+               `لم يُسجَّل أي اختراق ومرتد — السيولة لا تُعطي إشارة واضحة.\n`;
+
+    insight += `\n💥 T3 — التذبذب النسبي: مدى الأمس $${prevRange.toFixed(2)} مقابل متوسط $${avgRange.toFixed(2)}`;
+    insight += ` (نسبة ${(relVol*100).toFixed(0)}%)`;
+    insight += relVol < 0.6 ? ' — شمعة ضيقة جداً → توقع انفجار قريب.\n' :
+               relVol > 1.5 ? ' — تذبذب عالٍ جداً → توقع إرهاق واحتمال تراجع.\n' :
+               ' — تذبذب طبيعي.\n';
+
+    insight += `\n💵 DXY: ${dxyImpact}\n`;
+
+    insight += `\n🎯 الخلاصة: احتمالية الصعود = ${probPct}% `;
+    if (biasClass === 'BULLISH')   insight += `→ التحيز صعودي للشمعة القادمة. ابحث عن مناطق شراء.`;
+    else if (biasClass === 'BEARISH') insight += `→ التحيز هبوطي للشمعة القادمة. احذر من مناطق البيع.`;
+    else if (biasClass === 'EXPLOSIVE') insight += `→ الشمعة القادمة قد تكون انفجارية. انتظر الكسر لتحديد الاتجاه.`;
+    else insight += `→ لا تحيز واضح. الأفضل الانتظار لتأكيد الاتجاه.`;
+
+    document.getElementById('db-insightText').textContent = insight;
+
+  } catch(err) {
+    document.getElementById('db-insightText').textContent = '⚠️ ' + err.message;
+    console.error('Daily Bias error:', err);
+  }
+
+  if (btn)  { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+  if (icon) icon.textContent = '🔄';
+}
+
+// ══════════════════════════════════════════
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب FRED و Batch TD في وقت واحد
+  // 1. جلب FRED والـ Batch TD أولاً — 3 credits فقط لـ TD
   [fredData] = await Promise.all([
     fetchAllFRED(),
-    fetchTDBatchAll(),   // يملأ _tdCache بكل الأطر الزمنية
+    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز والأطر
   ]);
 
-  // 2. تشغيل كل التحليلات (تستخدم الكاش)
+  // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
 
-  // 3. تحديث بطاقة MTF Confluence بعد اكتمال الكاش
+  // 3. تحديث بطاقة MTF Confluence
   runMTFConfluence();
 
   // 4. Quant Brain إذا كان مفتوحاً
   if (document.getElementById('panel-quantbrain')?.classList.contains('active')) runQuantBrain();
+
+  // 5. Daily Bias إذا كان مفتوحاً
+  if (document.getElementById('panel-dailybias')?.classList.contains('active')) runDailyBias();
 }
 
 // ══════════════════════════════════════════
