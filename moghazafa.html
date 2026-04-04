@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v6 MTF</title>
+<title>Quant Signal Pro · Live v8 MTF</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1413,7 +1413,7 @@
 </div>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-logo">QUANT·PRO <span style="font-size:14px;color:var(--teal-light)">v2</span></div>
+  <div class="loading-logo">QUANT·PRO <span style="font-size:14px;color:var(--teal-light)">v8</span></div>
   <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   <div class="loading-text">جاري جلب البيانات الحقيقية...</div>
   <div class="loading-step" id="loadStep">⏳ الاتصال بـ Twelve Data</div>
@@ -1421,14 +1421,14 @@
 
 <div class="container">
   <div class="header">
-    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v6</span></div>
+    <div class="logo">QUANT<span>·PRO</span> <span class="logo-v2">v8</span></div>
     <div class="live-badge"><div class="live-dot"></div>مباشر</div>
   </div>
 
   <!-- SETUP MODAL -->
   <div class="setup-modal" id="setupModal">
     <div class="setup-modal-box">
-      <div class="setup-modal-logo">QUANT·PRO v2</div>
+      <div class="setup-modal-logo">QUANT·PRO v8</div>
       <div class="setup-modal-title">🔑 إعداد مفاتيح API</div>
       <div class="setup-modal-sub">مطلوب مرة واحدة فقط · تُحفظ على جهازك</div>
       <div class="setup-field">
@@ -2477,7 +2477,7 @@
   </div><!-- /panel-quantbrain -->
 
   <div class="footer">
-    نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v2<br>
+    نموذج بحثي · ليس توصية استثمارية · Quant Signal Pro v8<br>
     metals.live (ذهب/فضة) + Twelve Data (عملات) + FRED API · آخر تحديث: <span id="lastUpdate">—</span><br>
     <span id="countdownTimer" style="color:var(--gold);font-size:10px;">🔄 تحديث تلقائي كل 15 دقيقة</span>
   </div>
@@ -6054,10 +6054,10 @@ async function runDailyBias() {
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
-  // 1. جلب FRED والـ Batch TD أولاً — 3 credits فقط لـ TD
-  [fredData] = await Promise.all([
-    fetchAllFRED(),
-    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز والأطر
+  // 1. جلب TD أولاً ثم FRED — بالتوازي لكن ننتظر كليهما قبل المتابعة
+  await Promise.all([
+    fetchTDBatchAll(),   // يملأ _tdCache + _tdQuoteCache بكل الرموز (5 طلبات فقط)
+    fetchAllFRED().then(d => { fredData = d; }),
   ]);
 
   // 2. تشغيل كل التحليلات بعد اكتمال الكاش (كلها تقرأ من الذاكرة فقط)
