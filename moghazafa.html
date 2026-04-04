@@ -1460,11 +1460,11 @@
       </div>
       <div class="setup-field">
         <div class="setup-field-label">
-          <span>📰 NewsAPI Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري)</span></span>
-          <a class="setup-link" href="https://newsapi.org/register" target="_blank">احصل عليه مجاناً ↗</a>
+          <span>📊 Alpha Vantage Key <span style="font-size:10px;color:var(--muted);font-weight:400;">(اختياري · أخبار مالية)</span></span>
+          <a class="setup-link" href="https://www.alphavantage.co/support/#api-key" target="_blank">احصل عليه مجاناً ↗</a>
         </div>
-        <div class="setup-field-sub">يجلب أخبار مالية من 80,000+ مصدر · 100 طلب/يوم مجاناً</div>
-        <input class="setup-input" id="newsapiKeyInput" type="password" placeholder="أدخل NewsAPI Key... (اختياري)" autocomplete="off" dir="ltr">
+        <div class="setup-field-sub">أخبار مالية + sentiment analysis · 25 طلب/يوم مجاناً · يدعم CORS ✓</div>
+        <input class="setup-input" id="avKeyInput" type="password" placeholder="أدخل Alpha Vantage Key... (اختياري)" autocomplete="off" dir="ltr">
         <div class="setup-field-status" id="newsapiStatus"></div>
       </div>
       <button class="setup-save-btn" id="setupSaveBtn" onclick="saveAllKeys()">حفظ وبدء التحليل ✓</button>
@@ -2489,6 +2489,11 @@
     <span class="qb-nav-icon">📊</span>
     <span class="qb-nav-label">لوحة التحليل</span>
   </button>
+  <button class="qb-nav-btn" id="qbnav-alerts" onclick="switchBottomNav('alerts')">
+    <span class="qb-nav-icon">🔔</span>
+    <div class="alert-nav-dot" id="alertNavDot" style="display:none;position:absolute;top:6px;right:10px;width:8px;height:8px;background:var(--sell);border-radius:50%;animation:pulse 1s infinite;"></div>
+    <span class="qb-nav-label">التنبيهات</span>
+  </button>
   <button class="qb-nav-btn" id="qbnav-brain" onclick="switchBottomNav('brain')">
     <span class="qb-nav-icon">🧠</span>
     <div class="qb-brain-pulse"></div>
@@ -2496,23 +2501,167 @@
   </button>
 </div>
 
+<!-- ══════════════ ALERTS PANEL ══════════════ -->
+<div id="panel-alerts" class="qb-panel" style="display:none;">
+  <div class="container" style="padding-bottom:100px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold);">
+        🔔 <span style="color:var(--text);">نظام التنبيهات</span>
+      </div>
+      <div id="alertStatusDot" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;" id="alertActiveLed"></span>
+        <span id="alertActiveLabel">متوقف</span>
+      </div>
+    </div>
+
+    <!-- Telegram Setup -->
+    <div style="background:var(--card);border:1px solid rgba(0,136,204,0.3);border-radius:18px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:20px;">✈️</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#229ED9;">Telegram Bot</div>
+          <div style="font-size:10px;color:var(--muted);">أسرع طريقة · إشعار فوري على هاتفك</div>
+        </div>
+        <div style="margin-right:auto;" id="tgConnStatus">
+          <span style="font-size:10px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,0.05);color:var(--muted);">غير مفعّل</span>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Bot Token <a href="https://t.me/BotFather" target="_blank" style="color:#229ED9;font-size:10px;">← احصل عليه من @BotFather ↗</a></div>
+        <input id="tgBotToken" type="password" placeholder="123456789:ABC-..." autocomplete="off" dir="ltr"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12px;font-family:'Rajdhani',sans-serif;outline:none;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Chat ID <a href="https://t.me/userinfobot" target="_blank" style="color:#229ED9;font-size:10px;">← احصل عليه من @userinfobot ↗</a></div>
+        <input id="tgChatId" type="text" placeholder="123456789" autocomplete="off" dir="ltr"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12px;font-family:'Rajdhani',sans-serif;outline:none;">
+      </div>
+      <button onclick="testTelegram()" style="width:100%;padding:10px;background:rgba(34,158,217,0.15);border:1px solid rgba(34,158,217,0.4);border-radius:10px;color:#229ED9;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+        اختبار الاتصال 🔍
+      </button>
+      <div id="tgTestResult" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;min-height:16px;"></div>
+    </div>
+
+    <!-- Browser Notifications -->
+    <div style="background:var(--card);border:1px solid rgba(139,92,246,0.3);border-radius:18px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">🖥️</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--purple-light);">إشعارات المتصفح</div>
+            <div style="font-size:10px;color:var(--muted);">تعمل حتى لو الصفحة في الخلفية</div>
+          </div>
+        </div>
+        <button onclick="requestBrowserNotif()" id="browserNotifBtn"
+          style="padding:6px 14px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);border-radius:8px;color:var(--purple-light);font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">
+          تفعيل
+        </button>
+      </div>
+      <div id="browserNotifStatus" style="font-size:10px;color:var(--muted);margin-top:8px;">الحالة: <span id="browserNotifLabel">غير محدد</span></div>
+    </div>
+
+    <!-- Alert Settings -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;">⚙️ إعدادات التنبيه</div>
+
+      <!-- Signal Filter -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">نوع الإشارة</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <button class="alert-filter-btn active" id="af-buy" onclick="toggleAlertFilter('buy')"
+            style="padding:8px 4px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.15);color:var(--buy);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+            ↑ شراء
+          </button>
+          <button class="alert-filter-btn active" id="af-sell" onclick="toggleAlertFilter('sell')"
+            style="padding:8px 4px;border-radius:10px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.15);color:var(--sell);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+            ↓ بيع
+          </button>
+          <button class="alert-filter-btn" id="af-neutral" onclick="toggleAlertFilter('neutral')"
+            style="padding:8px 4px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">
+            ◈ محايد
+          </button>
+        </div>
+      </div>
+
+      <!-- Confidence threshold -->
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-size:11px;color:var(--muted);">الحد الأدنى للثقة</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--gold);" id="confThreshLabel">70%</div>
+        </div>
+        <input type="range" id="confThreshSlider" min="50" max="95" value="70" step="5"
+          oninput="document.getElementById('confThreshLabel').textContent=this.value+'%'"
+          style="width:100%;accent-color:var(--gold);">
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px;">
+          <span>50% — أكثر تنبيهاً</span><span>95% — أقل لكن أدق</span>
+        </div>
+      </div>
+
+      <!-- Symbols -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">الأزواج المراقبة</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="alert-sym-btn active" id="as-xau" onclick="toggleAlertSym('XAU')"
+            style="padding:6px 12px;border-radius:8px;border:1px solid rgba(212,168,83,0.4);background:rgba(212,168,83,0.15);color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">XAU</button>
+          <button class="alert-sym-btn active" id="as-eur" onclick="toggleAlertSym('EUR')"
+            style="padding:6px 12px;border-radius:8px;border:1px solid rgba(59,130,246,0.4);background:rgba(59,130,246,0.15);color:var(--blue-light);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">EUR</button>
+          <button class="alert-sym-btn active" id="as-jpy" onclick="toggleAlertSym('JPY')"
+            style="padding:6px 12px;border-radius:8px;border:1px solid rgba(139,92,246,0.4);background:rgba(139,92,246,0.15);color:var(--purple-light);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">JPY</button>
+        </div>
+      </div>
+
+      <!-- MTF confirmation toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);">
+        <div>
+          <div style="font-size:12px;font-weight:600;">تأكيد MTF مطلوب</div>
+          <div style="font-size:10px;color:var(--muted);">تنبيه فقط عند توافق إطارين زمنيين</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;">
+          <input type="checkbox" id="mtfConfirmToggle" style="opacity:0;width:0;height:0;" onchange="saveAlertSettings()">
+          <span onclick="this.previousElementSibling.click()" style="position:absolute;inset:0;background:rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;transition:0.3s;" id="mtfToggleTrack"></span>
+          <span id="mtfToggleThumb" style="position:absolute;left:2px;top:2px;width:20px;height:20px;background:var(--muted);border-radius:50%;transition:0.3s;pointer-events:none;"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Main Toggle -->
+    <button id="alertMasterBtn" onclick="toggleAlertSystem()"
+      style="width:100%;padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.4);color:var(--buy);font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:14px;transition:all 0.3s;">
+      🔔 تشغيل نظام التنبيهات
+    </button>
+
+    <!-- Alert Log -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;">📋 سجل التنبيهات</div>
+        <button onclick="clearAlertLog()" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;">مسح الكل</button>
+      </div>
+      <div id="alertLog" style="max-height:300px;overflow-y:auto;">
+        <div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0;">لا توجد تنبيهات بعد · شغّل النظام أعلاه</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════
-// ── تخزين المفاتيح: sessionStorage أولاً ← localStorage ← فارغ ──
+// ── تخزين المفاتيح بطبقات متعددة ──
 function _loadKey(k) {
-  try { return sessionStorage.getItem(k) || localStorage.getItem(k) || ''; }
-  catch(e) { return ''; }
+  try { return sessionStorage.getItem(k) || localStorage.getItem(k) || ''; } catch(e) { return ''; }
 }
 function _saveKey(k, v) {
   try { sessionStorage.setItem(k, v); } catch(e) {}
-  try { localStorage.setItem(k, v);   } catch(e) {}
+  try { localStorage.setItem(k, v); } catch(e) {}
 }
 let TD_KEY      = _loadKey('td_key');
 let FRED_KEY    = _loadKey('fred_key');
 let FINNHUB_KEY = _loadKey('finnhub_key');
-let NEWSAPI_KEY = _loadKey('newsapi_key');
+let AV_KEY      = _loadKey('av_key');   // Alpha Vantage (بديل NewsAPI — مجاني + يدعم CORS)
 const TD_BASE   = 'https://api.twelvedata.com';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 
@@ -2595,20 +2744,29 @@ function switchTab(tab) {
 }
 
 function switchBottomNav(mode) {
+  // إعادة تعيين كل الأزرار والبانلات
+  document.querySelectorAll('.qb-nav-btn').forEach(b => b.className = 'qb-nav-btn');
+  document.getElementById('panel-quantbrain').classList.remove('active');
+  const alertPanel = document.getElementById('panel-alerts');
+  if (alertPanel) alertPanel.style.display = 'none';
+
   if (mode === 'brain') {
-    // إخفاء كل البانلات الأخرى
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => { t.className = 'tab'; });
     document.getElementById('panel-quantbrain').classList.add('active');
     document.getElementById('qbnav-brain').className = 'qb-nav-btn active-brain';
-    document.getElementById('qbnav-main').className  = 'qb-nav-btn';
-    // شغّل Quant Brain تلقائياً إذا لم يُشغَّل بعد
     if (!_qbData) runQuantBrain();
+  } else if (mode === 'alerts') {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    if (alertPanel) alertPanel.style.display = 'block';
+    document.getElementById('qbnav-alerts').className = 'qb-nav-btn active-main';
+    renderAlertLog();
+    // مسح النقطة الحمراء عند فتح التاب
+    const dot = document.getElementById('alertNavDot');
+    if (dot && !_alertState.active) dot.style.display = 'none';
   } else {
-    // الرجوع للوضع الرئيسي — فعّل آخر تاب
+    // main
     document.getElementById('panel-quantbrain').classList.remove('active');
-    document.getElementById('qbnav-main').className  = 'qb-nav-btn active-main';
-    document.getElementById('qbnav-brain').className = 'qb-nav-btn';
+    document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
     switchTab(currentTab || 'gold');
   }
 }
@@ -2627,7 +2785,7 @@ function saveAllKeys() {
   const tdVal      = document.getElementById('tdKeyInput').value.trim();
   const fredVal    = document.getElementById('fredKeyInput').value.trim();
   const finnhubVal = document.getElementById('finnhubKeyInput').value.trim();
-  const newsapiVal = document.getElementById('newsapiKeyInput').value.trim();
+  const newsapiVal = ''; // محذوف — تم الاستبدال بـ Alpha Vantage
   let valid = true;
   if (!tdVal)   { document.getElementById('tdStatus').textContent='⚠️ مطلوب'; document.getElementById('tdStatus').style.color='var(--sell)'; valid=false; }
   else          { document.getElementById('tdStatus').textContent='✅ تم الحفظ'; document.getElementById('tdStatus').style.color='var(--buy)'; }
@@ -2635,17 +2793,19 @@ function saveAllKeys() {
   else          { document.getElementById('fredStatus').textContent='✅ تم الحفظ'; document.getElementById('fredStatus').style.color='var(--buy)'; }
   if (finnhubVal) { document.getElementById('finnhubStatus').textContent='✅ Finnhub · أخبار مالية حقيقية'; document.getElementById('finnhubStatus').style.color='var(--buy)'; }
   else            { document.getElementById('finnhubStatus').textContent='⚪ اختياري'; document.getElementById('finnhubStatus').style.color='var(--muted)'; }
-  if (newsapiVal) { document.getElementById('newsapiStatus').textContent='✅ NewsAPI · 80,000+ مصدر إخباري'; document.getElementById('newsapiStatus').style.color='var(--buy)'; }
-  else            { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
+  const avVal2 = document.getElementById('avKeyInput')?.value.trim() || '';
+  if (avVal2) { document.getElementById('newsapiStatus').textContent='✅ Alpha Vantage · أخبار مالية حقيقية'; document.getElementById('newsapiStatus').style.color='var(--buy)'; }
+  else        { document.getElementById('newsapiStatus').textContent='⚪ اختياري'; document.getElementById('newsapiStatus').style.color='var(--muted)'; }
   if (!valid) return;
-  TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; NEWSAPI_KEY=newsapiVal;
+  const avVal = document.getElementById('avKeyInput')?.value.trim() || '';
+  TD_KEY=tdVal; FRED_KEY=fredVal; FINNHUB_KEY=finnhubVal; AV_KEY=avVal;
   _saveKey('td_key',      tdVal);
   _saveKey('fred_key',    fredVal);
   _saveKey('finnhub_key', finnhubVal);
-  _saveKey('newsapi_key', newsapiVal);
-  // حفظ المفاتيح في URL hash كـ fallback إضافي
+  _saveKey('av_key',      avVal);
+  // حفظ في URL hash كـ fallback
   try {
-    const h = btoa(encodeURIComponent(JSON.stringify({td:tdVal,fred:fredVal,fh:finnhubVal,na:newsapiVal})));
+    const h = btoa(encodeURIComponent(JSON.stringify({td:tdVal,fred:fredVal,fh:finnhubVal,av:avVal})));
     history.replaceState(null,'','#k='+h);
   } catch(e) {}
   setTimeout(()=>{ document.getElementById('setupModal').classList.add('hidden'); document.getElementById('resetRow').style.display='block'; runAll(); },600);
@@ -2654,7 +2814,7 @@ function resetKeys() {
   document.getElementById('tdKeyInput').value    = TD_KEY;
   document.getElementById('fredKeyInput').value  = FRED_KEY;
   document.getElementById('finnhubKeyInput').value = FINNHUB_KEY;
-  document.getElementById('newsapiKeyInput').value = NEWSAPI_KEY;
+  if(document.getElementById('avKeyInput')) document.getElementById('avKeyInput').value = AV_KEY;
   ['tdStatus','fredStatus','finnhubStatus','newsapiStatus'].forEach(id => document.getElementById(id).textContent='');
   document.getElementById('setupModal').classList.remove('hidden');
 }
@@ -2676,10 +2836,9 @@ async function fetchTD(path) {
 // ██████ FETCH & CACHE ENGINE ██████
 // ══════════════════════════════════════════
 // الخطة المجانية: 8 credits/دقيقة
-// 5 طلبات (1h لكل رمز) — 4h و1day تُبنى منها رياضياً
+// 5 طلبات منفصلة (1h لكل رمز) — 4h و1day تُبنى منها رياضياً
 
 function _resample(candles1h, n) {
-  // candles مرتبة أحدث → أقدم، ندمج كل n شمعة → شمعة واحدة
   const asc = [...candles1h].reverse();
   const out = [];
   for (let i = 0; i + n <= asc.length; i += n) {
@@ -2707,16 +2866,16 @@ async function fetchTDBatchAll(force = false) {
     } catch(e) { console.warn(`TD failed [${sym}]:`, e.message); return null; }
   }
 
-  // 5 طلبات متوازية فقط
+  // 5 طلبات فقط بالتوازي
   const [xau, eur, jpy, xag, gbp] = await Promise.all([
     _fetchSym('XAU/USD'), _fetchSym('EUR/USD'), _fetchSym('USD/JPY'),
     _fetchSym('XAG/USD'), _fetchSym('GBP/USD'),
   ]);
 
-  const map1h = { 'XAU/USD':xau, 'EUR/USD':eur, 'USD/JPY':jpy, 'XAG/USD':xag, 'GBP/USD':gbp };
-  Object.entries(map1h).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
+  const map = {'XAU/USD':xau,'EUR/USD':eur,'USD/JPY':jpy,'XAG/USD':xag,'GBP/USD':gbp};
+  Object.entries(map).forEach(([s,v]) => { if(v) _tdCache['1h'][s] = v; });
 
-  // بناء 4h و 1day من 1h بدون طلبات إضافية
+  // بناء 4h و 1day من 1h — صفر credits إضافية
   ['XAU/USD','EUR/USD','USD/JPY','XAG/USD'].forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 8) {
@@ -2725,8 +2884,8 @@ async function fetchTDBatchAll(force = false) {
     }
   });
 
-  // Quote cache من آخر شمعتين
-  Object.keys(map1h).forEach(s => {
+  // Quote cache
+  Object.keys(map).forEach(s => {
     const v = _tdCache['1h'][s];
     if (v && v.length >= 2)
       _tdQuoteCache[s] = { price: parseFloat(v[0].close), prev: parseFloat(v[1].close) };
@@ -3288,6 +3447,7 @@ async function runGold(){
     const live=!!fredData;
     setPrice('g',price,change,pct,live?'📡 Twelve Data + FRED · بيانات حقيقية ✓':'📡 Twelve Data · بيانات حقيقية ✓','$');
     setSignal('g',res);
+    checkAndFireAlert('XAU', res.signal, res.confidence, price, regimeData.regime);
     setModel('g','m1',m1.sig,m1.val); setModel('g','m2',m2.sig,m2.val);
     setModel('g','m3',m3.sig,m3.val); setModel('g','m4',m4.sig,m4.val);
     const fv=(v,d)=>v!==null?v.toFixed(d):'—';
@@ -3332,6 +3492,7 @@ async function runEUR(){
     const live=!!fredData;
     setPrice('e',price,change,pct,live?'📡 Twelve Data + FRED ✓':'📡 Twelve Data ✓','');
     setSignal('e',res);
+    checkAndFireAlert('EUR', res.signal, res.confidence, price, regimeData.regime);
     setModel('e','m1',m1.sig,m1.val); setModel('e','m2',m2.sig,m2.val);
     setModel('e','m3',m3.sig,m3.val); setModel('e','m4',m4.sig,m4.val);
     setModel('e','m5',m5.sig,m5.val); setModel('e','m6',m6.sig,m6.val);
@@ -3385,6 +3546,7 @@ async function runJPY(){
     const live=!!fredData;
     setPrice('j',price,change,pct,live?'📡 Twelve Data + FRED ✓':'📡 Twelve Data ✓','¥');
     setSignal('j',res);
+    checkAndFireAlert('JPY', res.signal, res.confidence, price, regimeData.regime);
     setModel('j','m1',m1.sig,m1.val); setModel('j','m2',m2.sig,m2.val);
     setModel('j','m3',m3.sig,m3.val); setModel('j','m4',m4.sig,m4.val);
     setModel('j','m5',m5.sig,m5.val); setModel('j','m6',m6.sig,m6.val);
@@ -4071,7 +4233,7 @@ function showSentimentSetupPrompt(msg) {
            style="display:block;padding:10px 16px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);border-radius:10px;color:var(--cyan-light);font-size:12px;font-weight:700;text-decoration:none;">
           📡 Finnhub — مجاني · أخبار مالية متخصصة ↗
         </a>
-        <a href="https://newsapi.org/register" target="_blank"
+        <a href="https://www.alphavantage.co/support/#api-key" target="_blank"
            style="display:block;padding:10px 16px;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.3);border-radius:10px;color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;">
           📰 NewsAPI — مجاني · 80,000+ مصدر إخباري ↗
         </a>
@@ -4083,7 +4245,7 @@ function showSentimentSetupPrompt(msg) {
     </div>`;
 
   // إخفاء باقي الأقسام
-  document.getElementById('sent-nlpText').textContent = 'أضف مفتاح Finnhub أو NewsAPI لعرض التحليل النصي.';
+  document.getElementById('sent-nlpText').textContent = 'أضف مفتاح Finnhub أو Alpha Vantage لعرض التحليل النصي.';
   document.getElementById('sent-fgDesc').textContent = 'Fear & Greed يعتمد على بيانات السعر فقط بدون API للأخبار';
 }
 
@@ -4135,42 +4297,53 @@ async function fetchFinnhubNews(symbol) {
   } catch(e) { console.warn('Finnhub error:', e.message); return []; }
 }
 
-// ── جلب أخبار NewsAPI ──
-async function fetchNewsAPINews(symbol) {
-  if (!NEWSAPI_KEY) return [];
-  const qMap = {
-    XAU: 'gold price OR XAU/USD OR bullion',
-    EUR: 'EUR/USD OR euro dollar OR ECB interest rate',
-    JPY: 'USD/JPY OR yen dollar OR Bank of Japan',
-    USD: 'US dollar OR Federal Reserve OR Fed rate',
+// ── جلب أخبار Alpha Vantage (بديل NewsAPI — مجاني + يدعم CORS من المتصفح) ──
+// مجاني: 25 طلب/يوم — كافٍ للاستخدام الطبيعي
+// احصل على مفتاح مجاني من: https://www.alphavantage.co/support/#api-key
+async function fetchAVNews(symbol) {
+  if (!AV_KEY) return [];
+  const tickerMap = {
+    XAU: 'FOREX:XAUUSD',
+    EUR: 'FOREX:EURUSD',
+    JPY: 'FOREX:USDJPY',
+    USD: 'FOREX:EURUSD',
   };
-  const q = encodeURIComponent(qMap[symbol] || 'forex market');
+  const topics = {
+    XAU: 'finance,gold,commodities',
+    EUR: 'finance,forex,economy_macro',
+    JPY: 'finance,forex,economy_macro',
+    USD: 'finance,forex,economy_macro',
+  };
   try {
-    // NewsAPI لا يدعم CORS من المتصفح مباشرة — نستخدم everything endpoint
-    const url = `https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=6&apiKey=${NEWSAPI_KEY}`;
+    const ticker = tickerMap[symbol] || 'FOREX:EURUSD';
+    const topic  = topics[symbol] || 'finance,forex';
+    const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${ticker}&topics=${topic}&sort=LATEST&limit=8&apikey=${AV_KEY}`;
     const r = await fetch(url);
     if (!r.ok) return [];
     const d = await r.json();
-    if (d.status !== 'ok' || !Array.isArray(d.articles)) return [];
-    return d.articles.slice(0, 6).map(a => ({
+    if (!Array.isArray(d.feed)) return [];
+    return d.feed.slice(0, 6).map(a => ({
       headline: a.title,
-      summary:  a.description || '',
-      source:   a.source?.name || 'NewsAPI',
-      datetime: a.publishedAt ? new Date(a.publishedAt).getTime()/1000 : Date.now()/1000,
+      summary:  a.summary || '',
+      source:   a.source || 'Alpha Vantage',
+      datetime: a.time_published ? new Date(
+        a.time_published.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/, '$1-$2-$3T$4:$5:$6')
+      ).getTime()/1000 : Date.now()/1000,
       url:      a.url,
-      _origin:  'newsapi',
+      sentiment: a.overall_sentiment_label,  // Alpha Vantage يوفر sentiment جاهز
+      _origin:  'alphavantage',
     }));
-  } catch(e) { console.warn('NewsAPI error:', e.message); return []; }
+  } catch(e) { console.warn('Alpha Vantage news error:', e.message); return []; }
 }
 
-// ── دالة موحّدة: Finnhub + NewsAPI فقط — بدون محاكاة ──
+// ── دالة موحّدة: Finnhub + Alpha Vantage — بدون محاكاة ──
 async function fetchSentimentNews(symbol) {
-  const [finnhubNews, newsapiNews] = await Promise.all([
+  const [finnhubNews, avNews] = await Promise.all([
     fetchFinnhubNews(symbol),
-    fetchNewsAPINews(symbol),
+    fetchAVNews(symbol),
   ]);
 
-  const combined = [...finnhubNews, ...newsapiNews];
+  const combined = [...finnhubNews, ...avNews];
 
   // إزالة التكرار
   const unique = combined.filter((item, idx) =>
@@ -4241,14 +4414,14 @@ async function runSentiment() {
     const sym = currentSentSymbol;
 
     // تحقق: هل يوجد API key واحد على الأقل؟
-    if (!FINNHUB_KEY && !NEWSAPI_KEY) {
+    if (!FINNHUB_KEY && !AV_KEY) {
       showSentimentSetupPrompt();
       btn.style.opacity='1'; btn.style.pointerEvents='auto';
       icon.textContent='🔄';
       return;
     }
 
-    // 1. جلب الأخبار من Finnhub + NewsAPI
+    // 1. جلب الأخبار من Finnhub + Alpha Vantage
     const newsResult = await fetchSentimentNews(sym);
     const newsItems  = newsResult.items;
     const isReal     = newsResult.isReal;
@@ -4264,7 +4437,7 @@ async function runSentiment() {
     // مصادر نشطة
     const activeSources = [];
     if (FINNHUB_KEY) activeSources.push('Finnhub');
-    if (NEWSAPI_KEY) activeSources.push('NewsAPI');
+    if (AV_KEY) activeSources.push('Alpha Vantage');
 
     // 2. جلب بيانات السعر للتحليل
     let closes = [];
@@ -4338,7 +4511,7 @@ async function runSentiment() {
     document.getElementById('sent-confVal').className = 'sent-conf-val ' + verdict;
     document.getElementById('sent-sourceNote').textContent = isReal
       ? `📡 ${activeSources.join(' + ')} · ${newsItems.length} خبر محلَّل · بيانات حقيقية ✓`
-      : `🤖 محاكاة ذكية · ${newsItems.length} سيناريو · أضف Finnhub أو NewsAPI للأخبار الحقيقية`;
+      : `🤖 محاكاة ذكية · ${newsItems.length} سيناريو · أضف Finnhub أو Alpha Vantage للأخبار الحقيقية`;
 
     // Fear & Greed
     const fg = calcFearGreed(sym, closes, fredData);
@@ -4394,8 +4567,8 @@ async function runSentiment() {
       const scoreDisp = (n.score >= 0 ? '+' : '') + (n.score * 100).toFixed(0);
       const originBadge = n._origin === 'finnhub'
         ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(6,182,212,0.15);color:var(--cyan-light);">Finnhub</span>`
-        : n._origin === 'newsapi'
-        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(212,168,83,0.15);color:var(--gold);">NewsAPI</span>`
+        : n._origin === 'alphavantage'
+        ? `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(212,168,83,0.15);color:var(--gold);">AlphaVantage</span>`
         : `<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(107,114,128,0.15);color:var(--muted);">محاكاة</span>`;
       return `<div class="sent-news-item">
         <div class="sent-news-emoji">${n.emoji}</div>
@@ -6064,15 +6237,15 @@ async function runAll(){
 // INIT
 // ══════════════════════════════════════════
 window.addEventListener('load',()=>{
-  // محاولة استعادة المفاتيح من URL hash إذا فشل localStorage/sessionStorage
+  // استعادة المفاتيح من URL hash إذا فشل storage
   try {
     const hash = location.hash;
     if (hash.startsWith('#k=')) {
-      const parsed = JSON.parse(decodeURIComponent(atob(hash.slice(3))));
-      if (parsed.td  && !TD_KEY)      { TD_KEY      = parsed.td;  _saveKey('td_key',      TD_KEY); }
-      if (parsed.fred && !FRED_KEY)   { FRED_KEY    = parsed.fred; _saveKey('fred_key',   FRED_KEY); }
-      if (parsed.fh  && !FINNHUB_KEY) { FINNHUB_KEY = parsed.fh;  _saveKey('finnhub_key', FINNHUB_KEY); }
-      if (parsed.na  && !NEWSAPI_KEY) { NEWSAPI_KEY = parsed.na;  _saveKey('newsapi_key', NEWSAPI_KEY); }
+      const p = JSON.parse(decodeURIComponent(atob(hash.slice(3))));
+      if (p.td   && !TD_KEY)      { TD_KEY      = p.td;   _saveKey('td_key',      TD_KEY); }
+      if (p.fred && !FRED_KEY)    { FRED_KEY    = p.fred; _saveKey('fred_key',    FRED_KEY); }
+      if (p.fh   && !FINNHUB_KEY) { FINNHUB_KEY = p.fh;   _saveKey('finnhub_key', FINNHUB_KEY); }
+      if (p.av   && !AV_KEY)      { AV_KEY      = p.av;   _saveKey('av_key',      AV_KEY); }
     }
   } catch(e) {}
 
@@ -6112,6 +6285,341 @@ setInterval(()=>{
     el.textContent = `🔄 تحديث تلقائي بعد ${m}:${s}`;
   }, 1000);
 })();
+
+// ══════════════════════════════════════════════════════════
+// ██████ ALERT SYSTEM ██████
+// ══════════════════════════════════════════════════════════
+
+// ── State ──
+const _alertState = {
+  active:      false,
+  tgToken:     _loadKey('alert_tg_token'),
+  tgChatId:    _loadKey('alert_tg_chat'),
+  browserPerm: false,
+  filters:     { buy:true, sell:true, neutral:false },
+  syms:        { XAU:true, EUR:true, JPY:true },
+  confThresh:  70,
+  mtfConfirm:  false,
+  lastSent:    {},   // sym → { signal, ts } — منع التكرار
+  log:         [],
+};
+
+// ── تحميل إعدادات محفوظة ──
+(function loadAlertSettings() {
+  try {
+    const s = JSON.parse(_loadKey('alert_settings') || '{}');
+    if (s.filters)    _alertState.filters    = s.filters;
+    if (s.syms)       _alertState.syms       = s.syms;
+    if (s.confThresh) _alertState.confThresh = s.confThresh;
+    if (s.mtfConfirm !== undefined) _alertState.mtfConfirm = s.mtfConfirm;
+  } catch(e) {}
+})();
+
+function saveAlertSettings() {
+  const s = {
+    filters:    _alertState.filters,
+    syms:       _alertState.syms,
+    confThresh: parseInt(document.getElementById('confThreshSlider').value),
+    mtfConfirm: document.getElementById('mtfConfirmToggle').checked,
+  };
+  _alertState.confThresh  = s.confThresh;
+  _alertState.mtfConfirm  = s.mtfConfirm;
+  _saveKey('alert_settings', JSON.stringify(s));
+  // تحديث toggle UI
+  const thumb = document.getElementById('mtfToggleThumb');
+  const track = document.getElementById('mtfToggleTrack');
+  if (s.mtfConfirm) {
+    thumb.style.left = '22px'; thumb.style.background = 'var(--gold)';
+    track.style.background = 'rgba(212,168,83,0.3)';
+  } else {
+    thumb.style.left = '2px'; thumb.style.background = 'var(--muted)';
+    track.style.background = 'rgba(255,255,255,0.1)';
+  }
+}
+
+function toggleAlertFilter(type) {
+  _alertState.filters[type] = !_alertState.filters[type];
+  const btn = document.getElementById('af-' + type);
+  const colors = { buy:'rgba(34,197,94,0.15)', sell:'rgba(239,68,68,0.15)', neutral:'rgba(245,158,11,0.1)' };
+  const borders = { buy:'rgba(34,197,94,0.4)', sell:'rgba(239,68,68,0.4)', neutral:'rgba(245,158,11,0.3)' };
+  const textC = { buy:'var(--buy)', sell:'var(--sell)', neutral:'var(--neutral)' };
+  if (_alertState.filters[type]) {
+    btn.style.background = colors[type]; btn.style.borderColor = borders[type]; btn.style.color = textC[type];
+  } else {
+    btn.style.background = 'transparent'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--muted)';
+  }
+  saveAlertSettings();
+}
+
+function toggleAlertSym(sym) {
+  _alertState.syms[sym] = !_alertState.syms[sym];
+  const btn = document.getElementById('as-' + sym.toLowerCase());
+  const symColors = {
+    XAU: ['rgba(212,168,83,0.15)','rgba(212,168,83,0.4)','var(--gold)'],
+    EUR: ['rgba(59,130,246,0.15)','rgba(59,130,246,0.4)','var(--blue-light)'],
+    JPY: ['rgba(139,92,246,0.15)','rgba(139,92,246,0.4)','var(--purple-light)'],
+  };
+  const [bg, border, color] = symColors[sym] || ['rgba(255,255,255,0.05)','var(--border)','var(--muted)'];
+  if (_alertState.syms[sym]) {
+    btn.style.background = bg; btn.style.borderColor = border; btn.style.color = color;
+  } else {
+    btn.style.background = 'transparent'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--muted)';
+  }
+  saveAlertSettings();
+}
+
+// ── Telegram ──
+function saveTgCredentials() {
+  const tok = document.getElementById('tgBotToken').value.trim();
+  const cid = document.getElementById('tgChatId').value.trim();
+  if (tok) { _alertState.tgToken = tok; _saveKey('alert_tg_token', tok); }
+  if (cid) { _alertState.tgChatId = cid; _saveKey('alert_tg_chat', cid); }
+}
+
+async function sendTelegram(msg) {
+  const tok = _alertState.tgToken;
+  const cid = _alertState.tgChatId;
+  if (!tok || !cid) return false;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${tok}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: cid, text: msg, parse_mode: 'HTML' }),
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+
+async function testTelegram() {
+  saveTgCredentials();
+  const res = document.getElementById('tgTestResult');
+  res.textContent = '⏳ جاري الاختبار...';
+  res.style.color = 'var(--muted)';
+  const ok = await sendTelegram(
+    '✅ <b>Quant Signal Pro v8</b>\n\n' +
+    '🔔 تم الاتصال بنجاح!\n' +
+    '⏰ ' + new Date().toLocaleString('ar-SA') + '\n\n' +
+    'النظام جاهز لإرسال تنبيهات التداول 🚀'
+  );
+  if (ok) {
+    res.textContent = '✅ نجح الاتصال! تحقق من Telegram';
+    res.style.color = 'var(--buy)';
+    document.getElementById('tgConnStatus').innerHTML =
+      '<span style="font-size:10px;padding:3px 8px;border-radius:6px;background:rgba(34,197,94,0.15);color:var(--buy);">✅ متصل</span>';
+  } else {
+    res.textContent = '❌ فشل · تحقق من Token و Chat ID';
+    res.style.color = 'var(--sell)';
+  }
+}
+
+// ── Browser Notifications ──
+async function requestBrowserNotif() {
+  if (!('Notification' in window)) {
+    document.getElementById('browserNotifLabel').textContent = 'غير مدعوم في هذا المتصفح';
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  _alertState.browserPerm = perm === 'granted';
+  const lbl = document.getElementById('browserNotifLabel');
+  const btn = document.getElementById('browserNotifBtn');
+  if (perm === 'granted') {
+    lbl.textContent = '✅ مفعّل';
+    lbl.style.color = 'var(--buy)';
+    btn.textContent = 'مفعّل ✓';
+    btn.style.opacity = '0.5';
+    btn.style.pointerEvents = 'none';
+    new Notification('Quant Signal Pro 🔔', { body: 'إشعارات المتصفح مفعّلة بنجاح!' });
+  } else {
+    lbl.textContent = '❌ مرفوض — فعّل من إعدادات المتصفح';
+    lbl.style.color = 'var(--sell)';
+  }
+}
+
+function sendBrowserNotif(title, body) {
+  if (!_alertState.browserPerm || Notification.permission !== 'granted') return;
+  try { new Notification(title, { body, icon: '' }); } catch(e) {}
+}
+
+// ── Master Toggle ──
+function toggleAlertSystem() {
+  saveTgCredentials();
+  saveAlertSettings();
+  _alertState.active = !_alertState.active;
+  const btn   = document.getElementById('alertMasterBtn');
+  const led   = document.getElementById('alertActiveLed');
+  const label = document.getElementById('alertActiveLabel');
+  const dot   = document.getElementById('alertNavDot');
+  if (_alertState.active) {
+    btn.textContent   = '🔕 إيقاف نظام التنبيهات';
+    btn.style.background = 'linear-gradient(135deg,rgba(239,68,68,0.15),rgba(239,68,68,0.05))';
+    btn.style.borderColor = 'rgba(239,68,68,0.4)';
+    btn.style.color   = 'var(--sell)';
+    led.style.background  = 'var(--buy)';
+    led.style.animation   = 'pulse 1.5s infinite';
+    label.textContent     = '🟢 يعمل';
+    label.style.color     = 'var(--buy)';
+    dot.style.display     = 'block';
+    addAlertLog('system', 'SYSTEM', 'تم تشغيل نظام التنبيهات ✅', 100);
+  } else {
+    btn.textContent   = '🔔 تشغيل نظام التنبيهات';
+    btn.style.background = 'linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05))';
+    btn.style.borderColor = 'rgba(34,197,94,0.4)';
+    btn.style.color   = 'var(--buy)';
+    led.style.background  = 'var(--muted)';
+    led.style.animation   = 'none';
+    label.textContent     = 'متوقف';
+    label.style.color     = 'var(--muted)';
+    dot.style.display     = 'none';
+  }
+}
+
+// ── Main Alert Dispatcher ──
+// يُستدعى بعد كل تحديث للإشارات
+async function checkAndFireAlert(sym, signal, confidence, price, regime) {
+  if (!_alertState.active) return;
+
+  // فلتر النوع
+  const sigKey = signal.toLowerCase().replace('_','');
+  if (signal === 'BUY'     && !_alertState.filters.buy)     return;
+  if (signal === 'SELL'    && !_alertState.filters.sell)    return;
+  if (signal === 'NEUTRAL' && !_alertState.filters.neutral) return;
+
+  // فلتر الزوج
+  if (!_alertState.syms[sym]) return;
+
+  // فلتر الثقة
+  if (confidence < _alertState.confThresh) return;
+
+  // فلتر MTF
+  if (_alertState.mtfConfirm) {
+    const tdSym = sym === 'XAU' ? 'XAU/USD' : sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+    const v4h  = _tdCache['4h']?.[tdSym];
+    const v1d  = _tdCache['1day']?.[tdSym];
+    if (v4h && v1d) {
+      const s4h = calcMTFSignal(v4h).signal;
+      const s1d = calcMTFSignal(v1d).signal;
+      const mtfAgree = [s4h, s1d].filter(s => s === signal).length;
+      if (mtfAgree < 1) return; // يحتاج إطار واحد على الأقل موافق
+    }
+  }
+
+  // منع التكرار — نفس الإشارة خلال 30 دقيقة
+  const now = Date.now();
+  const last = _alertState.lastSent[sym];
+  if (last && last.signal === signal && now - last.ts < 30 * 60 * 1000) return;
+  _alertState.lastSent[sym] = { signal, ts: now };
+
+  // ── بناء الرسالة ──
+  const emoji = signal === 'BUY' ? '🟢' : signal === 'SELL' ? '🔴' : '🟡';
+  const symFull = sym === 'XAU' ? 'XAU/USD (ذهب)' : sym === 'EUR' ? 'EUR/USD' : 'USD/JPY';
+  const sigAr   = signal === 'BUY' ? 'شراء ↑' : signal === 'SELL' ? 'بيع ↓' : 'انتظار';
+  const priceStr = price ? (sym === 'JPY' ? price.toFixed(2) : price.toFixed(4)) : '—';
+
+  const tgMsg =
+    `${emoji} <b>إشارة ${sigAr}</b>\n` +
+    `━━━━━━━━━━━━━━\n` +
+    `📌 الزوج: <b>${symFull}</b>\n` +
+    `💰 السعر: <b>${priceStr}</b>\n` +
+    `📊 الثقة: <b>${confidence}%</b>\n` +
+    `🧠 Regime: ${regime || '—'}\n` +
+    `⏰ ${new Date().toLocaleString('ar-SA')}\n` +
+    `━━━━━━━━━━━━━━\n` +
+    `⚠️ نموذج بحثي · ليس توصية استثمارية`;
+
+  const browserTitle = `${emoji} ${signal} · ${sym}`;
+  const browserBody  = `السعر: ${priceStr} · ثقة: ${confidence}%`;
+
+  // ── إرسال ──
+  await sendTelegram(tgMsg);
+  sendBrowserNotif(browserTitle, browserBody);
+
+  // ── تسجيل في السجل ──
+  addAlertLog(sym, signal, `${symFull} · ${priceStr} · ثقة ${confidence}%`, confidence);
+}
+
+// ── Alert Log ──
+function addAlertLog(sym, signal, detail, confidence) {
+  const entry = {
+    sym, signal, detail, confidence,
+    time: new Date().toLocaleTimeString('ar-SA'),
+    date: new Date().toLocaleDateString('ar-SA'),
+  };
+  _alertState.log.unshift(entry);
+  if (_alertState.log.length > 50) _alertState.log.pop();
+  renderAlertLog();
+
+  // نقطة حمراء على تاب التنبيهات
+  const dot = document.getElementById('alertNavDot');
+  if (dot && signal !== 'system') dot.style.display = 'block';
+}
+
+function renderAlertLog() {
+  const el = document.getElementById('alertLog');
+  if (!el) return;
+  if (_alertState.log.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0;">لا توجد تنبيهات بعد · شغّل النظام أعلاه</div>';
+    return;
+  }
+  const sigColors = { BUY:'var(--buy)', SELL:'var(--sell)', NEUTRAL:'var(--neutral)', system:'var(--muted)' };
+  const sigEmoji  = { BUY:'🟢', SELL:'🔴', NEUTRAL:'🟡', system:'⚙️' };
+  el.innerHTML = _alertState.log.map(e => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <span style="font-size:18px;flex-shrink:0;">${sigEmoji[e.signal] || '🔔'}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:700;color:${sigColors[e.signal] || 'var(--text)'};">${e.signal === 'system' ? 'النظام' : e.signal + ' · ' + e.sym}</div>
+        <div style="font-size:11px;color:var(--text);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.detail}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${e.time} · ${e.date}</div>
+      </div>
+      ${e.signal !== 'system' ? `<span style="font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;">${e.confidence}%</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function clearAlertLog() {
+  _alertState.log = [];
+  renderAlertLog();
+}
+
+// ── تهيئة UI عند التحميل ──
+window.addEventListener('load', () => {
+  // تحميل قيم محفوظة في الواجهة
+  setTimeout(() => {
+    const tok = _loadKey('alert_tg_token');
+    const cid = _loadKey('alert_tg_chat');
+    if (tok) document.getElementById('tgBotToken').value = tok;
+    if (cid) document.getElementById('tgChatId').value  = cid;
+
+    const slider = document.getElementById('confThreshSlider');
+    const toggle = document.getElementById('mtfConfirmToggle');
+    if (slider) slider.value = _alertState.confThresh;
+    document.getElementById('confThreshLabel').textContent = _alertState.confThresh + '%';
+    if (toggle) {
+      toggle.checked = _alertState.mtfConfirm;
+      saveAlertSettings(); // تحديث UI للـ toggle
+    }
+
+    // تحديث أزرار الفلاتر
+    ['buy','sell','neutral'].forEach(f => {
+      if (!_alertState.filters[f]) toggleAlertFilter(f); // اضغط مرتين لا — نعيد رسم الحالة
+    });
+
+    // Browser notif status
+    if ('Notification' in window) {
+      const p = Notification.permission;
+      _alertState.browserPerm = p === 'granted';
+      const lbl = document.getElementById('browserNotifLabel');
+      if (lbl) {
+        if (p === 'granted')  { lbl.textContent = '✅ مفعّل'; lbl.style.color = 'var(--buy)'; }
+        else if (p === 'denied') { lbl.textContent = '❌ مرفوض'; lbl.style.color = 'var(--sell)'; }
+        else { lbl.textContent = 'اضغط "تفعيل" للسماح'; }
+      }
+    }
+  }, 500);
+});
+// ══════════════════════════════════════════════════════════
+// END ALERT SYSTEM
+// ══════════════════════════════════════════════════════════
+
 </script>
 </body>
 </html>
