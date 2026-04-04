@@ -3182,43 +3182,37 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => { t.className='tab'; });
   document.getElementById('panel-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).className = 'tab active-'+tab;
-  // تأكد أننا في وضع Main
   document.getElementById('qbnav-main').className = 'qb-nav-btn active-main';
   document.getElementById('qbnav-brain').className = 'qb-nav-btn';
 
-  // ── إدارة MTF widget ──
-  const mtfWidget = document.getElementById('mtf-widget');
+  // ── MTF: يظهر فقط في تابات الذهب/EUR/JPY ويتغير رمزه تلقائياً ──
+  const mtfWidget   = document.getElementById('mtf-widget');
   const mtfSelector = document.getElementById('mtf-sym-selector');
   if (mtfWidget) {
     if (tab === 'gold') {
-      // الذهب: أخفِ أزرار الاختيار — اعرض XAU تلقائياً
       mtfWidget.style.display = 'block';
-      if (mtfSelector) mtfSelector.style.display = 'none';
+      if (mtfSelector) mtfSelector.style.display = 'none'; // لا أزرار — XAU تلقائي
       currentMTFSym = 'XAU';
       runMTFConfluence();
     } else if (tab === 'eur') {
       mtfWidget.style.display = 'block';
       if (mtfSelector) mtfSelector.style.display = 'flex';
       document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
-      const eurBtn = document.getElementById('mtfbtn-eur');
-      if (eurBtn) eurBtn.classList.add('active');
+      document.getElementById('mtfbtn-eur')?.classList.add('active');
       currentMTFSym = 'EUR';
       runMTFConfluence();
     } else if (tab === 'jpy') {
       mtfWidget.style.display = 'block';
       if (mtfSelector) mtfSelector.style.display = 'flex';
       document.querySelectorAll('.mtf-sym-btn').forEach(b => b.classList.remove('active'));
-      const jpyBtn = document.getElementById('mtfbtn-jpy');
-      if (jpyBtn) jpyBtn.classList.add('active');
+      document.getElementById('mtfbtn-jpy')?.classList.add('active');
       currentMTFSym = 'JPY';
       runMTFConfluence();
     } else {
-      // كل التابات الأخرى: أخفِ MTF كلياً
       mtfWidget.style.display = 'none';
     }
   }
 
-  // شغّل Daily Bias تلقائياً عند فتح التاب إذا كان الكاش جاهزاً
   if (tab === 'dailybias' && Object.keys(_tdCache['1day']).length > 0) runDailyBias();
   if (tab === 'ms') setTimeout(loadMsData, 100);
 }
@@ -6786,7 +6780,6 @@ async function runAll(){
 // تشغيل التحليلات من الكاش بدون إعادة جلب TD
 async function _runAnalysisFromCache() {
   await Promise.all([runGold(), runEUR(), runJPY(), runPairs(), runOrderFlow(), runTimeSeries(), runSentiment()]);
-  // تشغيل MTF فقط للتابات المدعومة
   if (['gold','eur','jpy'].includes(currentTab)) {
     if (currentTab === 'gold') currentMTFSym = 'XAU';
     else if (currentTab === 'eur') currentMTFSym = 'EUR';
@@ -7228,27 +7221,44 @@ async function loadMsData() {
     const cfg = _msSymCfg[sym];
     let price = null, candles = [];
 
-    // محاولة جلب بيانات حقيقية من Twelve Data (إذا كان API_KEY محدداً)
-    if (typeof API_KEY !== 'undefined' && API_KEY && API_KEY !== 'YOUR_KEY') {
+    // الرمز بصيغة Twelve Data (مع شرطة مائلة)
+    const tdSymMap = { XAUUSD:'XAU/USD', EURUSD:'EUR/USD', USDJPY:'USD/JPY', GBPUSD:'GBP/USD' };
+    const tdSym = tdSymMap[sym];
+
+    // أولاً: محاولة جلب من الكاش المركزي (يُحدَّث عند الضغط على "تحديث الكاش")
+    const cached1h = _tdCache['1h']?.[tdSym];
+    if (cached1h && cached1h.length >= 10) {
+      price = parseFloat(cached1h[0].close);
+      candles = cached1h.slice(0, 50).map(c => ({
+        o: parseFloat(c.open),
+        h: parseFloat(c.high),
+        l: parseFloat(c.low),
+        c: parseFloat(c.close),
+        v: parseFloat(c.volume) || 1000
+      })).reverse();
+    }
+
+    // ثانياً: إذا الكاش فارغ — جلب مباشر من TD
+    if ((!price || candles.length === 0) && TD_KEY) {
       try {
         const [qRes, oRes] = await Promise.all([
-          fetch(`https://api.twelvedata.com/price?symbol=${sym}&apikey=${API_KEY}`),
-          fetch(`https://api.twelvedata.com/time_series?symbol=${sym}&interval=1min&outputsize=50&apikey=${API_KEY}`)
+          fetch(`https://api.twelvedata.com/price?symbol=${tdSym}&apikey=${TD_KEY}`),
+          fetch(`https://api.twelvedata.com/time_series?symbol=${tdSym}&interval=1h&outputsize=50&apikey=${TD_KEY}`)
         ]);
         const qd = await qRes.json();
         const od = await oRes.json();
         if (qd.price) price = parseFloat(qd.price);
         if (od.values) {
           candles = od.values.map(c => ({
-            o:parseFloat(c.open), h:parseFloat(c.high),
-            l:parseFloat(c.low), c:parseFloat(c.close),
-            v:parseFloat(c.volume)||Math.random()*1000+500
+            o: parseFloat(c.open), h: parseFloat(c.high),
+            l: parseFloat(c.low),  c: parseFloat(c.close),
+            v: parseFloat(c.volume) || 1000
           })).reverse();
         }
-      } catch(e) {}
+      } catch(e) { console.warn('MS direct fetch failed:', e.message); }
     }
 
-    // لا توجد بيانات حقيقية — عرض رسالة بدلاً من بيانات وهمية
+    // لا توجد بيانات — عرض رسالة واضحة بدون أرقام وهمية
     if (!price || candles.length === 0) {
       _msShowNoData();
       return;
@@ -7257,6 +7267,7 @@ async function loadMsData() {
     _msCompute(price, candles, sym, cfg);
   } catch(e) {
     console.error('MS Error:', e);
+    _msShowNoData();
   } finally {
     btn.classList.remove('loading');
     btn.innerHTML = '<span>🔄</span> تحديث هيكل السوق';
@@ -7265,23 +7276,21 @@ async function loadMsData() {
 
 function _msShowNoData() {
   const dash = '—';
-  const noMsg = 'لا توجد بيانات حالياً';
+  const noMsg = 'لا توجد بيانات حالياً · حدّث الكاش أولاً';
 
-  // بطاقة الحكم الرئيسية
   const card = document.getElementById('ms-master-card');
   if (card) card.className = 'ms-master-card NEUTRAL';
-  ['ms-master-score','ms-master-verdict'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = id === 'ms-master-score' ? dash : noMsg; el.className = el.className.split(' ')[0] + ' NEUTRAL'; }
-  });
+  const score = document.getElementById('ms-master-score');
+  if (score) { score.textContent = dash; score.className = 'ms-master-score NEUTRAL'; }
+  const verdict = document.getElementById('ms-master-verdict');
+  if (verdict) { verdict.textContent = noMsg; verdict.className = 'ms-master-verdict NEUTRAL'; }
   const sub = document.getElementById('ms-master-sub');
-  if (sub) sub.textContent = 'أدخل مفتاح Twelve Data واضغط تحديث';
+  if (sub) sub.textContent = 'اضغط "تحديث الكاش" في الأعلى ثم اضغط "تحديث هيكل السوق"';
   const cf = document.getElementById('ms-conf-fill');
   if (cf) { cf.style.width = '0%'; cf.className = 'ms-conf-fill NEUTRAL'; }
   const cv = document.getElementById('ms-conf-val');
   if (cv) { cv.textContent = dash; cv.className = 'ms-conf-val NEUTRAL'; }
 
-  // مستويات OB
   ['ob-supply','ob-demand','ob-vwap','ob-poc',
    'ob-supply-meta','ob-demand-meta','ob-vwap-meta','ob-poc-meta',
    'ba-bid-pct','ba-ask-pct','ba-spread','ba-depth','ba-liquidity',
@@ -7294,26 +7303,23 @@ function _msShowNoData() {
     if (el) { el.textContent = dash; el.style.color = 'var(--muted)'; }
   });
 
-  // Sweep list
   const sl = document.getElementById('ms-sweep-list');
   if (sl) sl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">${noMsg}</div>`;
 
-  // Insight
   const ins = document.getElementById('ms-insight-text');
-  if (ins) ins.textContent = 'أدخل مفتاح Twelve Data API واضغط تحديث لعرض التحليل.';
+  if (ins) ins.textContent = 'اضغط "تحديث الكاش" في الأعلى ثم أعد فتح هذا التاب.';
 
-  // Canvas
   const canvas = document.getElementById('ob-canvas');
   if (canvas) {
     const W = canvas.parentElement?.clientWidth || 400, H = 220;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(107,114,128,0.4)';
+    ctx.fillStyle = 'rgba(107,114,128,0.5)';
     ctx.font = '14px Tajawal'; ctx.textAlign = 'center';
-    ctx.fillText(noMsg, W/2, H/2 - 8);
+    ctx.fillText('لا توجد بيانات حالياً', W/2, H/2 - 8);
     ctx.font = '11px Tajawal'; ctx.fillStyle = 'rgba(107,114,128,0.6)';
-    ctx.fillText('أدخل مفتاح API واضغط تحديث', W/2, H/2 + 14);
+    ctx.fillText('حدّث الكاش أولاً', W/2, H/2 + 14);
   }
 }
 
