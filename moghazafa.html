@@ -475,9 +475,204 @@
   .setup-save-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:14px;color:#0A0C10;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity 0.2s;}
   .setup-save-btn:disabled{opacity:0.5;cursor:not-allowed;}
   .setup-note{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6;}
+
+  /* ══════════════ BREAKING NEWS ALERT SYSTEM ══════════════ */
+  /* شريط التنبيه العاجل العائم */
+  #breakingNewsBar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 9999;
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #breakingNewsBar.show {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .breaking-bar-inner {
+    background: linear-gradient(135deg, #7F1D1D, #991B1B, #B91C1C);
+    border-bottom: 2px solid #EF4444;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.5);
+    animation: breakingPulse 2s ease-in-out infinite;
+  }
+  @keyframes breakingPulse {
+    0%,100% { box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+    50%      { box-shadow: 0 4px 35px rgba(239,68,68,0.8); }
+  }
+  .breaking-tag {
+    background: #EF4444;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    animation: blinkTag 1s step-end infinite;
+  }
+  @keyframes blinkTag { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .breaking-icon { font-size: 18px; flex-shrink: 0; }
+  .breaking-text {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 700;
+    color: #FEE2E2;
+    line-height: 1.4;
+  }
+  .breaking-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .breaking-close:active { background: rgba(255,255,255,0.3); }
+
+  /* مودال تفاصيل الخبر العاجل */
+  #breakingModal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+    display: flex; align-items: flex-end;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  #breakingModal.show { opacity: 1; pointer-events: auto; }
+  .breaking-modal-box {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #1A0505, #1C0A0A);
+    border-top: 2px solid #EF4444;
+    border-radius: 24px 24px 0 0;
+    padding: 20px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #breakingModal.show .breaking-modal-box { transform: translateY(0); }
+  .bm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .bm-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 700; color: #EF4444;
+    letter-spacing: 1px;
+  }
+  .bm-close-btn {
+    background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+    color: #FCA5A5; font-size: 13px; padding: 4px 10px;
+    border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif;
+  }
+  .bm-impact-card {
+    border-radius: 14px; padding: 14px; margin-bottom: 14px;
+    border: 1px solid rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.07);
+  }
+  .bm-impact-label { font-size: 10px; color: #FCA5A5; letter-spacing: 1px; margin-bottom: 6px; }
+  .bm-impact-text { font-size: 14px; font-weight: 700; color: #FEE2E2; line-height: 1.5; }
+  .bm-impact-sub { font-size: 11px; color: #FCA5A5; margin-top: 6px; }
+  .bm-news-list { margin-bottom: 14px; }
+  .bm-news-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 12px; padding: 12px; margin-bottom: 8px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .bm-news-emoji { font-size: 18px; flex-shrink: 0; }
+  .bm-news-body { flex: 1; min-width: 0; }
+  .bm-news-headline { font-size: 12px; font-weight: 600; color: #FEE2E2; line-height: 1.4; margin-bottom: 4px; }
+  .bm-news-meta { font-size: 10px; color: #FCA5A5; }
+  .bm-category-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 5px; margin-left: 6px;
+  }
+  .bm-category-badge.war     { background: rgba(239,68,68,0.25); color: #FCA5A5; }
+  .bm-category-badge.inflation{ background: rgba(245,158,11,0.25); color: #FCD34D; }
+  .bm-category-badge.fed     { background: rgba(59,130,246,0.25); color: #93C5FD; }
+  .bm-category-badge.crisis  { background: rgba(139,92,246,0.25); color: #C4B5FD; }
+  .bm-category-badge.sanctions{ background: rgba(244,63,94,0.25); color: #FDA4AF; }
+  .bm-gold-impact {
+    background: linear-gradient(135deg, rgba(212,168,83,0.1), rgba(212,168,83,0.04));
+    border: 1px solid rgba(212,168,83,0.3);
+    border-radius: 14px; padding: 14px; margin-bottom: 14px;
+  }
+  .bm-gold-title { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+  .bm-gold-signal {
+    font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700;
+    color: var(--gold-light);
+  }
+  .bm-gold-desc { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .bm-dismiss-btn {
+    width: 100%; padding: 14px; background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.3); border-radius: 14px;
+    color: #FCA5A5; font-family: 'Tajawal', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .bm-dismiss-btn:active { background: rgba(239,68,68,0.25); }
+
+  /* مؤشر RSS في شريط المشاعر */
+  .rss-status-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 11px;
+  }
+  .rss-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .rss-dot.live { background: #EF4444; animation: pulse 1s infinite; }
+  .rss-dot.idle { background: var(--muted); }
+  .rss-label { color: var(--muted); flex: 1; }
+  .rss-count { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--text); }
+  .rss-alert-btn {
+    background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+    color: #FCA5A5; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px; cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+  }
 </style>
 </head>
 <body>
+
+<!-- ══════════════ BREAKING NEWS ALERT BAR ══════════════ -->
+<div id="breakingNewsBar">
+  <div class="breaking-bar-inner" onclick="openBreakingModal()">
+    <span class="breaking-tag">⚡ عاجل</span>
+    <span class="breaking-icon" id="bn-icon">🚨</span>
+    <div class="breaking-text" id="bn-barText">جاري رصد الأخبار العاجلة...</div>
+    <button class="breaking-close" onclick="event.stopPropagation();dismissBreaking()">✕</button>
+  </div>
+</div>
+
+<!-- مودال تفاصيل الخبر العاجل -->
+<div id="breakingModal" onclick="closeBreakingModal()">
+  <div class="breaking-modal-box" onclick="event.stopPropagation()">
+    <div class="bm-header">
+      <div class="bm-title">🚨 تحليل الأثر على الذهب</div>
+      <button class="bm-close-btn" onclick="closeBreakingModal()">إغلاق ✕</button>
+    </div>
+    <div class="bm-impact-card">
+      <div class="bm-impact-label">⚡ الخبر العاجل المرصود</div>
+      <div class="bm-impact-text" id="bm-headline">—</div>
+      <div class="bm-impact-sub" id="bm-source">—</div>
+    </div>
+    <div class="bm-gold-impact">
+      <div class="bm-gold-title">🥇 التأثير المتوقع على الذهب XAU/USD</div>
+      <div class="bm-gold-signal" id="bm-goldSignal">↑ صعود قوي متوقع</div>
+      <div class="bm-gold-desc" id="bm-goldDesc">—</div>
+    </div>
+    <div class="bm-news-list" id="bm-newsList"></div>
+    <button class="bm-dismiss-btn" onclick="closeBreakingModal()">✓ فهمت — إغلاق التنبيه</button>
+  </div>
+</div>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-logo">QUANT·PRO <span style="font-size:14px;color:var(--teal-light)">v2</span></div>
@@ -1058,6 +1253,14 @@
 
   <!-- ══════════════ SENTIMENT / NLP PANEL ══════════════ -->
   <div class="panel" id="panel-sentiment">
+
+    <!-- شريط حالة RSS المباشر -->
+    <div class="rss-status-bar">
+      <div class="rss-dot idle" id="rss-dot"></div>
+      <span class="rss-label" id="rss-label">🛰️ RSS Monitor — جاري الاتصال...</span>
+      <span class="rss-count" id="rss-count">0 خبر</span>
+      <button class="rss-alert-btn" onclick="forceRSSCheck()" id="rss-scanBtn">فحص الآن</button>
+    </div>
 
     <!-- اختيار الرمز -->
     <div class="sent-sym-selector">
@@ -2868,6 +3071,281 @@ async function runSentiment() {
 }
 
 // ══════════════════════════════════════════
+// ██████ BREAKING NEWS RSS ALERT ENGINE ██████
+// ══════════════════════════════════════════
+
+const RSS_FEEDS = [
+  { name: 'Reuters Business', url: 'https://feeds.reuters.com/reuters/businessNews' },
+  { name: 'Reuters Markets',  url: 'https://feeds.reuters.com/reuters/USmarketsnews' },
+  { name: 'Reuters World',    url: 'https://feeds.reuters.com/reuters/worldNews' },
+  { name: 'Bloomberg Markets',url: 'https://feeds.bloomberg.com/markets/news.rss' },
+  { name: 'MarketWatch',      url: 'https://feeds.marketwatch.com/marketwatch/topstories/' },
+  { name: 'FT Markets',       url: 'https://www.ft.com/markets?format=rss' },
+];
+
+// كلمات التحذير الحمراء — عوامل تحريك الذهب
+const ALERT_CATEGORIES = {
+  war: {
+    label: 'حروب وصراعات',
+    emoji: '⚔️',
+    badge: 'war',
+    keywords: ['war','warfare','military strike','invasion','attack','missile','troops','conflict','airstrike','nuclear threat','nato','military','combat','bomb','explosion','casualties','siege','offensive','ceasefire failed','escalation','frontline','weapons','armed forces','coup'],
+    goldImpact: 'صعود حاد متوقع',
+    goldDesc: 'الحروب والصراعات ترفع الطلب على الذهب كملاذ آمن — الأسواق تميل للهروب نحو الذهب في حالات عدم الاستقرار الجيوسياسي.',
+    severity: 3,
+  },
+  inflation: {
+    label: 'تضخم مفاجئ',
+    emoji: '📈',
+    badge: 'inflation',
+    keywords: ['inflation surges','unexpected inflation','cpi shock','inflation spike','hyperinflation','price surge unexpected','inflation higher than expected','stagflation','core inflation','pce jumps','inflation crisis','cost of living crisis'],
+    goldImpact: 'صعود قوي متوقع',
+    goldDesc: 'التضخم المفاجئ يُعزز جاذبية الذهب كتحوط ضد تآكل القيمة — يرتفع الذهب عادةً عندما يتجاوز التضخم توقعات الأسواق.',
+    severity: 3,
+  },
+  fed: {
+    label: 'قرارات الفيدرالي',
+    emoji: '🏦',
+    badge: 'fed',
+    keywords: ['fed rate cut','interest rate cut','fed pivot','rate decision','fomc emergency','federal reserve','rate hike surprise','quantitative easing','qe','rate pause','powell','fed chair','monetary policy','balance sheet'],
+    goldImpact: 'تحرك قوي محتمل',
+    goldDesc: 'قرارات الفيدرالي تؤثر مباشرة على الدولار وبالتالي الذهب — خفض الفائدة = صعود الذهب، رفع الفائدة = ضغط على الذهب.',
+    severity: 2,
+  },
+  crisis: {
+    label: 'أزمة مالية',
+    emoji: '💥',
+    badge: 'crisis',
+    keywords: ['financial crisis','bank collapse','banking crisis','market crash','stock market crash','recession','debt crisis','credit crunch','liquidity crisis','default','sovereign debt','bailout','bankruptcy','systemic risk','contagion','panic'],
+    goldImpact: 'ارتفاع حاد محتمل',
+    goldDesc: 'الأزمات المالية تُشعل الهروب نحو الذهب — في كل أزمة كبرى ارتفع الذهب بشكل ملحوظ خلال أيام من الحدث.',
+    severity: 3,
+  },
+  sanctions: {
+    label: 'عقوبات وحظر',
+    emoji: '🚫',
+    badge: 'sanctions',
+    keywords: ['sanctions','embargo','trade war','tariff','trade ban','export restrictions','oil embargo','SWIFT ban','economic pressure','trade conflict','protectionism'],
+    goldImpact: 'صعود متوسط متوقع',
+    goldDesc: 'العقوبات الاقتصادية تزيد من الغموض وتدفع المستثمرين نحو الذهب كملاذ آمن بعيداً عن أصول الدول المتأثرة.',
+    severity: 2,
+  },
+};
+
+let breakingNewsState = {
+  active: false,
+  dismissed: false,
+  lastChecked: 0,
+  scannedHeadlines: new Set(),
+  triggeredAlerts: [],
+  totalScanned: 0,
+};
+
+// ── تحليل عنوان الخبر ──
+function analyzeHeadline(headline) {
+  const text = headline.toLowerCase();
+  const results = [];
+  for (const [key, cat] of Object.entries(ALERT_CATEGORIES)) {
+    const matched = cat.keywords.filter(kw => text.includes(kw));
+    if (matched.length > 0) {
+      results.push({ category: key, cat, matched, headline });
+    }
+  }
+  return results;
+}
+
+// ── جلب RSS عبر CORS Proxy ──
+async function fetchRSSFeed(feed) {
+  const PROXIES = [
+    `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=20`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`,
+  ];
+
+  // rss2json — الأسهل للتحليل
+  try {
+    const r = await fetch(PROXIES[0], { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.status === 'ok' && Array.isArray(d.items)) {
+        return d.items.map(item => ({
+          title:     item.title || '',
+          pubDate:   item.pubDate || '',
+          link:      item.link || '',
+          source:    feed.name,
+        }));
+      }
+    }
+  } catch(e) { /* جرب البديل */ }
+
+  // allorigins — احتياطي
+  try {
+    const r = await fetch(PROXIES[1], { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      const xml = d.contents || '';
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'text/xml');
+      const items = [...doc.querySelectorAll('item')];
+      return items.slice(0, 20).map(item => ({
+        title:   item.querySelector('title')?.textContent || '',
+        pubDate: item.querySelector('pubDate')?.textContent || '',
+        link:    item.querySelector('link')?.textContent || '',
+        source:  feed.name,
+      }));
+    }
+  } catch(e) { /* فشل */ }
+
+  return [];
+}
+
+// ── الفحص الرئيسي للـ RSS ──
+async function checkRSSFeeds() {
+  const now = Date.now();
+  // فحص كل 3 دقائق فقط
+  if (now - breakingNewsState.lastChecked < 3 * 60 * 1000) return;
+  breakingNewsState.lastChecked = now;
+
+  const rssLabel  = document.getElementById('rss-label');
+  const rssDot    = document.getElementById('rss-dot');
+  const rssCount  = document.getElementById('rss-count');
+
+  if (rssLabel) rssLabel.textContent = '🛰️ RSS Monitor — جاري الفحص...';
+  if (rssDot)   { rssDot.classList.remove('idle'); rssDot.classList.add('live'); }
+
+  // اختر 3 feeds عشوائية لتقليل التحميل
+  const feedsToCheck = RSS_FEEDS.sort(() => Math.random() - 0.5).slice(0, 3);
+  const allItems = [];
+
+  await Promise.allSettled(
+    feedsToCheck.map(feed =>
+      fetchRSSFeed(feed).then(items => allItems.push(...items)).catch(() => {})
+    )
+  );
+
+  breakingNewsState.totalScanned += allItems.length;
+
+  // تحليل العناوين الجديدة فقط
+  const newAlerts = [];
+  for (const item of allItems) {
+    if (!item.title) continue;
+    const key = item.title.slice(0, 60);
+    if (breakingNewsState.scannedHeadlines.has(key)) continue;
+    breakingNewsState.scannedHeadlines.add(key);
+
+    const matches = analyzeHeadline(item.title);
+    if (matches.length > 0) {
+      matches.forEach(m => newAlerts.push({ ...m, item }));
+    }
+  }
+
+  if (rssCount) rssCount.textContent = breakingNewsState.totalScanned + ' خبر';
+
+  if (newAlerts.length > 0) {
+    // رتّب حسب الخطورة
+    newAlerts.sort((a, b) => b.cat.severity - a.cat.severity);
+    breakingNewsState.triggeredAlerts.push(...newAlerts);
+    breakingNewsState.active = true;
+    breakingNewsState.dismissed = false;
+
+    const topAlert = newAlerts[0];
+
+    if (rssLabel) rssLabel.textContent = `🚨 ${newAlerts.length} خبر عاجل مرصود — انقر للتفاصيل`;
+    if (rssDot)   rssDot.style.background = '#EF4444';
+
+    triggerBreakingAlert(topAlert, newAlerts);
+  } else {
+    if (rssLabel) {
+      const t = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+      rssLabel.textContent = `✅ RSS Monitor — آخر فحص ${t} · لا أخبار عاجلة`;
+    }
+    if (rssDot) { rssDot.classList.remove('live'); rssDot.classList.add('idle'); }
+  }
+}
+
+// ── إطلاق التنبيه المرئي ──
+function triggerBreakingAlert(topAlert, allAlerts) {
+  if (breakingNewsState.dismissed) return;
+
+  const bar     = document.getElementById('breakingNewsBar');
+  const barText = document.getElementById('bn-barText');
+  const bnIcon  = document.getElementById('bn-icon');
+
+  if (barText) barText.textContent = `${topAlert.cat.emoji} ${topAlert.item.title} — ${topAlert.cat.label}`;
+  if (bnIcon)  bnIcon.textContent  = topAlert.cat.emoji;
+
+  // ملء مودال التفاصيل
+  const bmHeadline   = document.getElementById('bm-headline');
+  const bmSource     = document.getElementById('bm-source');
+  const bmGoldSignal = document.getElementById('bm-goldSignal');
+  const bmGoldDesc   = document.getElementById('bm-goldDesc');
+  const bmNewsList   = document.getElementById('bm-newsList');
+
+  if (bmHeadline)   bmHeadline.textContent   = topAlert.item.title;
+  if (bmSource)     bmSource.textContent      = `📡 المصدر: ${topAlert.item.source} · ${topAlert.cat.label}`;
+  if (bmGoldSignal) bmGoldSignal.textContent  = `${topAlert.cat.emoji} ${topAlert.cat.goldImpact}`;
+  if (bmGoldDesc)   bmGoldDesc.textContent    = topAlert.cat.goldDesc;
+
+  if (bmNewsList) {
+    bmNewsList.innerHTML = allAlerts.slice(0, 5).map(a => `
+      <div class="bm-news-item">
+        <div class="bm-news-emoji">${a.cat.emoji}</div>
+        <div class="bm-news-body">
+          <div class="bm-news-headline">${a.item.title}</div>
+          <div class="bm-news-meta">
+            ${a.item.source}
+            <span class="bm-category-badge ${a.category}">${a.cat.label}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  // إظهار الشريط
+  if (bar) { bar.classList.add('show'); }
+
+  // صوت تنبيه (إذا كان المتصفح يسمح)
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start(); osc.stop(ctx.currentTime + 0.5);
+  } catch(e) { /* المتصفح لا يسمح بالصوت */ }
+}
+
+function dismissBreaking() {
+  const bar = document.getElementById('breakingNewsBar');
+  if (bar) bar.classList.remove('show');
+  breakingNewsState.dismissed = true;
+}
+
+function openBreakingModal() {
+  const modal = document.getElementById('breakingModal');
+  if (modal) modal.classList.add('show');
+}
+
+function closeBreakingModal() {
+  const modal = document.getElementById('breakingModal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function forceRSSCheck() {
+  const btn = document.getElementById('rss-scanBtn');
+  if (btn) { btn.textContent = '⟳ جاري...'; btn.style.opacity = '0.5'; }
+  breakingNewsState.lastChecked = 0; // إعادة تعيين التوقيت لإجبار الفحص
+  await checkRSSFeeds();
+  if (btn) { btn.textContent = 'فحص الآن'; btn.style.opacity = '1'; }
+}
+
+// ── بدء مراقبة RSS ──
+function startRSSMonitor() {
+  checkRSSFeeds(); // فحص فوري
+  setInterval(checkRSSFeeds, 3 * 60 * 1000); // كل 3 دقائق
+}
+
+// ══════════════════════════════════════════
 // RUN ALL
 // ══════════════════════════════════════════
 async function runAll(){
@@ -2892,6 +3370,8 @@ window.addEventListener('load',()=>{
   let i=0; const el=document.getElementById('loadStep');
   const iv=setInterval(()=>{ if(i<steps.length)el.textContent=steps[i++]; else clearInterval(iv); },350);
   setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); runAll(); },3200);
+  // ── بدء مراقب RSS للأخبار العاجلة ──
+  setTimeout(startRSSMonitor, 4000);
 });
 
 setInterval(()=>{
