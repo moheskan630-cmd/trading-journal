@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Quant Signal Pro · Live v2 (Real Data)</title>
+<title>Quant Signal Pro · Live v2 (Optimized)</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -705,7 +705,7 @@ const REGIME_NOTE = {
 let currentTab  = 'gold';
 let currentPair = 'XAUXAG';
 let fredData    = null;
-let globalMarketData = null; // لتخزين البيانات المجمعة
+let globalMarketData = null; 
 
 // ══════════════════════════════════════════
 // TAB & PAIR SWITCHING
@@ -748,28 +748,22 @@ function resetKeys() {
 }
 
 // ══════════════════════════════════════════
-// FETCH DATA (BATCHING TO AVOID RATE LIMITS)
+// FETCH DATA (OPTIMIZED BATCHING)
 // ══════════════════════════════════════════
 async function fetchAllMarketData() {
   if (!TD_KEY) throw new Error('مفتاح Twelve Data غير موجود');
   
-  // دمج جميع الرموز في طلبين فقط (واحد للأسعار الحالية، وواحد للشموع التاريخية)
+  // نطلب الشموع فقط (5 أصول = 5 نقاط فقط، أقل من الحد المسموح 8)
   const symbols = "XAU/USD,XAG/USD,EUR/USD,GBP/USD,USD/JPY";
   
-  const [quoteRes, seriesRes] = await Promise.all([
-    fetch(`${TD_BASE}/quote?symbol=${symbols}&apikey=${TD_KEY}`),
-    fetch(`${TD_BASE}/time_series?symbol=${symbols}&interval=1h&outputsize=30&apikey=${TD_KEY}`)
-  ]);
-
-  if (!quoteRes.ok || !seriesRes.ok) throw new Error(`Twelve Data HTTP Error`);
+  const seriesRes = await fetch(`${TD_BASE}/time_series?symbol=${symbols}&interval=1h&outputsize=30&apikey=${TD_KEY}`);
+  if (!seriesRes.ok) throw new Error(`Twelve Data HTTP Error`);
   
-  const quotes = await quoteRes.json();
   const series = await seriesRes.json();
-
-  if (quotes.status === 'error') throw new Error('Twelve Data: ' + quotes.message);
   if (series.status === 'error') throw new Error('Twelve Data: ' + series.message);
 
-  globalMarketData = { quotes, series };
+  // تخزين البيانات
+  globalMarketData = { series };
 }
 
 async function fetchFRED(seriesId) {
@@ -1062,14 +1056,13 @@ function setRegime(p, regimeData) {
 // ══════════════════════════════════════════
 function runGold(){
   try{
-    const quote = globalMarketData.quotes['XAU/USD'];
     const series = globalMarketData.series['XAU/USD'];
-    if(!quote || !series) throw new Error("بيانات الذهب غير متوفرة");
+    if(!series) throw new Error("بيانات الذهب غير متوفرة");
 
-    const price = parseFloat(quote.close || quote.price);
-    const prev = parseFloat(quote.previous_close);
-    const change = price - prev, pct = (change / prev) * 100;
     const closes = series.values.map(v=>parseFloat(v.close)).reverse();
+    const price = closes[closes.length - 1];
+    const prev = closes[closes.length - 25] || closes[0]; 
+    const change = price - prev, pct = (change / prev) * 100;
 
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
     const volArr = calcVolArray(closes);
@@ -1098,14 +1091,14 @@ function runGold(){
 
 function runEUR(){
   try{
-    const quote = globalMarketData.quotes['EUR/USD'];
     const series = globalMarketData.series['EUR/USD'];
-    if(!quote || !series) return;
+    if(!series) return;
 
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
-    const change=price-prev, pct=(change/prev)*100;
     const closes=series.values.map(v=>parseFloat(v.close)).reverse();
+    const price = closes[closes.length - 1];
+    const prev = closes[closes.length - 25] || closes[0];
+    const change=price-prev, pct=(change/prev)*100;
+    
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
     const volArr = calcVolArray(closes);
 
@@ -1143,14 +1136,14 @@ function runEUR(){
 
 function runJPY(){
   try{
-    const quote = globalMarketData.quotes['USD/JPY'];
     const series = globalMarketData.series['USD/JPY'];
-    if(!quote || !series) return;
+    if(!series) return;
 
-    const price=parseFloat(quote.close||quote.price);
-    const prev=parseFloat(quote.previous_close);
-    const change=price-prev, pct=(change/prev)*100;
     const closes=series.values.map(v=>parseFloat(v.close)).reverse();
+    const price = closes[closes.length - 1];
+    const prev = closes[closes.length - 25] || closes[0];
+    const change=price-prev, pct=(change/prev)*100;
+    
     const rsi=calcRSI(closes), z=calcZ(closes), vol=calcVol(closes);
     const volArr = calcVolArray(closes);
 
